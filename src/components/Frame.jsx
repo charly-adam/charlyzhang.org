@@ -23,7 +23,20 @@ export function Frame({ photo, lit, onOpen }) {
       <TrackLight />
       <div className="glow" aria-hidden="true" />
       <div className="pool" aria-hidden="true" />
-      <div className="beam" aria-hidden="true" />
+      <svg className="beam" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="beam-g" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#fffbf1" stopOpacity="0.95" />
+            <stop offset="0.35" stopColor="#fffbf1" stopOpacity="0.45" />
+            <stop offset="0.72" stopColor="#fffbf1" stopOpacity="0.16" />
+            <stop offset="1" stopColor="#fffbf1" stopOpacity="0" />
+          </linearGradient>
+          <filter id="beam-b" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="4" />
+          </filter>
+        </defs>
+        <path d="M50 0 L100 100 L0 100 Z" fill="url(#beam-g)" filter="url(#beam-b)" />
+      </svg>
       <div className="fshadow" aria-hidden="true" />
       <button type="button" className="frame" data-photo={photo.id} tabIndex={-1} onClick={onOpen} aria-label={`View ${photo.title}`}>
         <img

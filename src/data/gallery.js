@@ -8,6 +8,11 @@
 //   2. Add an entry to `photos` below.
 //   3. `pair: true` hangs a photo right next to the one before it, sharing one wall label.
 //
+// Photos hang in order round the room: along the left-hand wall from the door, across the far
+// wall, back along the right-hand wall, and the last two either side of the door. The far wall
+// takes 3 when the count is odd and 2 when it's even, so the long walls always match; the room
+// grows with them.
+//
 // Add a room: add an entry to `rooms` (slug, name, theme, blurb) and a folder in photos-originals.
 // Themes: 'white' (bright, even light), 'spot' (spotlit, wood frames),
 //         'teal' and 'violet' (colored walls, gold frames).
@@ -52,11 +57,13 @@ export const photos = [
 // Arrow direction on the lobby sign for each room, in order.
 const ARROWS = [-90, -135, -45, 180, 0, 90];
 
+// floor / ceil: the texture tiled over it (size in S, the room scale) and the colour it
+// shows until that loads.
 export const themes = {
-  white: { wall: '#efefec', boxBg: '#141414', boxFg: '#f4f3f0' },
-  spot: { wall: '#acaca9', boxBg: '#141414', boxFg: '#f4f3f0' },
-  teal: { wall: '#173e49', boxBg: '#eceae3', boxFg: '#173f4a' },
-  violet: { wall: '#24234c', boxBg: '#ecebf2', boxFg: '#24234a' },
+  white: { wall: '#efefec', boxBg: '#141414', boxFg: '#f4f3f0', floor: { img: '/textures/floor-stone.jpg', size: 0.77, color: '#b4b4b1' }, ceil: { img: null, size: 1, color: '#e4e4e1' } },
+  spot: { wall: '#acaca9', boxBg: '#141414', boxFg: '#f4f3f0', floor: { img: '/textures/floor-concrete.jpg', size: 1.05, color: '#4f4f4f' }, ceil: { img: '/textures/ceiling-tile.jpg', size: 0.27, color: '#dadad7' } },
+  teal: { wall: '#173e49', boxBg: '#eceae3', boxFg: '#173f4a', floor: { img: '/textures/floor-oak.jpg', size: 0.49, color: '#6b4e32' }, ceil: { img: null, size: 1, color: '#262828' } },
+  violet: { wall: '#24234c', boxBg: '#ecebf2', boxFg: '#24234a', floor: { img: '/textures/floor-walnut.jpg', size: 0.45, color: '#4a3326' }, ceil: { img: null, size: 1, color: '#1c1b25' } },
 };
 
 export const roomList = rooms.map((r, i) => {
