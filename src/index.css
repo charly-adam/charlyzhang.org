@@ -2,8 +2,9 @@
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Charly Zhang · Photography — a 2.5D walk-through gallery.
-   The back wall sits at z=0; floor, ceiling, end walls and the doorway
-   passage are planes in CSS 3D. Phones (≤700px) get a flat, swipeable wall.
+   A room is a box of planes in CSS 3D: four wall strips, floor, ceiling and a pillar, in a
+   world whose origin is at eye level. The camera is a transform on .cam: a push back by the
+   perspective, a turn, and the walk. The lobby is a single wall (.world) in the same stage.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 html,
@@ -80,6 +81,8 @@ a {
 }
 .t-white {
   --wall: linear-gradient(#e4e4e1 0, #efefec 22%, #f2f2ef 78%, #e8e8e5 100%);
+  --wall0: #e4e4e1;
+  --wall1: #efefec;
   --fg: #161616;
   --fg2: #3a3a38;
   --pool: rgba(255, 255, 255, 0);
@@ -88,6 +91,8 @@ a {
   --floorop: 0.92;
   --reflop: 0.6;
   --ceilbg: linear-gradient(to top, #cdcdca 0, #dededb 30px, #e3e3e0 calc(var(--S) * 0.085), #fdfdfb calc(var(--S) * 0.092), #fdfdfb calc(var(--S) * 0.104), #e6e6e3 calc(var(--S) * 0.112), #e2e2df calc(var(--S) * 0.22), #fdfdfb calc(var(--S) * 0.228), #fdfdfb calc(var(--S) * 0.242), #e2e2df calc(var(--S) * 0.25), #dadad7 100%);
+  --ceilimg: linear-gradient(#e4e4e1, #e4e4e1);
+  --ceilsize: 100% 100%;
   --endb: 0.9;
   --stagebg: #cfcfcc;
   --fb: calc(var(--S) * 0.0035);
@@ -96,6 +101,8 @@ a {
 }
 .t-spot {
   --wall: linear-gradient(#9d9d9a 0, #acaca9 40%, #a6a6a3 100%);
+  --wall0: #9d9d9a;
+  --wall1: #acaca9;
   --fg: #161616;
   --fg2: #2a2a27;
   --pool: rgba(255, 253, 247, 0.95);
@@ -106,6 +113,8 @@ a {
   --plh: calc(var(--S) * 0.0105);
   --plc: linear-gradient(#e2e2df, #cfcfcc);
   --ceilbg: url(/textures/ceiling-tile.jpg) 0 0 / calc(var(--S) * 0.27) calc(var(--S) * 0.27);
+  --ceilimg: url(/textures/ceiling-tile.jpg);
+  --ceilsize: calc(var(--S) * 0.27) calc(var(--S) * 0.27);
   --endb: 0.8;
   --stagebg: #1a1a1b;
   --fb: calc(var(--S) * 0.0094);
@@ -114,6 +123,8 @@ a {
 }
 .t-teal {
   --wall: linear-gradient(#0f2e37 0, #173e49 38%, #143a46 100%);
+  --wall0: #0f2e37;
+  --wall1: #173e49;
   --fg: #eceae3;
   --fg2: #c4cdcd;
   --pool: rgba(215, 240, 240, 0.34);
@@ -124,6 +135,8 @@ a {
   --plh: calc(var(--S) * 0.028);
   --plc: linear-gradient(#142a31, #0e1e23);
   --ceilbg: linear-gradient(#202222, #2c2e2e);
+  --ceilimg: linear-gradient(#262828, #262828);
+  --ceilsize: 100% 100%;
   --endb: 0.78;
   --stagebg: #141818;
   --fb: calc(var(--S) * 0.0165);
@@ -132,6 +145,8 @@ a {
 }
 .t-violet {
   --wall: linear-gradient(#1a1838 0, #24234c 42%, #1f1e46 100%);
+  --wall0: #1a1838;
+  --wall1: #24234c;
   --fg: #ecebf2;
   --fg2: #c0bfd4;
   --pool: rgba(232, 228, 255, 0.32);
@@ -142,6 +157,8 @@ a {
   --plh: calc(var(--S) * 0.03);
   --plc: linear-gradient(#4a4956, #393844);
   --ceilbg: linear-gradient(#17161f, #22212c);
+  --ceilimg: linear-gradient(#1c1b25, #1c1b25);
+  --ceilsize: 100% 100%;
   --endb: 0.78;
   --stagebg: #131219;
   --fb: calc(var(--S) * 0.012);
@@ -167,12 +184,172 @@ a {
   user-select: none;
   -webkit-user-select: none;
 }
+.stage.room {
+  perspective: calc(var(--S) * 1.1);
+  --archw: calc(var(--S) * 0.55); /* the archway, as in GEO.arch */
+  --archh: calc(var(--S) * 0.58);
+}
 .dolly,
 .cam {
   position: absolute;
   inset: 0;
   transform-style: preserve-3d;
   transform-origin: 50% 44%;
+}
+.cam {
+  will-change: transform;
+}
+/* the room's world: its origin at the eye, in the middle of the view and 44% down it */
+.room3d {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+.stage.unmeasured .room3d {
+  visibility: hidden;
+}
+/* a wall strip (and each face of the pillar): S tall, the wall itself from 0.07 S to 0.78 S,
+   stood in the room by an inline transform about its left end; a flex row of photo slots */
+.wall,
+.face {
+  position: absolute;
+  left: 0;
+  top: calc(var(--S) * -0.44);
+  height: var(--S);
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  gap: calc(var(--S) * 0.06);
+  padding: 0 calc(var(--S) * 0.2);
+  transform-origin: 0 0;
+  transform-style: preserve-3d;
+}
+.wall.has-door {
+  justify-content: space-between;
+}
+/* Only what you can act on takes a click. The room's surfaces let clicks through, or an unseen
+   wall could take a click meant for a photo; and so do the camera's own boxes, which sit at
+   the screen plane: the browser keeps the hit nearest the eye, and anything further off than
+   the screen plane (most of the room) would lose to them. */
+.room .dolly,
+.room .cam,
+.room3d,
+.room3d * {
+  pointer-events: none;
+}
+.frame,
+.label,
+.intro-inner,
+.doorbtn,
+.pface.front {
+  pointer-events: auto;
+}
+.frame,
+.label,
+.doorbtn {
+  backface-visibility: hidden;
+}
+.refl .frame {
+  backface-visibility: visible;
+}
+.face {
+  padding: 0;
+}
+.pillar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-style: preserve-3d;
+}
+.tile,
+.tstrip {
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  backface-visibility: hidden;
+}
+.ftile {
+  opacity: var(--floorop);
+}
+/* lights out: the tiles are canvases with nothing to lay a shade over, so they dim instead */
+.ftile,
+.ctile {
+  transition: opacity 0.9s ease 0.7s;
+}
+.stage.dark .ftile,
+.stage.dark .ctile {
+  transition: opacity 0.45s ease 0.08s;
+}
+.stage.dark .ftile {
+  opacity: 0.2;
+}
+.stage.dark .ctile {
+  opacity: 0.4;
+}
+.tstrip {
+  background: #141414;
+}
+/* a wall's surface, in panels: wall paint with its grain, a skirting at the floor, shaded at
+   the top, the bottom and (first and last) the ends */
+.panel {
+  position: absolute;
+  top: calc(var(--S) * 0.07);
+  height: calc(var(--S) * 0.71);
+  transform: translateZ(-2px);
+  backface-visibility: hidden;
+  background: url(/textures/wall-grain.png), var(--wall);
+}
+.panel.arch {
+  background: none;
+}
+.panel.arch svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.arch .s0 {
+  stop-color: var(--wall0);
+}
+.arch .s1 {
+  stop-color: var(--wall1);
+}
+.panel::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--plh);
+  background: var(--plc);
+  box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.18), 0 -8px 12px -6px rgba(0, 0, 0, 0.18);
+}
+.panel.arch::before {
+  display: none;
+}
+.panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  --ptop: linear-gradient(rgba(0, 0, 0, 0.1), transparent calc(var(--S) * 0.08));
+  --pbot: linear-gradient(to top, rgba(0, 0, 0, 0.13), transparent 9%);
+  --pl: linear-gradient(90deg, rgba(0, 0, 0, 0.16), transparent calc(var(--S) * 0.19));
+  --pr: linear-gradient(270deg, rgba(0, 0, 0, 0.16), transparent calc(var(--S) * 0.19));
+  background: var(--ptop), var(--pbot);
+}
+.panel.first::after {
+  background: var(--pl), var(--ptop), var(--pbot);
+}
+.panel.last::after {
+  background: var(--pr), var(--ptop), var(--pbot);
+}
+.panel.first.last::after {
+  background: var(--pl), var(--pr), var(--ptop), var(--pbot);
+}
+.panel.arch::after {
+  background: var(--ptop);
 }
 .world {
   position: absolute;
@@ -182,7 +359,6 @@ a {
   height: var(--S);
   display: flex;
   transform-style: preserve-3d;
-  will-change: transform;
 }
 .col {
   position: relative;
@@ -251,40 +427,6 @@ a {
   inset: 0;
   background: linear-gradient(transparent 70%, rgba(0, 0, 0, 0.22));
 }
-.track3d {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: calc(var(--S) * 0.15);
-  height: calc(var(--S) * 0.009);
-  background: linear-gradient(#2a2a2a, #0e0e0e);
-}
-.endwall {
-  top: calc(var(--S) * 0.07);
-  height: calc(var(--S) * 0.71);
-  width: calc(var(--S) * 1.8);
-  background: url(/textures/wall-grain.png), var(--wall);
-  filter: brightness(var(--endb));
-}
-.endwall::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: var(--plh);
-  background: var(--plc);
-}
-.endL {
-  left: 0;
-  transform-origin: 0 50%;
-  transform: rotateY(-90deg);
-}
-.endR {
-  right: 0;
-  transform-origin: 100% 50%;
-  transform: rotateY(90deg);
-}
 .refl {
   left: 0;
   right: 0;
@@ -293,14 +435,35 @@ a {
   transform-origin: 50% 100%;
   transform: translateZ(-2px) scaleY(-1);
   opacity: var(--reflop);
-  filter: blur(1.6px);
-  -webkit-mask-image: linear-gradient(to top, #000 0, rgba(0, 0, 0, 0.65) 30%, rgba(0, 0, 0, 0.2) 55%, transparent 75%);
-  mask-image: linear-gradient(to top, #000 0, rgba(0, 0, 0, 0.65) 30%, rgba(0, 0, 0, 0.2) 55%, transparent 75%);
   background: var(--wall);
 }
+.refl::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to top, transparent 0, color-mix(in srgb, var(--stagebg) 35%, transparent) 30%, color-mix(in srgb, var(--stagebg) 80%, transparent) 55%, var(--stagebg) 75%);
+}
+.refl .frame img {
+  filter: blur(1.4px);
+}
 .refl-row {
+  position: relative;
   display: flex;
+  justify-content: center;
+  gap: calc(var(--S) * 0.06);
   height: 100%;
+  box-sizing: border-box;
+  padding: 0 calc(var(--S) * 0.2);
+}
+.wall.has-door .refl-row {
+  justify-content: space-between;
+}
+.refl-door {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  margin-left: calc(var(--S) * -0.12);
 }
 .refl-col {
   flex: none;
@@ -329,8 +492,8 @@ a {
   pointer-events: none;
   transform: translateX(-50%) translateZ(calc(var(--S) * 0.15));
 }
-.t-white .track3d,
-.t-white .can {
+.t-white .can,
+.t-white .tstrip {
   display: none;
 }
 
@@ -395,37 +558,35 @@ a {
   width: calc(var(--S) * 0.7);
   margin-left: calc(var(--S) * -0.35);
   height: calc(var(--S) * 0.189);
+  overflow: visible;
   transform-origin: 50% 0;
   transform: translateZ(calc(var(--S) * 0.15)) rotateX(-52.5deg);
-  /* brightest at the lens, fading out over its last stretch as it nears the wall, where the
-     pool takes over (a hard end would draw a line along the wall) */
-  background: radial-gradient(ellipse 60% 100% at 50% 0, rgba(255, 251, 241, 0.95), rgba(255, 251, 241, 0.45) 35%, rgba(255, 251, 241, 0.16) 72%, transparent 100%);
-  -webkit-mask-image: conic-gradient(from 180deg at 50% 0, #000 0deg, rgba(0, 0, 0, 0.8) 14deg, rgba(0, 0, 0, 0.35) 32deg, transparent 54deg, transparent 306deg, rgba(0, 0, 0, 0.35) 328deg, rgba(0, 0, 0, 0.8) 346deg, #000 360deg);
-  mask-image: conic-gradient(from 180deg at 50% 0, #000 0deg, rgba(0, 0, 0, 0.8) 14deg, rgba(0, 0, 0, 0.35) 32deg, transparent 54deg, transparent 306deg, rgba(0, 0, 0, 0.35) 328deg, rgba(0, 0, 0, 0.8) 346deg, #000 360deg);
+  /* a soft wedge, brightest at the lens, fading before it reaches the wall, where the pool
+     takes over (drawn in SVG: see Frame.jsx) */
   opacity: 0.85;
 }
 .pool,
 .glow {
-  top: calc(50% - var(--S) * 0.355);
-  width: 250%;
-  margin-left: -125%;
-  height: calc(var(--S) * 0.71);
-  transform-origin: 50% 6%;
+  top: calc(50% - var(--S) * 0.25);
+  width: 160%;
+  margin-left: -80%;
+  height: calc(var(--S) * 0.5);
+  transform-origin: 50% 0;
 }
 .pool {
-  background: radial-gradient(ellipse 22% 24% at 50% 46%, var(--pool) 0%, transparent 100%), radial-gradient(ellipse 36% 42% at 50% 42%, var(--pool) 0%, transparent 100%);
+  background: radial-gradient(ellipse 34% 34% at 50% 44%, var(--pool) 0%, transparent 100%), radial-gradient(ellipse 56% 60% at 50% 39%, var(--pool) 0%, transparent 100%);
   opacity: 0.75;
-  -webkit-mask-image: linear-gradient(transparent 10%, #000 30%, #000 64%, transparent 88%);
-  mask-image: linear-gradient(transparent 10%, #000 30%, #000 64%, transparent 88%);
 }
 .glow {
-  /* wide enough to take in the wall label beside the frame */
-  width: 300%;
-  margin-left: -150%;
-  background: radial-gradient(ellipse 45% 52% at 52% 47%, rgba(174, 174, 170, 0.97) 0%, rgba(158, 158, 154, 0.88) 42%, rgba(120, 120, 116, 0.45) 72%, transparent 100%);
+  /* wide enough to take in the wall label beside the frame; drawn only with the room dark */
+  width: 190%;
+  margin-left: -95%;
+  background: radial-gradient(ellipse 48% 56% at 53% 44%, rgba(174, 174, 170, 0.97) 0%, rgba(158, 158, 154, 0.88) 42%, rgba(120, 120, 116, 0.45) 72%, transparent 100%);
   opacity: 0;
-  -webkit-mask-image: linear-gradient(transparent 12%, #000 24%, #000 76%, transparent 96%);
-  mask-image: linear-gradient(transparent 12%, #000 24%, #000 76%, transparent 96%);
+  visibility: hidden;
+}
+.stage.dark .glow {
+  visibility: visible;
 }
 .t-white .beam {
   display: none;
@@ -499,7 +660,7 @@ a {
   width: var(--ft);
   transform-origin: 0 50%;
   transform: rotateY(90deg);
-  filter: brightness(0.85);
+  background: color-mix(in srgb, var(--fside) 85%, black);
 }
 .sr {
   right: calc(-1 * var(--fb));
@@ -508,7 +669,7 @@ a {
   width: var(--ft);
   transform-origin: 100% 50%;
   transform: rotateY(-90deg);
-  filter: brightness(0.7);
+  background: color-mix(in srgb, var(--fside) 70%, black);
 }
 .st {
   top: calc(-1 * var(--fb));
@@ -517,7 +678,7 @@ a {
   height: var(--ft);
   transform-origin: 50% 0;
   transform: rotateX(-90deg);
-  filter: brightness(1.3);
+  background: color-mix(in srgb, var(--fside) 75%, white);
 }
 .sb {
   bottom: calc(-1 * var(--fb));
@@ -526,10 +687,13 @@ a {
   height: var(--ft);
   transform-origin: 50% 100%;
   transform: rotateX(90deg);
-  filter: brightness(0.5);
+  background: color-mix(in srgb, var(--fside) 50%, black);
 }
 .refl .frame {
   transform: none;
+}
+.room .refl {
+  backface-visibility: hidden;
 }
 /* a set height; the width follows the photo's own proportions (from its width/height attributes) */
 .imgL {
@@ -541,8 +705,8 @@ a {
   height: calc(var(--S) * 0.33);
 }
 .gpad {
-  padding-left: calc(var(--S) * 0.085);
-  padding-right: calc(var(--S) * 0.085);
+  padding-left: calc(var(--S) * 0.035);
+  padding-right: calc(var(--S) * 0.035);
 }
 .ggap {
   gap: calc(var(--S) * 0.028);
@@ -591,16 +755,13 @@ a {
    and light show through it, like the labels beside the photos. (Not mix-blend-mode: that
    flattens the whole 3D room.) */
 .intro,
-.end .door-sign {
+.door-w .door-sign {
   opacity: 0.88;
 }
-.intro-w {
-  flex: none;
-  width: calc(var(--S) * 0.42);
-}
 .intro {
-  padding-left: calc(var(--S) * 0.08);
-  padding-right: calc(var(--S) * 0.03);
+  width: 100%;
+  padding-left: calc(var(--S) * 0.06);
+  padding-right: calc(var(--S) * 0.04);
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
@@ -617,9 +778,9 @@ a {
 }
 .intro-room,
 .intro-name {
-  font-size: calc(var(--S) * 0.024);
-  line-height: 1.12;
-  letter-spacing: -0.01em;
+  font-size: calc(var(--S) * 0.05);
+  line-height: 1.1;
+  letter-spacing: -0.015em;
 }
 .intro-room {
   font-weight: 600;
@@ -629,34 +790,34 @@ a {
   font-weight: 700;
 }
 .intro-text {
-  margin-top: calc(var(--S) * 0.03);
-  width: calc(var(--S) * 0.22);
-  font-size: calc(var(--S) * 0.0105);
-  line-height: 1.55;
+  margin-top: calc(var(--S) * 0.04);
+  width: calc(var(--S) * 0.48);
+  font-size: calc(var(--S) * 0.024);
+  line-height: 1.45;
 }
 
-/* ---------- doorway: an opening in the back wall with a passage behind it ---------- */
-.end-w {
-  flex: none;
-  box-sizing: border-box;
-  width: calc(var(--S) * 0.54);
-  padding-left: calc(var(--S) * 0.07);
-  padding-right: calc(var(--S) * 0.07);
-}
-.end {
-  align-items: flex-end;
-  justify-content: flex-start;
+/* ---------- the archway in the middle of the entrance wall, and the hallway beyond ---------- */
+.door-w {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: var(--archw);
+  margin-left: calc(var(--archw) / -2);
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
 }
 .door {
   display: block;
-  width: calc(var(--S) * 0.223);
-  height: calc(var(--S) * 0.5);
+  width: var(--archw);
+  height: var(--archh);
+  border-radius: calc(var(--archw) / 2) calc(var(--archw) / 2) 0 0;
 }
 .doorbtn {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: calc(var(--S) * 0.016);
+  gap: calc(var(--S) * 0.012);
 }
 .door-sign {
   display: flex;
@@ -670,106 +831,101 @@ a {
 }
 .door-room {
   display: block;
-  font-size: calc(var(--S) * 0.013);
+  font-size: calc(var(--S) * 0.012);
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 .door-name {
   display: block;
-  font-size: calc(var(--S) * 0.024);
+  font-size: calc(var(--S) * 0.022);
   font-weight: 600;
 }
-.hasdoor {
-  -webkit-mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
-  -webkit-mask-size: 100% 100%, calc(var(--S) * 0.223) 70.42%;
-  -webkit-mask-position: 0 0, right calc(var(--S) * 0.247) bottom 0;
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-composite: xor;
-  mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
-  mask-size: 100% 100%, calc(var(--S) * 0.223) 70.42%;
-  mask-position: 0 0, right calc(var(--S) * 0.247) bottom 0;
-  mask-repeat: no-repeat;
-  mask-composite: exclude;
-}
-.passage {
-  --pd: calc(var(--S) * 0.42);
+/* the opening's reflection: the hallway's far wall beyond */
+.refl-door {
   position: absolute;
-  left: calc(var(--S) * 0.07);
+  left: 50%;
   bottom: 0;
-  width: calc(var(--S) * 0.223);
-  height: calc(var(--S) * 0.5);
+  margin-left: calc(var(--archw) / -2);
+}
+.refl-door .door {
+  background: var(--wall);
+}
+/* the reveal through the wall: two jambs and the arch in facets */
+.passage {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: var(--archw);
+  height: var(--archh);
   transform-style: preserve-3d;
   pointer-events: none;
 }
 .passage > * {
   position: absolute;
+  backface-visibility: hidden;
 }
-.pback {
-  inset: 0;
-  transform: translateZ(calc(-1 * var(--pd)));
-}
-.pback-shade {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(rgba(0, 0, 0, 0.18), transparent 30%, transparent 80%, rgba(0, 0, 0, 0.25));
-}
-.pback-frame {
-  position: absolute;
-  left: 50%;
-  top: 30%;
-  width: 34%;
-  height: 22%;
-  margin-left: -17%;
-  box-sizing: border-box;
-  border: 3px solid #1b1a19;
-  background: #f4f3ef;
-  padding: 7%;
-  box-shadow: 0 6px 8px -4px rgba(0, 0, 0, 0.4);
-}
-.pback-frame > div {
-  width: 100%;
-  height: 100%;
-  background: #6f6e6a;
+.pjl,
+.pjr {
+  bottom: 0;
 }
 .pjl {
   left: 0;
-  top: 0;
-  height: 100%;
-  width: var(--pd);
   transform-origin: 0 50%;
   transform: rotateY(90deg);
-  background: var(--wall);
-  filter: brightness(0.82);
+  background: linear-gradient(rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.18)), var(--wall);
 }
 .pjr {
   right: 0;
-  top: 0;
-  height: 100%;
-  width: var(--pd);
   transform-origin: 100% 50%;
   transform: rotateY(-90deg);
-  background: var(--wall);
-  filter: brightness(0.62);
+  background: linear-gradient(rgba(0, 0, 0, 0.38), rgba(0, 0, 0, 0.38)), var(--wall);
 }
-.ptop {
+.parch {
   left: 0;
-  right: 0;
   top: 0;
-  height: var(--pd);
-  transform-origin: 50% 0;
-  transform: rotateX(-90deg);
-  background: var(--wall);
-  filter: brightness(0.55);
+  transform-origin: 0 0;
+  background: linear-gradient(rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0.42)), var(--wall);
 }
-.pfloor {
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: var(--pd);
-  transform-origin: 50% 100%;
-  transform: rotateX(90deg);
-  background: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.1)), var(--floorimg) 0 0 / var(--floorsize);
+/* the hallway: the outside of the entrance wall, the wall across from it, floor and ceiling,
+   finished like the room. While you stand in it, its floor and ceiling and the far wall are
+   out of view (under, over and behind you) and stay hidden; they'd cost dearly to draw. */
+.stage.at-door .hall {
+  display: none;
+}
+/* a curtain over the room until it has had a moment to draw, and again as you walk out */
+.curtain {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  background: #000;
+  pointer-events: none;
+  transition: opacity 1s ease;
+}
+.stage.ready .curtain {
+  opacity: 0;
+}
+.stage.ready.leaving .curtain {
+  opacity: 1;
+  transition: opacity 0.8s ease 1.05s;
+}
+/* the lobby, too, comes up out of black and goes back into it on the way to a room, so every
+   change of place passes through the dark */
+.stage.lobby .curtain {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  animation: curtain-lift 0.8s ease;
+}
+.stage.lobby.going .curtain {
+  opacity: 1;
+}
+@keyframes curtain-lift {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 /* ---------- glass controls: step buttons and the dock ---------- */
@@ -792,32 +948,87 @@ body:has(.stage.dark) .dock {
 .dock-link:focus-visible {
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
 }
-.stepnav {
-  position: absolute;
-  right: 18px;
-  bottom: calc(16px + env(safe-area-inset-bottom));
-  display: flex;
-  gap: 10px;
-  transition: opacity 0.25s;
-}
-.stepbtn {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  box-sizing: border-box;
-  border-radius: 50%;
-}
-.stepbtn:hover {
-  background: rgba(255, 255, 255, 0.28);
-}
-.stepbtn:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-body:has(.dock.open) .stepnav {
+/* an arrow floating either side of the view; in the doorway each gives a little nudge now
+   and then */
+body:has(.dock.open) .turn {
   opacity: 0;
   pointer-events: none;
+}
+.turn {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+.turn.hide {
+  opacity: 0;
+}
+.turnbtn {
+  position: absolute;
+  top: 50%;
+  width: 54px;
+  height: 54px;
+  margin-top: -27px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  pointer-events: auto;
+  color: #f3f2ee;
+  background: linear-gradient(rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.1));
+}
+.turn.hide .turnbtn {
+  pointer-events: none;
+}
+.turnbtn:hover {
+  background: rgba(255, 255, 255, 0.36);
+}
+.turn-l {
+  left: max(20px, 4vw);
+}
+.turn-r {
+  right: max(20px, 4vw);
+}
+/* in the doorway they sit within the archway: the ways in */
+.stage.at-door .turn-l {
+  left: calc(50% - var(--S) * 0.38 - 27px);
+  animation: nudge-l 2.8s ease-in-out 1.2s infinite;
+}
+.stage.at-door .turn-r {
+  right: calc(50% - var(--S) * 0.38 - 27px);
+  animation: nudge-r 2.8s ease-in-out 1.2s infinite;
+}
+@keyframes nudge-l {
+  0%,
+  72%,
+  100% {
+    translate: 0 0;
+  }
+  82% {
+    translate: -8px 0;
+  }
+  92% {
+    translate: 2px 0;
+  }
+}
+@keyframes nudge-r {
+  0%,
+  72%,
+  100% {
+    translate: 0 0;
+  }
+  82% {
+    translate: 8px 0;
+  }
+  92% {
+    translate: -2px 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .turn-l,
+  .turn-r {
+    animation: none;
+  }
 }
 .dock {
   position: fixed;
@@ -964,16 +1175,18 @@ body:has(.dock.open) .stepnav {
 /* lights on: once the camera has pulled back, lamps nearest the photo first */
 .beam,
 .pool,
-.glow,
 .can-glow,
 .label,
 .frame::before {
   transition: opacity 0.5s ease calc(0.75s + var(--off, 0ms));
 }
+.glow {
+  transition: opacity 0.5s ease calc(0.75s + var(--off, 0ms)), visibility 0s linear calc(1.25s + var(--off, 0ms));
+}
 .shade,
 .refl,
 .intro,
-.end .doorbtn,
+.door-w .doorbtn,
 .passage > *,
 .dof-t,
 .dof-b,
@@ -990,6 +1203,9 @@ body:has(.dock.open) .stepnav {
 .stage.dark .frame::before {
   transition: opacity 0.12s ease-out var(--off, 0ms);
 }
+.stage.dark .glow {
+  transition: opacity 0.12s ease-out var(--off, 0ms), visibility 0s;
+}
 /* the lamp left on: stays on when you first walk up; moving on to another photo, it clicks on as
    the camera arrives (--on, set by Room.jsx) while the one you left clicks off */
 .stage.dark .fw.lit .beam,
@@ -1003,7 +1219,7 @@ body:has(.dock.open) .stepnav {
 .stage.dark .shade,
 .stage.dark .refl,
 .stage.dark .intro,
-.stage.dark .end .doorbtn,
+.stage.dark .door-w .doorbtn,
 .stage.dark .passage > *,
 .stage.near .dof-t,
 .stage.near .dof-b,
@@ -1012,24 +1228,26 @@ body:has(.dock.open) .stepnav {
   transition: opacity 0.45s ease 0.08s;
 }
 .stage.dark .shade {
-  opacity: 0.9;
+  opacity: 0.55;
 }
 .stage.dark .refl {
-  opacity: 0.08;
+  opacity: 0.3;
 }
 .stage.dark .passage > * {
-  opacity: 0.12;
+  opacity: 0.5;
 }
 .stage.dark .beam,
 .stage.dark .pool,
 .stage.dark .can-glow,
-.stage.dark .label,
-.stage.dark .intro,
-.stage.dark .end .doorbtn,
 .stage.near .dof-t,
 .stage.near .dof-b,
 .stage.near .grain {
   opacity: 0;
+}
+.stage.dark .label,
+.stage.dark .intro,
+.stage.dark .door-w .doorbtn {
+  opacity: 0.45;
 }
 .stage.dark .fw.lit .beam,
 .stage.dark .fw.lit .glow {
@@ -1051,7 +1269,7 @@ body:has(.dock.open) .stepnav {
   opacity: 0;
 }
 .stage.dark .fw:not(.lit) .frame::before {
-  opacity: 0.88;
+  opacity: 0.55;
 }
 .vignette::after {
   content: "";
@@ -1061,9 +1279,10 @@ body:has(.dock.open) .stepnav {
   opacity: 0;
 }
 .stage.dark .vignette::after {
-  opacity: 1;
+  opacity: 0.45;
 }
 /* at rest up close, let the browser redraw the wall sharp at the new size */
-.stage.near:not(.moving) .world {
+.stage.near:not(.moving) .cam {
   will-change: auto;
 }
+
