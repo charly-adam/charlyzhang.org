@@ -26,6 +26,14 @@ export function Arrow({ rotate = 0, size = 32, color = 'currentColor' }) {
   );
 }
 
+export function Home() {
+  return (
+    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3.5 11 12 4l8.5 7M6 9.5V20h4.5v-5.5h3V20H18V9.5" />
+    </svg>
+  );
+}
+
 export function Chevron({ dir = 1 }) {
   return (
     <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -38,7 +46,7 @@ export function Chevron({ dir = 1 }) {
 // work below it, so you see its rear cap and body, with the light spilling out of the far end.
 export function TrackLight() {
   return (
-    <svg className="can" aria-hidden="true" width="30" height="46" viewBox="0 0 30 46">
+    <svg className="can" aria-hidden="true" viewBox="0 0 30 46">
       <defs>
         <radialGradient id="can-spill" cx="50%" cy="0%" r="100%">
           <stop offset="0" stopColor="#fffaf0" />

@@ -12,6 +12,15 @@ body,
   height: 100%;
   margin: 0;
   overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+img {
+  -webkit-user-drag: none;
 }
 body {
   font-family: "Inter Tight Variable", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -32,83 +41,33 @@ a {
   color: inherit;
   text-decoration: none;
 }
-:focus-visible {
-  outline: 2px solid currentColor;
-  outline-offset: 4px;
+:focus {
+  outline: none;
 }
 
-/* ---------- page frame ---------- */
+/* ---------- page frame ----------
+   The room fills the screen. --S is the room's scale (the height of a desktop view); narrow
+   screens shrink it, so a phone sees the same room, just smaller. */
 .app {
-  --hh: 48px; /* header height */
-  --S: max(572px, calc(100dvh - var(--hh))); /* height of the gallery view */
+  --H: 100dvh;
+  --S: min(var(--H), calc(100vw / 1.6));
   position: relative;
   width: 100%;
-  height: calc(var(--S) + var(--hh));
-  display: flex;
-  flex-direction: column;
+  height: var(--H);
   overflow: hidden;
 }
 .main {
-  position: relative;
-  flex: 1;
-  min-height: 0;
+  position: absolute;
+  inset: 0;
   overflow: hidden;
 }
-.site-header {
-  position: relative;
-  z-index: 30;
-  flex: none;
-  height: var(--hh);
-  box-sizing: border-box;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0 20px;
-  padding: 0 28px;
-  background: #f6f6f4;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.09);
-}
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  font-size: 14px;
-  font-weight: 600;
-}
-.brand-sub {
-  font-size: 13px;
-  font-weight: 400;
-  color: #5a5955;
-}
-.tabs {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0 22px;
-}
-.tab {
-  display: flex;
-  align-items: center;
-  min-height: 44px;
-  font-size: 13px;
-}
-.tab[aria-current="page"] {
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 6px;
-  text-decoration-thickness: 1.5px;
-}
-.tab:hover,
 .walltext-btn:hover .u,
 .signrow:hover .u,
 .label:hover .lt,
-.panel:hover .lt,
-.light-btn:hover,
-.dark-btn:hover {
+.intro-inner:hover .intro-text,
+.light-btn:hover {
   text-decoration: underline;
-  text-underline-offset: 4px;
+  text-underline-offset: 0.3em;
 }
 
 /* ---------- room themes ---------- */
@@ -125,13 +84,13 @@ a {
   --fg2: #3a3a38;
   --pool: rgba(255, 255, 255, 0);
   --floorimg: url(/textures/floor-stone.jpg);
-  --floorsize: 660px 660px;
+  --floorsize: calc(var(--S) * 0.77) calc(var(--S) * 0.77);
   --floorop: 0.92;
   --reflop: 0.6;
   --ceilbg: linear-gradient(to top, #cdcdca 0, #dededb 30px, #e3e3e0 calc(var(--S) * 0.085), #fdfdfb calc(var(--S) * 0.092), #fdfdfb calc(var(--S) * 0.104), #e6e6e3 calc(var(--S) * 0.112), #e2e2df calc(var(--S) * 0.22), #fdfdfb calc(var(--S) * 0.228), #fdfdfb calc(var(--S) * 0.242), #e2e2df calc(var(--S) * 0.25), #dadad7 100%);
   --endb: 0.9;
   --stagebg: #cfcfcc;
-  --fb: 3px;
+  --fb: calc(var(--S) * 0.0035);
   --fside: #191817;
   --mat: #f8f8f6;
 }
@@ -141,15 +100,15 @@ a {
   --fg2: #2a2a27;
   --pool: rgba(255, 253, 247, 0.95);
   --floorimg: url(/textures/floor-concrete.jpg);
-  --floorsize: 900px 900px;
+  --floorsize: calc(var(--S) * 1.05) calc(var(--S) * 1.05);
   --floorop: 0.5;
   --reflop: 0.9;
-  --plh: 9px;
+  --plh: calc(var(--S) * 0.0105);
   --plc: linear-gradient(#e2e2df, #cfcfcc);
-  --ceilbg: url(/textures/ceiling-tile.jpg) 0 0/230px 230px;
+  --ceilbg: url(/textures/ceiling-tile.jpg) 0 0 / calc(var(--S) * 0.27) calc(var(--S) * 0.27);
   --endb: 0.8;
   --stagebg: #1a1a1b;
-  --fb: 8px;
+  --fb: calc(var(--S) * 0.0094);
   --fside: #9c7650;
   --mat: #f6f4ef;
 }
@@ -159,7 +118,7 @@ a {
   --fg2: #c4cdcd;
   --pool: rgba(215, 240, 240, 0.34);
   --floorimg: url(/textures/floor-oak.jpg);
-  --floorsize: 420px 420px;
+  --floorsize: calc(var(--S) * 0.49) calc(var(--S) * 0.49);
   --floorop: 0.8;
   --reflop: 0.7;
   --plh: calc(var(--S) * 0.028);
@@ -167,7 +126,7 @@ a {
   --ceilbg: linear-gradient(#202222, #2c2e2e);
   --endb: 0.78;
   --stagebg: #141818;
-  --fb: 14px;
+  --fb: calc(var(--S) * 0.0165);
   --fside: #8f6c2c;
   --mat: #f3f0e8;
 }
@@ -177,7 +136,7 @@ a {
   --fg2: #c0bfd4;
   --pool: rgba(232, 228, 255, 0.32);
   --floorimg: url(/textures/floor-walnut.jpg);
-  --floorsize: 380px 380px;
+  --floorsize: calc(var(--S) * 0.45) calc(var(--S) * 0.45);
   --floorop: 0.66;
   --reflop: 0.8;
   --plh: calc(var(--S) * 0.03);
@@ -185,7 +144,7 @@ a {
   --ceilbg: linear-gradient(#17161f, #22212c);
   --endb: 0.78;
   --stagebg: #131219;
-  --fb: 10px;
+  --fb: calc(var(--S) * 0.012);
   --fside: #8f6c2c;
   --mat: #f3f0e8;
 }
@@ -218,9 +177,9 @@ a {
 .world {
   position: absolute;
   left: 0;
-  top: 0;
+  top: calc((var(--H) - var(--S)) * 0.44);
   width: max-content;
-  height: 100%;
+  height: var(--S);
   display: flex;
   transform-style: preserve-3d;
   will-change: transform;
@@ -264,7 +223,7 @@ a {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.16), transparent 160px), linear-gradient(270deg, rgba(0, 0, 0, 0.16), transparent 160px), linear-gradient(rgba(0, 0, 0, 0.1), transparent 70px), linear-gradient(to top, rgba(0, 0, 0, 0.13), transparent 9%);
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.16), transparent calc(var(--S) * 0.19)), linear-gradient(270deg, rgba(0, 0, 0, 0.16), transparent calc(var(--S) * 0.19)), linear-gradient(rgba(0, 0, 0, 0.1), transparent calc(var(--S) * 0.08)), linear-gradient(to top, rgba(0, 0, 0, 0.13), transparent 9%);
 }
 .floor3d {
   left: 0;
@@ -297,7 +256,7 @@ a {
   left: 0;
   right: 0;
   bottom: calc(var(--S) * 0.15);
-  height: 8px;
+  height: calc(var(--S) * 0.009);
   background: linear-gradient(#2a2a2a, #0e0e0e);
 }
 .endwall {
@@ -359,10 +318,15 @@ a {
   align-items: flex-end;
   justify-content: flex-start;
 }
+/* a lamp per frame, centred over it on a ceiling track 0.15 S out from the wall (frames sit
+   centred on the wall, so the ceiling line is 0.355 S above a frame's middle) */
 .can {
   position: absolute;
   left: 50%;
-  top: calc(var(--S) * 0.07);
+  top: calc(50% - var(--S) * 0.355);
+  width: calc(var(--S) * 0.034);
+  height: calc(var(--S) * 0.052);
+  pointer-events: none;
   transform: translateX(-50%) translateZ(calc(var(--S) * 0.15));
 }
 .t-white .track3d,
@@ -409,37 +373,70 @@ a {
   -webkit-mask-image: linear-gradient(#000, transparent);
   mask-image: linear-gradient(#000, transparent);
 }
-.flatonly {
-  display: none;
-}
-.flat-ceil {
-  left: 0;
-  right: 0;
-  top: 0;
-  height: calc(var(--S) * 0.07);
-  background: var(--ceilbg);
-}
-.flat-floor {
-  left: 0;
-  right: 0;
-  top: calc(var(--S) * 0.78);
-  bottom: 0;
-  background: linear-gradient(rgba(0, 0, 0, 0.3), transparent 18%), var(--floorimg) 0 0 / var(--floorsize);
-}
-
-/* spotlight on the wall: a hot oval on the work, a softer beam fanning up toward the lamp */
-.pool {
+/* Each lamp's light, in the room's real 3D space:
+   - the beam: a soft cone in the air, from the lamp's lens (0.045 S below the ceiling line, 0.15 S
+     out from the wall) leaning back 52.5 degrees to land on the wall 0.16 S below the ceiling line,
+     above every frame, so it never crosses the photo;
+   - the pool: a broad, soft wash on the wall that carries on from where the beam lands;
+   - the glow: with the room dark, the patch of wall this lamp still lights.
+   The pool and glow boxes run from the ceiling line to the floor, so the frame's middle is at 50%
+   and the beam lands at 22.5%. All three swing very gently about the lamp, each lamp in its own
+   time. */
+.beam,
+.pool,
+.glow {
   position: absolute;
   left: 50%;
-  top: -95%;
-  width: 250%;
-  height: 240%;
-  transform: translateX(-50%);
   pointer-events: none;
-  background: radial-gradient(ellipse 30% 26% at 50% 58%, var(--pool) 0%, transparent 100%), radial-gradient(ellipse 42% 58% at 50% 46%, var(--pool) 0%, transparent 70%), conic-gradient(from 160deg at 50% 0%, transparent 0deg, var(--pool) 20deg, transparent 40deg);
+  animation: lamp-sway 7s ease-in-out calc(var(--i, 0) * -2.3s) infinite alternate;
+}
+.beam {
+  top: calc(50% - var(--S) * 0.31);
+  width: calc(var(--S) * 0.7);
+  margin-left: calc(var(--S) * -0.35);
+  height: calc(var(--S) * 0.189);
+  transform-origin: 50% 0;
+  transform: translateZ(calc(var(--S) * 0.15)) rotateX(-52.5deg);
+  /* brightest at the lens, fading out over its last stretch as it nears the wall, where the
+     pool takes over (a hard end would draw a line along the wall) */
+  background: radial-gradient(ellipse 60% 100% at 50% 0, rgba(255, 251, 241, 0.95), rgba(255, 251, 241, 0.45) 35%, rgba(255, 251, 241, 0.16) 72%, transparent 100%);
+  -webkit-mask-image: conic-gradient(from 180deg at 50% 0, #000 0deg, rgba(0, 0, 0, 0.8) 14deg, rgba(0, 0, 0, 0.35) 32deg, transparent 54deg, transparent 306deg, rgba(0, 0, 0, 0.35) 328deg, rgba(0, 0, 0, 0.8) 346deg, #000 360deg);
+  mask-image: conic-gradient(from 180deg at 50% 0, #000 0deg, rgba(0, 0, 0, 0.8) 14deg, rgba(0, 0, 0, 0.35) 32deg, transparent 54deg, transparent 306deg, rgba(0, 0, 0, 0.35) 328deg, rgba(0, 0, 0, 0.8) 346deg, #000 360deg);
   opacity: 0.85;
-  -webkit-mask-image: linear-gradient(transparent 0, #000 30%, #000 80%, transparent);
-  mask-image: linear-gradient(transparent 0, #000 30%, #000 80%, transparent);
+}
+.pool,
+.glow {
+  top: calc(50% - var(--S) * 0.355);
+  width: 250%;
+  margin-left: -125%;
+  height: calc(var(--S) * 0.71);
+  transform-origin: 50% 6%;
+}
+.pool {
+  background: radial-gradient(ellipse 22% 24% at 50% 46%, var(--pool) 0%, transparent 100%), radial-gradient(ellipse 36% 42% at 50% 42%, var(--pool) 0%, transparent 100%);
+  opacity: 0.75;
+  -webkit-mask-image: linear-gradient(transparent 10%, #000 30%, #000 64%, transparent 88%);
+  mask-image: linear-gradient(transparent 10%, #000 30%, #000 64%, transparent 88%);
+}
+.glow {
+  /* wide enough to take in the wall label beside the frame */
+  width: 300%;
+  margin-left: -150%;
+  background: radial-gradient(ellipse 45% 52% at 52% 47%, rgba(174, 174, 170, 0.97) 0%, rgba(158, 158, 154, 0.88) 42%, rgba(120, 120, 116, 0.45) 72%, transparent 100%);
+  opacity: 0;
+  -webkit-mask-image: linear-gradient(transparent 12%, #000 24%, #000 76%, transparent 96%);
+  mask-image: linear-gradient(transparent 12%, #000 24%, #000 76%, transparent 96%);
+}
+.t-white .beam {
+  display: none;
+}
+@keyframes lamp-sway {
+  from {
+    rotate: -0.7deg;
+  }
+  to {
+    rotate: 0.7deg;
+  }
 }
 
 /* ---------- frames: depth (side faces), white mat with bevel, glass sheen, shadow on the wall ---------- */
@@ -465,7 +462,7 @@ a {
   cursor: zoom-in;
   transform-style: preserve-3d;
   transform: translateZ(var(--ft));
-  padding: calc(var(--S) * 0.016);
+  padding: calc(var(--S) * 0.02);
   background: var(--mat);
   border: var(--fb) solid #1b1a19;
   box-shadow: inset 0 5px 7px -4px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(0, 0, 0, 0.07);
@@ -557,34 +554,36 @@ a {
 .lblpos {
   flex: none;
   display: block;
-  width: 96px;
+  width: calc(var(--S) * 0.113);
   margin: calc(var(--S) * 0.18) 0 0 calc(var(--S) * 0.03);
 }
 
-/* wall labels: tiny print, click for a close-up */
+/* wall labels: tiny print; clicking one walks up to its photo. A hair off the wall, so a lamp's
+   light (on the wall's own plane) never draws over the text. */
 .label {
   cursor: zoom-in;
   align-self: center;
+  transform: translateZ(1px);
 }
 .lbl-artist {
   display: block;
-  font-size: 6.5px;
+  font-size: calc(var(--S) * 0.0076);
   font-weight: 600;
   line-height: 1.35;
 }
 .lbl-entry {
   display: block;
-  margin-top: 3px;
+  margin-top: calc(var(--S) * 0.0035);
 }
 .lbl-title {
   display: block;
-  font-size: 6.5px;
+  font-size: calc(var(--S) * 0.0076);
   font-style: italic;
   line-height: 1.35;
 }
 .lbl-meta {
   display: block;
-  font-size: 5.5px;
+  font-size: calc(var(--S) * 0.0065);
   line-height: 1.4;
 }
 
@@ -607,48 +606,42 @@ a {
   align-items: flex-start;
 }
 .intro-inner {
-  margin-top: calc(var(--S) * -0.05);
-}
-.intro-room {
-  margin: 0;
-  font-size: calc(var(--S) * 0.024);
-  line-height: 1.12;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  opacity: 0.9;
-}
-.namebox {
-  margin: calc(var(--S) * 0.008) 0 0;
-  display: inline-block;
-  padding: 0.12em 0.32em 0.18em;
-  font-size: calc(var(--S) * 0.024);
-  font-weight: 700;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
-}
-.panel {
   display: block;
-  margin-top: calc(var(--S) * 0.03);
-  padding-top: calc(var(--S) * 0.012);
-  border-top: 1px solid currentColor;
-  box-sizing: border-box;
-  width: calc(var(--S) * 0.22);
+  margin-top: calc(var(--S) * -0.05);
   cursor: zoom-in;
 }
-.panel .lt {
+.intro-room,
+.intro-name,
+.intro-text {
   display: block;
+}
+.intro-room,
+.intro-name {
+  font-size: calc(var(--S) * 0.024);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+}
+.intro-room {
+  font-weight: 600;
+}
+.intro-name {
+  margin-top: calc(var(--S) * 0.006);
+  font-weight: 700;
+}
+.intro-text {
+  margin-top: calc(var(--S) * 0.03);
+  width: calc(var(--S) * 0.22);
   font-size: calc(var(--S) * 0.0105);
   line-height: 1.55;
-  opacity: 0.9;
 }
 
 /* ---------- doorway: an opening in the back wall with a passage behind it ---------- */
 .end-w {
   flex: none;
   box-sizing: border-box;
-  width: 460px;
-  padding-left: 60px;
-  padding-right: 60px;
+  width: calc(var(--S) * 0.54);
+  padding-left: calc(var(--S) * 0.07);
+  padding-right: calc(var(--S) * 0.07);
 }
 .end {
   align-items: flex-end;
@@ -656,19 +649,24 @@ a {
 }
 .door {
   display: block;
-  width: 190px;
+  width: calc(var(--S) * 0.223);
   height: calc(var(--S) * 0.5);
 }
 .doorbtn {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 14px;
+  gap: calc(var(--S) * 0.016);
 }
 .door-sign {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: calc(var(--S) * 0.012);
+}
+.door-sign svg {
+  flex: none;
+  width: calc(var(--S) * 0.026);
+  height: calc(var(--S) * 0.026);
 }
 .door-room {
   display: block;
@@ -684,22 +682,22 @@ a {
 }
 .hasdoor {
   -webkit-mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
-  -webkit-mask-size: 100% 100%, 190px 70.42%;
-  -webkit-mask-position: 0 0, right 210px bottom 0;
+  -webkit-mask-size: 100% 100%, calc(var(--S) * 0.223) 70.42%;
+  -webkit-mask-position: 0 0, right calc(var(--S) * 0.247) bottom 0;
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-composite: xor;
   mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
-  mask-size: 100% 100%, 190px 70.42%;
-  mask-position: 0 0, right 210px bottom 0;
+  mask-size: 100% 100%, calc(var(--S) * 0.223) 70.42%;
+  mask-position: 0 0, right calc(var(--S) * 0.247) bottom 0;
   mask-repeat: no-repeat;
   mask-composite: exclude;
 }
 .passage {
   --pd: calc(var(--S) * 0.42);
   position: absolute;
-  left: 60px;
+  left: calc(var(--S) * 0.07);
   bottom: 0;
-  width: 190px;
+  width: calc(var(--S) * 0.223);
   height: calc(var(--S) * 0.5);
   transform-style: preserve-3d;
   pointer-events: none;
@@ -774,29 +772,126 @@ a {
   background: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.1)), var(--floorimg) 0 0 / var(--floorsize);
 }
 
-/* step buttons */
+/* ---------- glass controls: step buttons and the dock ---------- */
+.glass,
+.dock {
+  color: #161616;
+  background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+  -webkit-backdrop-filter: blur(10px) saturate(1.8) brightness(1.05);
+  backdrop-filter: blur(10px) saturate(1.8) brightness(1.05);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: inset 0 1px 0.5px rgba(255, 255, 255, 0.7), inset 0 -1px 0.5px rgba(255, 255, 255, 0.18), inset 0 0 16px rgba(255, 255, 255, 0.07), 0 8px 24px -12px rgba(0, 0, 0, 0.4);
+  transition: color 0.6s ease;
+}
+.stage.dark .glass,
+body:has(.stage.dark) .dock {
+  color: #f3f2ee;
+}
+.glass:focus-visible,
+.dock-home:focus-visible,
+.dock-link:focus-visible {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
+}
 .stepnav {
   position: absolute;
-  right: 24px;
-  bottom: 22px;
+  right: 18px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
   display: flex;
   gap: 10px;
+  transition: opacity 0.25s;
 }
 .stepbtn {
   display: grid;
   place-items: center;
   width: 44px;
   height: 44px;
+  box-sizing: border-box;
   border-radius: 50%;
-  background: rgba(246, 246, 244, 0.82);
-  color: #141414;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 .stepbtn:hover {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.28);
+}
+.stepbtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+body:has(.dock.open) .stepnav {
+  opacity: 0;
+  pointer-events: none;
+}
+.dock {
+  position: fixed;
+  left: 50%;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 40;
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr; /* equal sides keep the home button in the middle */
+  align-items: center;
+  width: max-content; /* not limited to the half-screen right of left: 50% */
+  max-width: calc(100vw - 24px);
+  box-sizing: border-box;
+  padding: 3px;
+  border-radius: 999px;
+}
+.dock-home {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+.dock-home:hover,
+.dock.open .dock-home {
+  background: rgba(255, 255, 255, 0.22);
+}
+/* each side opens outward from the home button */
+.dock-side {
+  display: grid;
+  grid-template-columns: 0fr;
+  transition: grid-template-columns 0.55s cubic-bezier(0.3, 0.9, 0.25, 1);
+}
+.dock.open .dock-side {
+  grid-template-columns: 1fr;
+}
+.dock-side > div {
+  display: flex;
+  min-width: 0;
+  overflow: hidden;
+}
+.dock-l > div {
+  justify-content: flex-end;
+}
+.dock-link {
+  flex: none;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 clamp(6px, 1.5vw, 13px);
+  border-radius: 999px;
+  font-size: clamp(11.5px, 3vw, 14px);
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s, background 0.2s;
+}
+.dock.open .dock-link {
+  opacity: 1;
+  transition: opacity 0.35s ease 0.12s, background 0.2s;
+}
+.dock-link:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+.dock-link[aria-current="page"] {
+  font-weight: 650;
 }
 
-/* ---------- lobby: directory sign and floor plan ---------- */
+/* ---------- lobby: the directory sign ---------- */
+.lobby-col > * {
+  zoom: var(--k, 1);
+}
 .lobby-col {
   width: 100%;
   flex-direction: column;
@@ -855,323 +950,96 @@ a {
   font-size: 13px;
   color: #3a3936;
 }
-.view-toggle {
-  display: flex;
-  gap: 22px;
-  font-size: 13px;
-}
-.view-toggle button {
-  min-height: 44px;
-}
-.view-toggle button[aria-pressed="true"] {
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 5px;
-}
-.plan {
-  width: min(660px, 92vw);
-}
-.plan .sign-kicker {
-  margin-bottom: 10px;
-}
-.plan-box {
-  position: relative;
-  box-sizing: border-box;
-  padding: 24px;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 110px;
-  row-gap: 32px;
-  border: 3px solid #141414;
-  border-bottom: 0;
-}
-.plan-room {
-  box-sizing: border-box;
-  height: 96px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 11px 13px 13px;
-  border: 2px solid #141414;
-}
-.plan-room:hover {
-  background: rgba(0, 0, 0, 0.05);
-}
-.plan-works {
-  display: flex;
-  gap: 9px;
-  align-items: flex-start;
-}
-.plan-works span {
-  display: block;
-  height: 4px;
-  background: #141414;
-}
-.plan-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.plan-num {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  background: #141414;
-  color: #f4f3f0;
-  font-size: 13px;
-  font-weight: 600;
-}
-.plan-name {
-  font-size: 19px;
-  font-weight: 500;
-}
-.plan-lobby {
+/* ---------- up close ----------
+   The camera walks up to one thing on the wall. For a photo, first the lights go out: every other
+   lamp clicks off in a quick ripple outward from it (--off, set per group) and the room falls
+   dark, then the camera moves in (the 420 ms lead-in in Room.jsx). Stepping back, the lights come
+   on again as the camera finishes pulling away. All of it is opacity, which animates smoothly. */
+.shade {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 96px;
-  height: 96px;
-  margin: -48px 0 0 -48px;
-  box-sizing: border-box;
-  border-radius: 50%;
-  border: 2px solid #141414;
-  display: grid;
-  place-items: center;
-  background: #f0f0ed;
-  font-size: 14px;
-  font-weight: 500;
-}
-.plan-wall-l,
-.plan-wall-r {
-  position: absolute;
-  bottom: -3px;
-  width: calc(50% - 33px);
-  height: 3px;
-  background: #141414;
-}
-.plan-wall-l {
-  left: -3px;
-}
-.plan-wall-r {
-  right: -3px;
-}
-.plan-here {
-  margin: 8px 0 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.plan-here span {
-  display: block;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #141414;
-}
-
-/* ---------- overlays ---------- */
-.zoom-backdrop {
-  position: fixed;
   inset: 0;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  background: rgba(240, 240, 237, 0.96);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  background: #050505;
+  opacity: 0;
 }
-.zoom-card {
-  width: min(520px, 100%);
-  max-height: 100%;
-  overflow: auto;
-  color: #141414;
-}
-.zoom-card p {
-  margin: 0;
-}
-.zoom-artist {
-  font-size: 22px;
-  font-weight: 600;
-}
-.zoom-entry {
-  margin-top: 22px;
-}
-.zoom-title {
-  font-size: 22px;
-  font-style: italic;
-}
-.zoom-meta {
-  margin-top: 6px !important;
-  font-size: 16px;
-  line-height: 1.55;
-  color: #2a2a28;
-}
-.zoom-note {
-  margin-top: 12px !important;
-  font-size: 17px;
-  line-height: 1.6;
-}
-.zoom-lead {
-  margin-top: 22px !important;
-}
-.zoom-room {
-  font-size: 26px;
-  line-height: 1.15;
-  font-weight: 600;
-}
-.zoom-namebox {
-  margin-top: 8px !important;
-  display: inline-block;
-  padding: 3px 8px 4px;
-  font-size: 22px;
-  font-weight: 700;
-  background: #141414;
-  color: #f4f3f0;
-}
-.zoom-view {
-  margin-top: 6px;
-  min-height: 44px;
-  font-size: 14px;
-  font-weight: 600;
-}
-.zoom-close {
-  margin-top: 18px;
-  min-height: 44px;
-  font-size: 14px;
-}
-.photo-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  background: rgba(14, 14, 14, 0.96);
-}
-.photo-close {
-  position: absolute;
-  top: 10px;
-  right: 24px;
-  min-height: 44px;
-  font-size: 13px;
-}
-.photo-body {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 28px;
-}
-.photo-img {
-  display: block;
-  width: min(66vw, 105vh);
-  height: auto;
-  max-height: 80vh;
-  object-fit: contain;
-}
-.photo-img.portrait {
-  width: auto;
-  height: 78vh;
-  max-width: 90vw;
-}
-.photo-side {
-  width: 200px;
-  color: #f2f1ee;
-}
-.photo-side p {
-  margin: 0;
-}
-.photo-title {
-  font-size: 13px;
-  font-weight: 600;
-}
-.photo-meta {
-  margin-top: 6px !important;
-  font-size: 12px;
-  line-height: 1.5;
-  color: #b9b8b4;
-}
-.photo-count {
-  margin-top: 18px !important;
-  font-size: 12px;
-  color: #9a9995;
-}
-.photo-nav {
-  margin-top: 4px;
-  display: flex;
-  gap: 20px;
-  font-size: 13px;
-}
-.photo-nav button {
-  min-height: 44px;
-}
-.dark-btn {
-  color: #f2f1ee;
-}
-.dark-btn:disabled {
-  opacity: 0.3;
-  cursor: default;
-  text-decoration: none;
-}
-
-/* ---------- up close: the camera walks to one photo and the other lights go out ---------- */
-.backwall,
-.endwall,
-.floor3d,
-.ceil3d,
-.refl,
-.passage > *,
+/* lights on: once the camera has pulled back, lamps nearest the photo first */
+.beam,
 .pool,
+.glow,
+.can-glow,
 .label,
+.frame::before {
+  transition: opacity 0.5s ease calc(0.75s + var(--off, 0ms));
+}
+.shade,
+.refl,
 .intro,
 .end .doorbtn,
-.can-glow,
-.frame::before,
+.passage > *,
 .dof-t,
 .dof-b,
 .grain,
 .vignette::after {
-  transition: filter 1.3s ease 0.15s, opacity 1.3s ease 0.15s;
+  transition: opacity 0.9s ease 0.7s;
 }
-.stage.dark .backwall,
-.stage.dark .ceil3d,
-.stage.dark .floor3d,
-.stage.dark .passage > * {
-  filter: brightness(0.16);
+/* lights off: a quick click per lamp, then the room */
+.stage.dark .beam,
+.stage.dark .pool,
+.stage.dark .glow,
+.stage.dark .can-glow,
+.stage.dark .label,
+.stage.dark .frame::before {
+  transition: opacity 0.12s ease-out var(--off, 0ms);
 }
-.stage.dark .endwall {
-  filter: brightness(0.12);
+/* the lamp left on: stays on when you first walk up; moving on to another photo, it clicks on as
+   the camera arrives (--on, set by Room.jsx) while the one you left clicks off */
+.stage.dark .fw.lit .beam,
+.stage.dark .fw.lit .pool,
+.stage.dark .fw.lit .glow,
+.stage.dark .fw.lit .can-glow,
+.stage.dark .fw.lit .frame::before,
+.stage.dark .col.lit .label {
+  transition: opacity 0.3s ease var(--on, 0s);
+}
+.stage.dark .shade,
+.stage.dark .refl,
+.stage.dark .intro,
+.stage.dark .end .doorbtn,
+.stage.dark .passage > *,
+.stage.near .dof-t,
+.stage.near .dof-b,
+.stage.near .grain,
+.stage.dark .vignette::after {
+  transition: opacity 0.45s ease 0.08s;
+}
+.stage.dark .shade {
+  opacity: 0.9;
 }
 .stage.dark .refl {
+  opacity: 0.08;
+}
+.stage.dark .passage > * {
   opacity: 0.12;
 }
-.stage.dark .world {
-  will-change: auto; /* let the browser redraw the photo sharp at close range */
-}
+.stage.dark .beam,
 .stage.dark .pool,
 .stage.dark .can-glow,
 .stage.dark .label,
 .stage.dark .intro,
 .stage.dark .end .doorbtn,
-.stage.dark .dof-t,
-.stage.dark .dof-b,
-.stage.dark .grain {
+.stage.near .dof-t,
+.stage.near .dof-b,
+.stage.near .grain {
   opacity: 0;
 }
-.stage.dark .fw.lit .pool {
+.stage.dark .fw.lit .beam,
+.stage.dark .fw.lit .glow {
   opacity: 1;
 }
-.stage.dark .lit .can-glow {
+.stage.dark .fw.lit .pool {
+  opacity: 0.35;
+}
+.stage.dark .fw.lit .can-glow,
+.stage.dark .col.lit .label {
   opacity: 1;
 }
 .frame::before {
@@ -1183,167 +1051,19 @@ a {
   opacity: 0;
 }
 .stage.dark .fw:not(.lit) .frame::before {
-  opacity: 0.86;
+  opacity: 0.88;
 }
 .vignette::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 62% 66% at 50% 44%, transparent 40%, rgba(0, 0, 0, 0.6) 100%);
+  background: radial-gradient(ellipse 62% 66% at 50% 44%, transparent 40%, rgba(0, 0, 0, 0.55) 100%);
   opacity: 0;
 }
 .stage.dark .vignette::after {
   opacity: 1;
 }
-/* flat, sharp copy of the framed print, laid over the 3D one once the camera arrives */
-.print {
-  position: absolute;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.35s ease;
-}
-.print.shown {
-  opacity: 1;
-}
-.print .frame {
-  transform: none;
-  cursor: default;
-}
-.closeup {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-.closeup-hit {
-  position: absolute;
-  inset: 0;
-  pointer-events: auto;
-  cursor: zoom-out;
-}
-.closeup-cap,
-.closeup-close {
-  pointer-events: auto;
-  animation: closeup-in 0.9s ease 1.2s both;
-}
-.closeup-cap {
-  position: absolute;
-  left: 28px;
-  bottom: 22px;
-  max-width: min(320px, 40vw);
-  color: #f2f1ee;
-}
-.closeup-cap p {
-  margin: 0;
-}
-.closeup-title {
-  font-size: 14px;
-  font-weight: 600;
-}
-.closeup-meta {
-  margin-top: 4px !important;
-  font-size: 12px;
-  color: #b9b8b4;
-}
-.closeup-note {
-  margin-top: 8px !important;
-  font-size: 13px;
-  line-height: 1.5;
-  color: #dcdbd7;
-}
-.closeup-count {
-  margin-top: 10px !important;
-  font-size: 12px;
-  color: #8f8e8a;
-}
-.closeup-close {
-  position: absolute;
-  top: 10px;
-  right: 24px;
-  min-height: 44px;
-  font-size: 13px;
-}
-.stepbtn:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
-@keyframes closeup-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .dolly {
-    transition: none !important;
-  }
-  .closeup-cap,
-  .closeup-close {
-    animation-delay: 0s;
-  }
-}
-
-/* ---------- phones: the flat wall, swiped natively ---------- */
-@media (max-width: 700px) {
-  .app {
-    --hh: 84px;
-  }
-  .site-header {
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 0;
-    padding: 0 16px;
-  }
-  .brand,
-  .tab {
-    min-height: 38px;
-  }
-  .tabs {
-    gap: 0 16px;
-  }
-  .stage {
-    perspective: none;
-    overflow-x: auto;
-    overflow-y: hidden;
-    touch-action: pan-x;
-  }
-  .dolly,
-  .cam {
-    position: static;
-    transform: none !important;
-  }
-  .world {
-    position: relative;
-    transform: none !important;
-  }
-  .backwall,
-  .frame {
-    transform: none;
-  }
-  .floor3d,
-  .ceil3d,
-  .endwall,
-  .refl,
-  .can,
-  .vignette,
-  .stepnav,
-  .dof-b,
-  .dof-t,
-  .passage,
-  .side {
-    display: none;
-  }
-  .hasdoor {
-    -webkit-mask-image: none;
-    mask-image: none;
-  }
-  .flatonly {
-    display: block;
-  }
-  .photo-img,
-  .photo-img.portrait {
-    width: 100%;
-    height: auto;
-    max-height: 70vh;
-  }
+/* at rest up close, let the browser redraw the wall sharp at the new size */
+.stage.near:not(.moving) .world {
+  will-change: auto;
 }

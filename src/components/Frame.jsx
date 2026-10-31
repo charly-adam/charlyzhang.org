@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
+import { TrackLight } from './Icons.jsx';
 
-// A framed, matted print hung on the wall: light pool, cast shadow, frame with real depth.
+// A framed, matted print hung on the wall: its own lamp, its beam and the light it throws on the
+// wall (and, with the room dark, its glow), cast shadow, frame with real depth. Wall things stay out of the Tab order: you walk with
+// the arrow keys and Enter walks up to what you're facing.
 // `lit` means the camera is up close on it: its lamp stays on and the full-size image loads in.
 export function Frame({ photo, lit, onOpen }) {
   const [src, setSrc] = useState(photo.wall);
@@ -16,10 +19,13 @@ export function Frame({ photo, lit, onOpen }) {
   }, [lit, src, photo.file]);
 
   return (
-    <div className={lit ? 'fw lit' : 'fw'}>
+    <div className={lit ? 'fw lit' : 'fw'} style={{ '--i': photo.index }}>
+      <TrackLight />
+      <div className="glow" aria-hidden="true" />
       <div className="pool" aria-hidden="true" />
+      <div className="beam" aria-hidden="true" />
       <div className="fshadow" aria-hidden="true" />
-      <button type="button" className="frame" data-photo={photo.id} onClick={onOpen} aria-label={`View ${photo.title}`}>
+      <button type="button" className="frame" data-photo={photo.id} tabIndex={-1} onClick={onOpen} aria-label={`View ${photo.title}`}>
         <img
           className={photo.portrait ? 'imgP' : 'imgL'}
           src={src}
@@ -54,11 +60,11 @@ export function FrameReflection({ photo }) {
 export const titleLine = (p) => [p.title, p.year].filter(Boolean).join(', ');
 export const metaLine = (p) => [p.place, p.camera].filter(Boolean).join(' · ');
 
-// Small wall label printed beside a group of photos.
+// Small wall label printed beside a group of photos; clicking it walks up to the photo.
 export function WallLabel({ group, artist, onZoom }) {
   const names = group.map((p) => p.title).join(' and ');
   return (
-    <button type="button" className="label ink lblpos" onClick={onZoom} aria-label={`Read label for ${names}`}>
+    <button type="button" className="label ink lblpos" tabIndex={-1} onClick={onZoom} aria-label={`View ${names}`}>
       <span className="lt lbl-artist">{artist}</span>
       {group.map((p) => (
         <span key={p.id} className="lbl-entry">

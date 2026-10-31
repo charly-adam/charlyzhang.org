@@ -1,16 +1,29 @@
-// The architectural shell shared by the lobby and the rooms: ceiling, back wall,
-// floor in perspective, plus flat stand-ins used on phones.
+// The architectural shell shared by the lobby and the rooms: ceiling, back wall and floor in
+// perspective. Each surface carries a `.shade` that darkens it when the room's lights go out.
 export function Shell({ door = false, ends = false, track = false, children }) {
   return (
     <>
-      <div className="plane ceil3d" aria-hidden="true">{track && <div className="track3d" />}</div>
-      <div className={`plane backwall${door ? ' hasdoor' : ''}`} aria-hidden="true" />
-      {ends && <div className="plane endwall endL" aria-hidden="true" />}
-      {ends && <div className="plane endwall endR" aria-hidden="true" />}
+      <div className="plane ceil3d" aria-hidden="true">
+        {track && <div className="track3d" />}
+        <div className="shade" />
+      </div>
+      <div className={`plane backwall${door ? ' hasdoor' : ''}`} aria-hidden="true">
+        <div className="shade" />
+      </div>
+      {ends && (
+        <div className="plane endwall endL" aria-hidden="true">
+          <div className="shade" />
+        </div>
+      )}
+      {ends && (
+        <div className="plane endwall endR" aria-hidden="true">
+          <div className="shade" />
+        </div>
+      )}
       {children}
-      <div className="plane floor3d" aria-hidden="true" />
-      <div className="plane flatonly flat-ceil" aria-hidden="true" />
-      <div className="plane flatonly flat-floor" aria-hidden="true" />
+      <div className="plane floor3d" aria-hidden="true">
+        <div className="shade" />
+      </div>
     </>
   );
 }

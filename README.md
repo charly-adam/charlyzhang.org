@@ -2,12 +2,14 @@
 
 Charly Zhang's photography, hung as a walk-through museum gallery.
 
-- **Lobby:** a wayfinding sign (or a floor plan) pointing to each room.
-- **Rooms:** a 2.5D gallery room per section. Scroll, swipe on a trackpad, drag, or use the
-  arrow keys to walk along the wall; it glides and settles on the nearest photo.
-  Click a photo and the camera walks up to it while the other lights go out (Esc or "Step back"
-  to return, ← → for the neighbours). Click its tiny wall label for a close-up of the label.
-- **Phones:** a flat wall you swipe sideways.
+- **Lobby:** a wayfinding sign pointing to each room.
+- **Rooms:** a 2.5D gallery room per section. Scroll, swipe, drag, or use the arrow keys to walk
+  along the wall; it glides and settles on the nearest photo. Click a photo or its wall label (or
+  press Enter) and the other lights click off, then the camera walks up to it (← → for the
+  neighbours; Esc or a click anywhere else steps back). Click the room's title text to walk up to
+  that. The doorway at the end leads to the next room, or back to the lobby after the last one.
+- **Navigation:** the glass home button at the bottom opens sideways into the list of rooms.
+- **Phones:** the same room, scaled to fit the screen.
 
 Built with Vite, React 19, react-router 7 and Tailwind 4. Hosted on Vercel.
 
@@ -41,7 +43,7 @@ To add a room, add it to `rooms` in the same file (`slug`, `name`, `theme`, `ico
 create `photos-originals/<slug>/`. Themes: `white`, `spot`, `teal`, `violet` (every room uses
 `spot` for now).
 
-The Benches photos are Charly's; the other rooms still hold placeholders.
+For now there's one room, Benches, with Charly's photos.
 
 ## Deploy
 

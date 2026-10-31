@@ -1,19 +1,14 @@
 import { useCallback, useEffect, useRef } from 'react';
 
-const FLAT = '(max-width: 700px)';
-
 /**
  * Walks a camera along the wall: wheel / trackpad / drag / keys set a target,
  * the camera glides toward it with eased momentum, then settles on the nearest
  * stop ([data-stop] elements). A slight turn of the head follows the motion.
- * On phones (FLAT) it does nothing and the wall scrolls natively instead.
  */
 export function useWallCamera({ stageRef, camRef, worldRef, resetKey, paused }) {
   const s = useRef({ x: 0, tx: 0, sway: 0, raf: 0, last: 0, settle: 0, drag: null, dragged: false });
   const pausedRef = useRef(paused);
   pausedRef.current = paused;
-
-  const flat = () => window.matchMedia(FLAT).matches;
 
   const bounds = useCallback(() => {
     const vw = stageRef.current ? stageRef.current.clientWidth : window.innerWidth;
@@ -36,7 +31,7 @@ export function useWallCamera({ stageRef, camRef, worldRef, resetKey, paused }) 
 
   const apply = useCallback(() => {
     const st = s.current;
-    if (!worldRef.current || flat()) return;
+    if (!worldRef.current) return;
     worldRef.current.style.transform = `translate3d(${(-st.x).toFixed(2)}px,0,0)`;
     if (camRef.current) camRef.current.style.transform = `rotateY(${st.sway.toFixed(3)}deg)`;
   }, [worldRef, camRef]);
@@ -113,7 +108,7 @@ export function useWallCamera({ stageRef, camRef, worldRef, resetKey, paused }) 
     const st = s.current;
 
     const onWheel = (e) => {
-      if (flat() || pausedRef.current) return;
+      if (pausedRef.current) return;
       e.preventDefault();
       let d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
       if (e.deltaMode === 1) d *= 32;
@@ -124,7 +119,7 @@ export function useWallCamera({ stageRef, camRef, worldRef, resetKey, paused }) 
     };
 
     const onDown = (e) => {
-      if (flat() || pausedRef.current || e.button !== 0) return;
+      if (pausedRef.current || e.button !== 0) return;
       st.drag = { x0: e.clientX, tx0: st.tx, lastX: e.clientX, lastT: performance.now(), v: 0, id: e.pointerId, moved: false };
       st.dragged = false;
     };
@@ -166,31 +161,20 @@ export function useWallCamera({ stageRef, camRef, worldRef, resetKey, paused }) 
     };
 
     const onKey = (e) => {
-      if (flat() || pausedRef.current || e.altKey || e.ctrlKey || e.metaKey) return;
+      if (pausedRef.current || e.altKey || e.ctrlKey || e.metaKey) return;
       if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); step(1); }
       else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); step(-1); }
       else if (e.key === 'Home') { e.preventDefault(); goTo(bounds().min); }
       else if (e.key === 'End') { e.preventDefault(); goTo(bounds().max); }
     };
 
-    // The browser scrolls the (overflow: hidden) stage to reveal a focused or clicked element
-    // that's partly out of view; undo that, and walk there instead when it came from the keyboard.
+    // The browser scrolls the (overflow: hidden) stage to reveal a clicked element that's partly
+    // out of view; undo that.
     const onScroll = () => {
-      if (flat()) return;
       stage.scrollLeft = 0;
       stage.scrollTop = 0;
     };
-    const onFocus = (e) => {
-      if (flat() || pausedRef.current || !e.target.matches(':focus-visible')) return;
-      const col = e.target.closest('[data-stop]');
-      if (col) goTo(col.offsetLeft + col.offsetWidth / 2 - bounds().vw / 2);
-    };
-
     const onResize = () => {
-      if (flat()) {
-        if (worldRef.current) worldRef.current.style.transform = '';
-        return;
-      }
       st.tx = clamp(st.tx);
       st.x = clamp(st.x);
       apply();
@@ -203,7 +187,6 @@ export function useWallCamera({ stageRef, camRef, worldRef, resetKey, paused }) 
     stage.addEventListener('pointercancel', onUp);
     stage.addEventListener('click', onClickCapture, true);
     stage.addEventListener('scroll', onScroll);
-    stage.addEventListener('focusin', onFocus);
     window.addEventListener('keydown', onKey);
     window.addEventListener('resize', onResize);
     return () => {
@@ -214,7 +197,6 @@ export function useWallCamera({ stageRef, camRef, worldRef, resetKey, paused }) 
       stage.removeEventListener('pointercancel', onUp);
       stage.removeEventListener('click', onClickCapture, true);
       stage.removeEventListener('scroll', onScroll);
-      stage.removeEventListener('focusin', onFocus);
       window.removeEventListener('keydown', onKey);
       window.removeEventListener('resize', onResize);
       cancelAnimationFrame(st.raf);
