@@ -1,0 +1,57 @@
+{
+  "/photos/benches/01.jpg": {
+    "width": 2400,
+    "height": 1958,
+    "wall": "/photos/benches/01-wall.jpg"
+  },
+  "/photos/benches/02.jpg": {
+    "width": 2400,
+    "height": 1591,
+    "wall": "/photos/benches/02-wall.jpg"
+  },
+  "/photos/benches/03.jpg": {
+    "width": 2400,
+    "height": 1591,
+    "wall": "/photos/benches/03-wall.jpg"
+  },
+  "/photos/benches/04.jpg": {
+    "width": 2400,
+    "height": 1591,
+    "wall": "/photos/benches/04-wall.jpg"
+  },
+  "/photos/benches/05.jpg": {
+    "width": 1958,
+    "height": 2400,
+    "wall": "/photos/benches/05-wall.jpg"
+  },
+  "/photos/benches/06.jpg": {
+    "width": 1958,
+    "height": 2400,
+    "wall": "/photos/benches/06-wall.jpg"
+  },
+  "/photos/benches/07.jpg": {
+    "width": 1957,
+    "height": 2400,
+    "wall": "/photos/benches/07-wall.jpg"
+  },
+  "/photos/benches/08.jpg": {
+    "width": 2400,
+    "height": 1591,
+    "wall": "/photos/benches/08-wall.jpg"
+  },
+  "/photos/benches/09.jpg": {
+    "width": 1958,
+    "height": 2400,
+    "wall": "/photos/benches/09-wall.jpg"
+  },
+  "/photos/benches/10.jpg": {
+    "width": 2400,
+    "height": 1591,
+    "wall": "/photos/benches/10-wall.jpg"
+  },
+  "/photos/benches/11.jpg": {
+    "width": 2400,
+    "height": 1591,
+    "wall": "/photos/benches/11-wall.jpg"
+  }
+}
