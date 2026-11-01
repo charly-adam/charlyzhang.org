@@ -177,7 +177,7 @@ export function Pillar({ room, site, onToggle, faces, S, pillarRef }) {
   return (
     <div ref={pillarRef} className="pillar">
       {face('front', (
-        <section className="col intro">
+        <section className="col intro ink">
           <button type="button" className="intro-inner" tabIndex={-1} onClick={onToggle} aria-label={`Read the introduction to ${room.name}`}>
             <span className="intro-room">
               Room {room.num}:

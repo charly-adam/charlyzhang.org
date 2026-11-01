@@ -48,8 +48,12 @@ async function main() {
       const name = path.basename(f, path.extname(f));
       const full = path.join(OUT, room, `${name}.jpg`);
       const before = (await stat(src)).size;
-      const after = await write(src, full, FULL);
-      await write(src, path.join(OUT, room, `${name}-wall.jpg`), WALL);
+      // a panorama (wider than 2:1) is sized by its height instead, so it stays sharp up close
+      const meta = await sharp(src).rotate().metadata();
+      const ratio = Math.max(meta.width, meta.height) / Math.min(meta.width, meta.height);
+      const wide = ratio > 2 ? Math.min(Math.round(ratio * 1400), 7200) : 0;
+      const after = await write(src, full, wide || FULL);
+      await write(src, path.join(OUT, room, `${name}-wall.jpg`), wide ? Math.round(wide / 2) : WALL);
       const { width, height } = await sharp(full).metadata();
       sizes[`/photos/${room}/${name}.jpg`] = { width, height, wall: `/photos/${room}/${name}-wall.jpg` };
       console.log(`  ${f}  ${mb(before)} → ${mb(after)}  (${width}×${height})`);

@@ -1,7 +1,7 @@
 {
   "/photos/benches/01.jpg": {
     "width": 2400,
-    "height": 1958,
+    "height": 1591,
     "wall": "/photos/benches/01-wall.jpg"
   },
   "/photos/benches/02.jpg": {
@@ -10,8 +10,8 @@
     "wall": "/photos/benches/02-wall.jpg"
   },
   "/photos/benches/03.jpg": {
-    "width": 2400,
-    "height": 1591,
+    "width": 1958,
+    "height": 2400,
     "wall": "/photos/benches/03-wall.jpg"
   },
   "/photos/benches/04.jpg": {
@@ -20,7 +20,7 @@
     "wall": "/photos/benches/04-wall.jpg"
   },
   "/photos/benches/05.jpg": {
-    "width": 1958,
+    "width": 1957,
     "height": 2400,
     "wall": "/photos/benches/05-wall.jpg"
   },
@@ -30,7 +30,7 @@
     "wall": "/photos/benches/06-wall.jpg"
   },
   "/photos/benches/07.jpg": {
-    "width": 1957,
+    "width": 1958,
     "height": 2400,
     "wall": "/photos/benches/07-wall.jpg"
   },
@@ -40,8 +40,8 @@
     "wall": "/photos/benches/08-wall.jpg"
   },
   "/photos/benches/09.jpg": {
-    "width": 1958,
-    "height": 2400,
+    "width": 2400,
+    "height": 1591,
     "wall": "/photos/benches/09-wall.jpg"
   },
   "/photos/benches/10.jpg": {
@@ -51,7 +51,352 @@
   },
   "/photos/benches/11.jpg": {
     "width": 2400,
-    "height": 1591,
+    "height": 1958,
     "wall": "/photos/benches/11-wall.jpg"
+  },
+  "/photos/birds/01.jpg": {
+    "width": 1920,
+    "height": 2400,
+    "wall": "/photos/birds/01-wall.jpg"
+  },
+  "/photos/birds/02.jpg": {
+    "width": 2400,
+    "height": 1600,
+    "wall": "/photos/birds/02-wall.jpg"
+  },
+  "/photos/birds/03.jpg": {
+    "width": 2400,
+    "height": 1600,
+    "wall": "/photos/birds/03-wall.jpg"
+  },
+  "/photos/birds/04.jpg": {
+    "width": 1600,
+    "height": 2400,
+    "wall": "/photos/birds/04-wall.jpg"
+  },
+  "/photos/birds/05.jpg": {
+    "width": 2400,
+    "height": 1600,
+    "wall": "/photos/birds/05-wall.jpg"
+  },
+  "/photos/birds/06.jpg": {
+    "width": 2400,
+    "height": 1600,
+    "wall": "/photos/birds/06-wall.jpg"
+  },
+  "/photos/birds/07.jpg": {
+    "width": 1600,
+    "height": 2400,
+    "wall": "/photos/birds/07-wall.jpg"
+  },
+  "/photos/birds/08.jpg": {
+    "width": 1600,
+    "height": 2400,
+    "wall": "/photos/birds/08-wall.jpg"
+  },
+  "/photos/birds/09.jpg": {
+    "width": 1600,
+    "height": 2400,
+    "wall": "/photos/birds/09-wall.jpg"
+  },
+  "/photos/birds/10.jpg": {
+    "width": 2400,
+    "height": 1600,
+    "wall": "/photos/birds/10-wall.jpg"
+  },
+  "/photos/birds/11.jpg": {
+    "width": 2400,
+    "height": 1600,
+    "wall": "/photos/birds/11-wall.jpg"
+  },
+  "/photos/cars/01.jpg": {
+    "width": 2400,
+    "height": 1600,
+    "wall": "/photos/cars/01-wall.jpg"
+  },
+  "/photos/cars/02.jpg": {
+    "width": 2400,
+    "height": 1958,
+    "wall": "/photos/cars/02-wall.jpg"
+  },
+  "/photos/cars/03.jpg": {
+    "width": 2400,
+    "height": 1600,
+    "wall": "/photos/cars/03-wall.jpg"
+  },
+  "/photos/cars/04.jpg": {
+    "width": 2400,
+    "height": 1602,
+    "wall": "/photos/cars/04-wall.jpg"
+  },
+  "/photos/cars/05.jpg": {
+    "width": 2400,
+    "height": 1602,
+    "wall": "/photos/cars/05-wall.jpg"
+  },
+  "/photos/cars/06.jpg": {
+    "width": 2400,
+    "height": 1602,
+    "wall": "/photos/cars/06-wall.jpg"
+  },
+  "/photos/cars/07.jpg": {
+    "width": 2400,
+    "height": 1602,
+    "wall": "/photos/cars/07-wall.jpg"
+  },
+  "/photos/cars/08.jpg": {
+    "width": 2400,
+    "height": 1602,
+    "wall": "/photos/cars/08-wall.jpg"
+  },
+  "/photos/cars/09.jpg": {
+    "width": 2400,
+    "height": 1602,
+    "wall": "/photos/cars/09-wall.jpg"
+  },
+  "/photos/favorites/01.jpg": {
+    "width": 2400,
+    "height": 2400,
+    "wall": "/photos/favorites/01-wall.jpg"
+  },
+  "/photos/favorites/02.jpg": {
+    "width": 1602,
+    "height": 2400,
+    "wall": "/photos/favorites/02-wall.jpg"
+  },
+  "/photos/favorites/03.jpg": {
+    "width": 1920,
+    "height": 2400,
+    "wall": "/photos/favorites/03-wall.jpg"
+  },
+  "/photos/favorites/04.jpg": {
+    "width": 3804,
+    "height": 1400,
+    "wall": "/photos/favorites/04-wall.jpg"
+  },
+  "/photos/favorites/05.jpg": {
+    "width": 1920,
+    "height": 2400,
+    "wall": "/photos/favorites/05-wall.jpg"
+  },
+  "/photos/favorites/06.jpg": {
+    "width": 2400,
+    "height": 1920,
+    "wall": "/photos/favorites/06-wall.jpg"
+  },
+  "/photos/film/01.jpg": {
+    "width": 2400,
+    "height": 1591,
+    "wall": "/photos/film/01-wall.jpg"
+  },
+  "/photos/film/02.jpg": {
+    "width": 1800,
+    "height": 2400,
+    "wall": "/photos/film/02-wall.jpg"
+  },
+  "/photos/film/03.jpg": {
+    "width": 1591,
+    "height": 2400,
+    "wall": "/photos/film/03-wall.jpg"
+  },
+  "/photos/film/04.jpg": {
+    "width": 1958,
+    "height": 2400,
+    "wall": "/photos/film/04-wall.jpg"
+  },
+  "/photos/film/05.jpg": {
+    "width": 2400,
+    "height": 1958,
+    "wall": "/photos/film/05-wall.jpg"
+  },
+  "/photos/film/06.jpg": {
+    "width": 2400,
+    "height": 1591,
+    "wall": "/photos/film/06-wall.jpg"
+  },
+  "/photos/film/07.jpg": {
+    "width": 1591,
+    "height": 2400,
+    "wall": "/photos/film/07-wall.jpg"
+  },
+  "/photos/film/08.jpg": {
+    "width": 1941,
+    "height": 2400,
+    "wall": "/photos/film/08-wall.jpg"
+  },
+  "/photos/film/09.jpg": {
+    "width": 2400,
+    "height": 1958,
+    "wall": "/photos/film/09-wall.jpg"
+  },
+  "/photos/film/10.jpg": {
+    "width": 1591,
+    "height": 2400,
+    "wall": "/photos/film/10-wall.jpg"
+  },
+  "/photos/film/11.jpg": {
+    "width": 1228,
+    "height": 1637,
+    "wall": "/photos/film/11-wall.jpg"
+  },
+  "/photos/film/12.jpg": {
+    "width": 1710,
+    "height": 1238,
+    "wall": "/photos/film/12-wall.jpg"
+  },
+  "/photos/film/13.jpg": {
+    "width": 1212,
+    "height": 1727,
+    "wall": "/photos/film/13-wall.jpg"
+  },
+  "/photos/nature/01.jpg": {
+    "width": 2400,
+    "height": 1591,
+    "wall": "/photos/nature/01-wall.jpg"
+  },
+  "/photos/nature/02.jpg": {
+    "width": 2400,
+    "height": 1591,
+    "wall": "/photos/nature/02-wall.jpg"
+  },
+  "/photos/nature/03.jpg": {
+    "width": 2400,
+    "height": 1920,
+    "wall": "/photos/nature/03-wall.jpg"
+  },
+  "/photos/nature/04.jpg": {
+    "width": 2400,
+    "height": 1600,
+    "wall": "/photos/nature/04-wall.jpg"
+  },
+  "/photos/nature/05.jpg": {
+    "width": 1958,
+    "height": 2400,
+    "wall": "/photos/nature/05-wall.jpg"
+  },
+  "/photos/nature/06.jpg": {
+    "width": 2400,
+    "height": 1600,
+    "wall": "/photos/nature/06-wall.jpg"
+  },
+  "/photos/nature/07.jpg": {
+    "width": 2400,
+    "height": 1957,
+    "wall": "/photos/nature/07-wall.jpg"
+  },
+  "/photos/nature/08.jpg": {
+    "width": 2400,
+    "height": 1602,
+    "wall": "/photos/nature/08-wall.jpg"
+  },
+  "/photos/nature/09.jpg": {
+    "width": 2400,
+    "height": 1602,
+    "wall": "/photos/nature/09-wall.jpg"
+  },
+  "/photos/nature/10.jpg": {
+    "width": 1602,
+    "height": 2400,
+    "wall": "/photos/nature/10-wall.jpg"
+  },
+  "/photos/nature/11.jpg": {
+    "width": 2400,
+    "height": 1602,
+    "wall": "/photos/nature/11-wall.jpg"
+  },
+  "/photos/nature/12.jpg": {
+    "width": 1919,
+    "height": 2400,
+    "wall": "/photos/nature/12-wall.jpg"
+  },
+  "/photos/nature/13.jpg": {
+    "width": 1602,
+    "height": 2400,
+    "wall": "/photos/nature/13-wall.jpg"
+  },
+  "/photos/nature/14.jpg": {
+    "width": 6493,
+    "height": 1400,
+    "wall": "/photos/nature/14-wall.jpg"
+  },
+  "/photos/nature/15.jpg": {
+    "width": 2400,
+    "height": 1602,
+    "wall": "/photos/nature/15-wall.jpg"
+  },
+  "/photos/nature/16.jpg": {
+    "width": 1602,
+    "height": 2400,
+    "wall": "/photos/nature/16-wall.jpg"
+  },
+  "/photos/nature/17.jpg": {
+    "width": 2400,
+    "height": 1602,
+    "wall": "/photos/nature/17-wall.jpg"
+  },
+  "/photos/nature/18.jpg": {
+    "width": 1602,
+    "height": 2400,
+    "wall": "/photos/nature/18-wall.jpg"
+  },
+  "/photos/nature/19.jpg": {
+    "width": 2400,
+    "height": 2400,
+    "wall": "/photos/nature/19-wall.jpg"
+  },
+  "/photos/travel/01.jpg": {
+    "width": 2400,
+    "height": 1591,
+    "wall": "/photos/travel/01-wall.jpg"
+  },
+  "/photos/travel/02.jpg": {
+    "width": 1591,
+    "height": 2400,
+    "wall": "/photos/travel/02-wall.jpg"
+  },
+  "/photos/travel/03.jpg": {
+    "width": 1590,
+    "height": 2400,
+    "wall": "/photos/travel/03-wall.jpg"
+  },
+  "/photos/travel/04.jpg": {
+    "width": 1591,
+    "height": 2400,
+    "wall": "/photos/travel/04-wall.jpg"
+  },
+  "/photos/travel/05.jpg": {
+    "width": 1591,
+    "height": 2400,
+    "wall": "/photos/travel/05-wall.jpg"
+  },
+  "/photos/travel/06.jpg": {
+    "width": 2400,
+    "height": 1591,
+    "wall": "/photos/travel/06-wall.jpg"
+  },
+  "/photos/travel/07.jpg": {
+    "width": 2400,
+    "height": 1591,
+    "wall": "/photos/travel/07-wall.jpg"
+  },
+  "/photos/travel/08.jpg": {
+    "width": 1591,
+    "height": 2400,
+    "wall": "/photos/travel/08-wall.jpg"
+  },
+  "/photos/travel/09.jpg": {
+    "width": 1591,
+    "height": 2400,
+    "wall": "/photos/travel/09-wall.jpg"
+  },
+  "/photos/travel/10.jpg": {
+    "width": 1591,
+    "height": 2400,
+    "wall": "/photos/travel/10-wall.jpg"
+  },
+  "/photos/travel/11.jpg": {
+    "width": 2400,
+    "height": 1591,
+    "wall": "/photos/travel/11-wall.jpg"
   }
 }
