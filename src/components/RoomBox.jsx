@@ -9,7 +9,7 @@ import { GEO, placeFace } from '../room/geometry.js';
 // A wall's surface in panels, left to right. With a door: panels up to the arch, the arch
 // itself (a panel with the opening cut out of it), panels after.
 function panelsFor(len, S, door, size) {
-  const w = size * S;
+  const w = Math.max(size * S, GEO.panelMin);
   const out = [];
   const run = (a, b, key) => {
     const n = Math.max(1, Math.ceil((b - a) / w));
@@ -187,12 +187,16 @@ export function Hallway({ S, D, theme }) {
 // Each face has its reflection in the floor, solid, so it hides the reflections of whatever the
 // pillar stands in front of, as the pillar hides the things themselves.
 export function Pillar({ room, site, onToggle, faces, S, pillarRef }) {
+  // The narrow sides are painted plain, no panels and no reflection: seen nearly edge on from
+  // the doorway, Safari would sort those pieces wrongly and draw them over the front face.
   const face = (name, extra) => {
     const f = faces[name];
+    const plain = name === 'sideN' || name === 'sideS';
     return (
       <div className={`face pface ${name}`} style={f && { width: f.len, transform: f.transform }}>
-        {f && <Panels len={f.len} S={S} />}
-        {f && <div className="refl pillar-refl" aria-hidden="true" />}
+        {f && !plain && <Panels len={f.len} S={S} />}
+        {f && !plain && <div className="refl pillar-refl" aria-hidden="true" />}
+        {f && plain && <div className="pside" aria-hidden="true" />}
         {extra}
       </div>
     );
@@ -228,23 +232,34 @@ export function Pillar({ room, site, onToggle, faces, S, pillarRef }) {
 // GPU, so the browser never redraws it at the screen's resolution however close the camera
 // comes (a plain plane it would, at a cost of hundreds of megabytes near the eye). Each tile
 // says where it is, for hiding the ones right under or over the camera.
+// Loaded and decoded: Safari decodes big images in the background after they load, and until
+// it has, it can't make a pattern of one (it throws).
 const images = new Map();
 function loadImage(src) {
   if (!images.has(src)) {
-    images.set(src, new Promise((resolve) => {
-      const im = new Image();
-      im.onload = () => resolve(im);
-      im.onerror = () => resolve(null);
-      im.src = src;
-    }));
+    const im = new Image();
+    im.src = src;
+    images.set(src, im.decode().then(() => im, () => null));
   }
   return images.get(src);
 }
 
+// a repeating pattern of an image, or null if the browser won't make one yet (the tile is then
+// left its plain colour, still shaded)
+function makePattern(ctx, im) {
+  try {
+    return ctx.createPattern(im, 'repeat');
+  } catch {
+    return null;
+  }
+}
+
+const phone = window.matchMedia('(max-width: 700px)');
+
 // '#rrggbb' at k times its strength, as rgb()
 const scaled = (hex, k) => `rgb(${[1, 3, 5].map((i) => Math.round(parseInt(hex.slice(i, i + 2), 16) * k)).join(',')})`;
 
-function Tile({ w, h, S, look, ox, oy, dirs, dark, edge, className, style, ...rest }) {
+function Tile({ w, h, S, look, ox, oy, dirs, dark, edge, solid, className, style, ...rest }) {
   const ref = useRef(null);
   useEffect(() => {
     let live = true;
@@ -255,9 +270,9 @@ function Tile({ w, h, S, look, ox, oy, dirs, dark, edge, className, style, ...re
       const k = c.width / w; // canvas px per css px
       ctx.fillStyle = look.color;
       ctx.fillRect(0, 0, c.width, c.height);
-      if (im) {
+      const pat = im && makePattern(ctx, im);
+      if (pat) {
         const period = look.size * S; // the texture repeats every `period` css px, from the room's corner
-        const pat = ctx.createPattern(im, 'repeat');
         const ph = (v) => (((v % period) + period) % period) * k;
         pat.setTransform(new DOMMatrix().translate(-ph(ox), -ph(oy)).scale((period * k) / im.width));
         ctx.fillStyle = pat;
@@ -287,15 +302,27 @@ function Tile({ w, h, S, look, ox, oy, dirs, dark, edge, className, style, ...re
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, W, H);
       }
+      // a solid floor: the room's dark mixed in as the see-through floor would show it, so it
+      // looks the same at full opacity
+      if (solid) {
+        const css = getComputedStyle(c);
+        ctx.globalAlpha = 1 - parseFloat(css.getPropertyValue('--floorop'));
+        ctx.fillStyle = css.getPropertyValue('--stagebg');
+        ctx.fillRect(0, 0, W, H);
+        ctx.globalAlpha = 1;
+      }
     };
     if (look.img) loadImage(look.img).then(draw);
     else draw(null);
     return () => {
       live = false;
     };
-  }, [w, h, S, look, ox, oy, dirs, dark, edge]);
-  // a plain colour (no texture) needs only a little canvas: its edge shading scales up smoothly
-  const px = look.img ? GEO.tilePx : 64;
+  }, [w, h, S, look, ox, oy, dirs, dark, edge, solid]);
+  // A texture gets 1.5 canvas px per css px, up to tilePx; a phone's small room needs far less
+  // than a desktop's, and canvases are memory a phone hasn't got to spare (with them all at
+  // full size the biggest room ran Safari out of it). A plain colour needs only a little
+  // canvas: its edge shading scales up smoothly.
+  const px = look.img ? Math.min(GEO.tilePx, Math.ceil(w * 1.5)) : 64;
   return <canvas ref={ref} width={px} height={Math.round((px * h) / w)} className={className} style={style} {...rest} />;
 }
 
@@ -303,19 +330,31 @@ export function Slab({ kind, S, L, D, theme, x0 = 0, cls = '', edge = 0.3 }) {
   if (!L) return null;
   const floor = kind === 'floor';
   const look = floor ? theme.floor : theme.ceil;
-  const T = GEO.tile * S;
-  const nx = Math.ceil(L / T);
+  const T = Math.max(GEO.tile * S, GEO.tileMin);
+  // Columns along the room, cut where the pillar's front and back stand: Safari orders 3D
+  // surfaces roughly by their middles, and a tile running under the pillar's face could come
+  // out in front of it.
+  const cuts = [x0, ...[GEO.pillar.x * S, (GEO.pillar.x + GEO.pillar.t) * S].filter((c) => c > x0 && c < x0 + L), x0 + L];
+  const cols = [];
+  for (let k = 1; k < cuts.length; k++) {
+    const n = Math.ceil((cuts[k] - cuts[k - 1]) / T - 0.01);
+    const cw = (cuts[k] - cuts[k - 1]) / n;
+    for (let i = 0; i < n; i++) cols.push([cuts[k - 1] + i * cw, cw]);
+  }
+  const nx = cols.length;
   const ny = Math.ceil(D / T) | 1; // an odd count across, so no seam runs down the middle
-  // the floor is see-through (the reflections show in it), so its tiles meet edge to edge:
-  // overlapped, the join would show twice as dense. The ceiling is solid and can overlap.
-  const lap = floor ? 0 : 2;
-  const w = L / nx;
+  // The floor is see-through (the reflections show in it), so its tiles meet edge to edge:
+  // overlapped, the join would show twice as dense. The ceiling is solid and can overlap. So
+  // is the floor on a phone, where there are no reflections and you see a lot of floor (and
+  // see-through tiles edge to edge can leave a hairline between them).
+  const solid = !floor || phone.matches;
+  const lap = solid ? 2 : 0;
   const h = D / ny;
   const y = (floor ? 0.78 - GEO.eye : 0.07 - GEO.eye) * S;
   const tiles = [];
   for (let j = 0; j < ny; j++) {
     for (let i = 0; i < nx; i++) {
-      const tx = x0 + i * w;
+      const [tx, w] = cols[i];
       const z0 = j * h;
       // which edges of this tile meet a wall (the ceiling is turned the other way, so its
       // local top is the far side)
@@ -335,6 +374,7 @@ export function Slab({ kind, S, L, D, theme, x0 = 0, cls = '', edge = 0.3 }) {
           oy={floor ? z0 : D - z0 - h}
           dirs={dirs}
           dark={floor ? 0.42 : 0.3}
+          solid={floor && solid}
           edge={edge * S}
           className={`plane tile ${floor ? 'ftile' : 'ctile'}${cls ? ` ${cls}` : ''}`}
           data-cx={(tx + w / 2).toFixed(1)}

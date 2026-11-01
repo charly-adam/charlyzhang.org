@@ -9,6 +9,11 @@
 // Yaw: 0 faces -z (the N wall), 90 faces +x (E), 180 faces +z (S), 270 faces -x (W).
 // ─────────────────────────────────────────────────────────────────────────────
 
+// The room's scale S for a view w × h: the height of a desktop view, or on a screen taller than
+// it's wide, its width. (Narrower than that, the room would sit in a band across the middle
+// of a phone, small, with the camera looking far up and down past its walls.)
+export const roomScale = (w, h) => Math.min(h, w);
+
 export const GEO = {
   P: 1.1, // perspective: the eye's distance from the picture plane
   d: 1.1, // how far from a wall you stand to look at it (= P, so it's seen at scale 1); also
@@ -30,11 +35,15 @@ export const GEO = {
   // each piece's bitmap by how close its corner is, so a piece near the camera must be small
   // or it costs hundreds of megabytes (and Chrome drops surfaces when it runs out). The floor
   // and ceiling tiles are canvases, drawn once at a fixed size, which sidesteps that.
-  tile: 0.5, // floor and ceiling tiles
-  tilePx: 512, // pixels across a textured tile's canvas
+  tile: 0.5, // floor and ceiling tiles, and at least tileMin px across (in a phone's small
+  tileMin: 360, // room: Safari falls over with too many surfaces in one 3D scene)
+  tilePx: 512, // at most this many pixels across a textured tile's canvas
   panel: 0.75, // wall panels
   panelNear: 0.3, // on the entrance wall, which you pass close by going in
-  nearFloor: 0.6, // floor nearer than this can't be seen (you look 27° down at most), so it's hidden
+  panelMin: 300, // but at least this many px (a phone's small room needs few, and Safari
+  // falls over with too many surfaces in one 3D scene)
+  nearFloor: 0.6, // floor nearer than this can't be seen on a desktop (you look 27° down at
+  // most), so it's hidden; a taller view sees further down (Room.jsx works it out)
   nearCeil: 0.85, // likewise the ceiling (22° up)
 };
 

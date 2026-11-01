@@ -2,11 +2,12 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { Navigate, useNavigate, useParams } from 'react-router';
 import { getRoom, nextRoom, site, themes } from '../data/gallery.js';
 import { Curtain, Lens } from '../components/Scene.jsx';
+import { metaLine, titleLine } from '../components/Frame.jsx';
 import { EdgeArrows, Hallway, Pillar, Slab, Track, Wall } from '../components/RoomBox.jsx';
 import { useRailCamera } from '../hooks/useRailCamera.js';
 import { useDolly } from '../hooks/useDolly.js';
 import { usePreload } from '../hooks/usePreload.js';
-import { GEO, WALL_ORDER, depthOf, distribute, localBox, pillarFor, placeFace, standAt, turnTo, wallsFor } from '../room/geometry.js';
+import { GEO, WALL_ORDER, depthOf, distribute, localBox, pillarFor, placeFace, roomScale, standAt, turnTo, wallsFor } from '../room/geometry.js';
 
 export default function RoomRoute() {
   const { slug } = useParams();
@@ -16,6 +17,7 @@ export default function RoomRoute() {
 }
 
 const FLY_MS = 2000;
+const displayed = (el) => (el && el.offsetParent ? el : null); // an element, unless it's display: none
 
 function Room({ room }) {
   const { photoId } = useParams();
@@ -24,7 +26,7 @@ function Room({ room }) {
   const [entered, setEntered] = useState(!!photoId); // past the doorway (a deep link lands inside)
   const [flying, setFlying] = useState(false);
   const [leaving, setLeaving] = useState(false); // walking out through the arch
-  const [geo, setGeo] = useState(null); // { S, L, D } in px, once the walls have been measured
+  const [geo, setGeo] = useState(null); // { S, L, D, tall } in px, once the walls have been measured
   const [ready, setReady] = useState(false); // the room has loaded and had a moment to draw; the curtain lifts
   const [tick, setTick] = useState(0); // bumps on resize
   const stageRef = useRef(null);
@@ -82,7 +84,7 @@ function Room({ room }) {
   useLayoutEffect(() => {
     const stage = stageRef.current;
     if (!stage) return;
-    const S = Math.min(stage.clientHeight, stage.clientWidth / 1.6);
+    const S = roomScale(stage.clientWidth, stage.clientHeight);
     const natural = (side) => {
       const w = wallRefs[side].current;
       if (!w) return 0;
@@ -92,7 +94,12 @@ function Room({ room }) {
     };
     const L = Math.max(GEO.minL * S, natural('N'), natural('S'));
     const D = Math.max(GEO.D * S, natural('E'));
-    setGeo((g) => (g && g.S === S && g.L === L && g.D === D ? g : { S, L, D }));
+    // a view tall enough to see past the top and bottom of the entrance wall from the doorway
+    // (a phone) needs the hallway's floor and ceiling there
+    const P = GEO.P * S;
+    const out = (GEO.hall.t + GEO.doorCam) * -S; // from the doorway to the entrance wall
+    const tall = (0.56 * stage.clientHeight) / P > ((0.78 - GEO.eye) * S) / out || (0.44 * stage.clientHeight) / P > ((GEO.eye - 0.07) * S) / out;
+    setGeo((g) => (g && g.S === S && g.L === L && g.D === D && g.tall === tall ? g : { S, L, D, tall }));
   });
 
   useEffect(() => {
@@ -152,7 +159,7 @@ function Room({ room }) {
         reach = Math.max(reach, wall.len - b.x);
       }
       if (nfirst) {
-        const b = localBox(nfirst.querySelector('.label') || nfirst, nel);
+        const b = localBox(displayed(nfirst.querySelector('.label')) || nfirst, nel);
         reach = Math.max(reach, b.x + b.w);
       }
       // by the pillar the view keeps to the walk's distance, so it stays clear of it
@@ -193,15 +200,19 @@ function Room({ room }) {
     cam.setDoor(doorPose, P);
     cam.setRail(rail, keep);
     markUnseen(doorPose, walls, S, D);
-    // The floor right under the camera and the ceiling right over it are never in view (you
-    // look 27° down and 22° up at most), but the browser would still draw them at a huge
-    // magnification. Hide those tiles as the camera moves.
+    // The floor right under the camera and the ceiling right over it are never in view (on a
+    // desktop you look 27° down and 22° up at most; a tall view sees further), but the browser
+    // would still draw them at a huge magnification. Hide those tiles as the camera moves.
+    const down = (0.56 * stage.clientHeight) / P; // how steeply you see down, and up
+    const up = (0.44 * stage.clientHeight) / P;
+    const nearFloor = Math.min(GEO.nearFloor * S, (0.9 * (0.78 - GEO.eye) * S) / down);
+    const nearCeil = Math.min(GEO.nearCeil * S, (0.9 * (GEO.eye - 0.07) * S) / up);
     const tiles = [...worldRef.current.querySelectorAll('.tile')].map((el) => ({
       el,
       cx: +el.dataset.cx,
       cz: +el.dataset.cz,
       r: +el.dataset.r,
-      R: (el.classList.contains('ftile') ? GEO.nearFloor : GEO.nearCeil) * S,
+      R: el.classList.contains('ftile') ? nearFloor : nearCeil,
       hidden: false,
     }));
     cullRef.current = (p) => {
@@ -220,7 +231,8 @@ function Room({ room }) {
   // everything in the view behind the entrance wall too, and in a big room that's more than it
   // has memory for: it drops surfaces. So mark what can't be seen through the opening (wall
   // panels, photo columns with their lamps, floor and ceiling tiles: each by its corners,
-  // projected through the arch from where you stand); CSS hides it until you go in.
+  // projected through the arch from where you stand), and the photos (and their reflections)
+  // wholly behind the pillar, which Safari can draw over it; CSS hides it until you go in.
   const markUnseen = (pose, walls, S, D) => {
     const eye = GEO.eye * S;
     const ax = -GEO.hall.t * S; // the opening's outer face
@@ -244,6 +256,12 @@ function Room({ room }) {
       return z1 > D / 2 - aw && z0 < D / 2 + aw && y1 > top && y0 < bottom;
     };
     const wallTop = 0.07 * S - eye;
+    const pf = pillarFor(S, D).front;
+    const behindPillar = (pts) => pts.every(([x, , z]) => {
+      if (x <= pf.x0) return false;
+      const pz = pose.z + ((z - pose.z) * (pf.x0 - pose.x)) / (x - pose.x);
+      return pz > pf.z0 && pz < pf.z0 + pf.len;
+    });
     ['N', 'E', 'S'].forEach((side) => {
       const w = walls[side];
       const el = wallRefs[side].current;
@@ -251,14 +269,23 @@ function Room({ room }) {
       const span = (a, b, out) => [at(a, wallTop), at(b, wallTop), at(a, bottom), at(b, bottom), at(a, wallTop, out), at(b, wallTop, out), at(a, bottom, out), at(b, bottom, out)];
       el.querySelectorAll(':scope > .panel').forEach((p) => p.toggleAttribute('data-unseen', !seen(span(p.offsetLeft, p.offsetLeft + p.offsetWidth, 0))));
       // a column's lamp and its light reach out past it and off the wall
-      el.querySelectorAll(':scope > [data-stop="photo"]').forEach((c) => c.toggleAttribute('data-unseen', !seen(span(c.offsetLeft - 0.3 * S, c.offsetLeft + c.offsetWidth + 0.3 * S, 0.25 * S))));
+      const refls = el.querySelectorAll('.refl-col');
+      el.querySelectorAll(':scope > [data-stop="photo"]').forEach((c, i) => {
+        const hid = behindPillar(span(c.offsetLeft, c.offsetLeft + c.offsetWidth, 0));
+        c.toggleAttribute('data-unseen', hid || !seen(span(c.offsetLeft - 0.3 * S, c.offsetLeft + c.offsetWidth + 0.3 * S, 0.25 * S)));
+        refls[i]?.toggleAttribute('data-unseen', hid);
+      });
     });
-    worldRef.current.querySelectorAll('.tile').forEach((t) => {
+    // (the hallway's own tiles are this side of the entrance wall, in plain view)
+    worldRef.current.querySelectorAll('.tile:not(.hall)').forEach((t) => {
       const cx = +t.dataset.cx;
       const cz = +t.dataset.cz;
       const r = +t.dataset.r;
       const y = t.classList.contains('ftile') ? bottom : wallTop;
-      t.toggleAttribute('data-unseen', !seen([[cx - r, y, cz - r], [cx + r, y, cz - r], [cx - r, y, cz + r], [cx + r, y, cz + r]]));
+      const hw = t.offsetWidth / 2;
+      const hh = t.offsetHeight / 2;
+      const hid = behindPillar([[cx - hw, y, cz - hh], [cx + hw, y, cz - hh], [cx - hw, y, cz + hh], [cx + hw, y, cz + hh]]);
+      t.toggleAttribute('data-unseen', hid || !seen([[cx - r, y, cz - r], [cx + r, y, cz - r], [cx - r, y, cz + r], [cx + r, y, cz + r]]));
     });
   };
 
@@ -300,9 +327,9 @@ function Room({ room }) {
     const wallEl = frame?.closest('.wall');
     if (!wallEl) return null;
     const side = wallEl.dataset.side;
-    // a photo is framed with its wall label beside it
+    // a photo is framed with its wall label beside it (where there is one: not on a phone)
     const col = frame.closest('[data-stop]');
-    const boxes = [frame, col.querySelector('.label')].filter(Boolean).map((e) => localBox(e, wallEl));
+    const boxes = [frame, displayed(col.querySelector('.label'))].filter(Boolean).map((e) => localBox(e, wallEl));
     const x0 = Math.min(...boxes.map((b) => b.x));
     const x1 = Math.max(...boxes.map((b) => b.x + b.w));
     const y0 = Math.min(...boxes.map((b) => b.y));
@@ -441,7 +468,7 @@ function Room({ room }) {
 
   const door = { to: exit, next, onLeave: leave };
   const wallProps = { S, near, solo: !!room.solo, artist: site.name, offFor, onOpen, onZoom: onZoomGroup };
-  const stageClass = `stage room t-${room.theme}${room.solo ? ' solo' : ''}${focus ? ' near' : ''}${near ? ' dark' : ''}${atIntro ? ' at-intro' : ''}${geo ? '' : ' unmeasured'}${ready ? ' ready' : ''}${leaving ? ' leaving' : ''}${entered ? ' in' : ' at-door'}`;
+  const stageClass = `stage room t-${room.theme}${room.solo ? ' solo' : ''}${focus ? ' near' : ''}${near ? ' dark' : ''}${atIntro ? ' at-intro' : ''}${geo ? '' : ' unmeasured'}${ready ? ' ready' : ''}${leaving ? ' leaving' : ''}${entered ? ' in' : ' at-door'}${geo?.tall ? ' tall' : ''}`;
   const arrowLabels = near ? ['The photo to the left', 'The photo to the right'] : entered ? ['Walk left', 'Walk right'] : ['Go round to the left', 'Go round to the right'];
 
   return (
@@ -461,6 +488,12 @@ function Room({ room }) {
         </div>
       </div>
       <Lens />
+      {near && (
+        <p key={near.id} className="caption">
+          <span className="caption-title">{titleLine(near)}</span>
+          <span className="caption-meta">{metaLine(near)}</span>
+        </p>
+      )}
       <Curtain key={room.slug} kicker={`Room ${room.num}`} name={room.name} progress={progress} />
       <EdgeArrows onLeft={() => arrow(-1)} onRight={() => arrow(1)} hidden={focus === 'intro' || flying || leaving} leftLabel={arrowLabels[0]} rightLabel={arrowLabels[1]} />
     </div>
