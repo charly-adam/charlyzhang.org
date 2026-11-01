@@ -1,6 +1,6 @@
 import { createContext, useEffect, useRef, useState } from 'react';
 import { roomList, site } from '../data/gallery.js';
-import { Arrow, Pictogram } from './Icons.jsx';
+import { Pictogram } from './Icons.jsx';
 
 // openMap(from, opener): takes the map out, from the stand on the desk ('stand') or the home
 // button ('dock'); `opener` gets focus back when it's folded away. Provided by App.
@@ -69,9 +69,8 @@ function KeyHere() {
 }
 
 // The map, over whatever page you're on: unfolded from the stand, or uncrumpled up out of the
-// home button. `here` is the room you're in (null at the front desk). Pick a room on the plan
-// or in the key to read about it; a button to go there comes up in its box on the plan. Going,
-// the map goes to black and onGo(path) takes you (App closes the map once the new page is up
+// home button. `here` is the room you're in (null at the front desk). Point at a room on the
+// plan or in the key to read about it; click it to go there. Going, the map goes to black and onGo(path) takes you (App closes the map once the new page is up
 // behind it). Escape, the fold button or a click off the paper puts it away.
 export function GalleryMap({ from, here, onClose, onGo }) {
   const ref = useRef(null);
@@ -80,7 +79,7 @@ export function GalleryMap({ from, here, onClose, onGo }) {
   closeRef.current = onClose;
   const goRef = useRef(onGo);
   goRef.current = onGo;
-  const [sel, setSel] = useState(null); // a room's slug, or DESK
+  const [sel, setSel] = useState(null); // the room (slug) or DESK you're pointing at
   const [folding, setFolding] = useState(false);
   const [going, setGoing] = useState(null); // where you've set off for
   const fold = () => !going && setFolding(true);
@@ -103,18 +102,22 @@ export function GalleryMap({ from, here, onClose, onGo }) {
   }, [going]);
 
   const room = roomList.find((r) => r.slug === sel) || null;
-  const pressed = (key) => (sel === key ? 'true' : 'false');
-  // the button to go there, in the box you picked
-  const goButton = (label, to) => (
-    <button type="button" className="plan-go" onClick={() => setGoing(to)} disabled={!!going}>
-      <span>Go to {label}</span>
-      <Arrow size={14} />
-    </button>
-  );
+  // pointing at a place (or tabbing to it) tells you about it; clicking it takes you there,
+  // unless it's where you are
+  const pick = (key, to, isHere) => ({
+    onPointerEnter: () => !going && setSel(key),
+    onFocus: () => !going && setSel(key),
+    onClick: () => {
+      if (going) return;
+      setSel(key);
+      if (!isHere) setGoing(to);
+    },
+    disabled: !!going && sel !== key,
+  });
 
-  let pick;
+  let about;
   if (room) {
-    pick = (
+    about = (
       <>
         <p className="pick-room">Room {room.num}</p>
         <p className="pick-name">{room.name}</p>
@@ -123,7 +126,7 @@ export function GalleryMap({ from, here, onClose, onGo }) {
       </>
     );
   } else if (sel === DESK) {
-    pick = (
+    about = (
       <>
         <p className="pick-room">The lobby</p>
         <p className="pick-name">Front desk</p>
@@ -132,7 +135,7 @@ export function GalleryMap({ from, here, onClose, onGo }) {
       </>
     );
   } else {
-    pick = <p className="pick-blurb">Pick a room on the plan or in the list.</p>;
+    about = <p className="pick-blurb">Click a room on the plan or in the list to go there.</p>;
   }
 
   return (
@@ -172,9 +175,8 @@ export function GalleryMap({ from, here, onClose, onGo }) {
                 <button
                   type="button"
                   className="plan-pick"
-                  aria-pressed={pressed(r.slug)}
-                  aria-label={`Room ${r.num}, ${r.name}, ${r.photos.length} photographs${r.slug === here ? ', you are here' : ''}`}
-                  onClick={() => setSel(r.slug)}
+                  aria-label={r.slug === here ? `Room ${r.num}, ${r.name}, ${r.photos.length} photographs, you are here` : `Go to room ${r.num}, ${r.name}, ${r.photos.length} photographs`}
+                  {...pick(r.slug, `/room/${r.slug}`, r.slug === here)}
                 >
                   <span className="plan-ticks" aria-hidden="true">
                     {r.photos.map((p) => (
@@ -191,7 +193,6 @@ export function GalleryMap({ from, here, onClose, onGo }) {
                     </span>
                   </span>
                 </button>
-                {sel === r.slug && r.slug !== here && goButton(r.name, `/room/${r.slug}`)}
                 {r.slug === here && <Here />}
               </div>
             ))}
@@ -199,11 +200,10 @@ export function GalleryMap({ from, here, onClose, onGo }) {
               Hall
             </div>
             <div className={sel === DESK ? 'plan-desk picked' : 'plan-desk'} style={{ gridColumn: plan.middle, gridRow: plan.rows }}>
-              <button type="button" className="plan-pick" aria-pressed={pressed(DESK)} aria-label={`Front desk${here ? '' : ', you are here'}`} onClick={() => setSel(DESK)}>
+              <button type="button" className="plan-pick" aria-label={here ? 'Go to the front desk' : 'Front desk, you are here'} {...pick(DESK, '/', !here)}>
                 <span className="plan-desk-top" aria-hidden="true" />
                 <span className="plan-desk-name">Front desk</span>
               </button>
-              {sel === DESK && here && goButton('the front desk', '/')}
               {!here && <Here />}
             </div>
             <div className="plan-door" aria-hidden="true" />
@@ -215,7 +215,7 @@ export function GalleryMap({ from, here, onClose, onGo }) {
             </p>
             <div className="key-rows" role="group" aria-labelledby="map-key">
               {roomList.map((r) => (
-                <button key={r.slug} type="button" className="key-row" aria-pressed={pressed(r.slug)} onClick={() => setSel(r.slug)}>
+                <button key={r.slug} type="button" className={sel === r.slug ? 'key-row picked' : 'key-row'} {...pick(r.slug, `/room/${r.slug}`, r.slug === here)}>
                   <span className="key-num">{r.num}</span>
                   <span className="key-name">
                     {r.name}
@@ -224,7 +224,7 @@ export function GalleryMap({ from, here, onClose, onGo }) {
                   <span className="key-count">{r.photos.length}</span>
                 </button>
               ))}
-              <button type="button" className="key-row" aria-pressed={pressed(DESK)} onClick={() => setSel(DESK)}>
+              <button type="button" className={sel === DESK ? 'key-row picked' : 'key-row'} {...pick(DESK, '/', !here)}>
                 <span className="key-num" aria-hidden="true">
                   ·
                 </span>
@@ -238,7 +238,7 @@ export function GalleryMap({ from, here, onClose, onGo }) {
           </div>
 
           <div className={sel ? 'key-pick picked' : 'key-pick'} aria-live="polite">
-            {pick}
+            {about}
           </div>
         </div>
       </div>
