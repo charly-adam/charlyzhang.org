@@ -9,7 +9,7 @@ import { GEO, placeFace } from '../room/geometry.js';
 // A wall's surface in panels, left to right. With a door: panels up to the arch, the arch
 // itself (a panel with the opening cut out of it), panels after.
 function panelsFor(len, S, door, size) {
-  const w = size * S;
+  const w = Math.max(size * S, GEO.panelMin);
   const out = [];
   const run = (a, b, key) => {
     const n = Math.max(1, Math.ceil((b - a) / w));
@@ -32,7 +32,7 @@ export function Panels({ len, S, door, size = GEO.panel }) {
     p.arch ? (
       <ArchPanel key={p.key} left={p.left} S={S} />
     ) : (
-      <div key={p.key} className={`panel${p.first ? ' first' : ''}${p.last ? ' last' : ''}`} style={{ left: p.left, width: p.width, backgroundPosition: `${-p.left}px 0, 0 0` }} aria-hidden="true">
+      <div key={p.key} className={`panel${p.first ? ' first' : ''}${p.last ? ' last' : ''}`} style={{ left: p.left, width: p.width, backgroundPosition: `${-p.left}px 0, ${-p.left}px 0, 0 0` }} aria-hidden="true">
         <div className="shade" />
       </div>
     ),
@@ -66,32 +66,55 @@ function ArchPanel({ left, S }) {
   );
 }
 
+// The floor's reflection of what hangs on a wall: each frame mirrored below the floor line, a
+// small plane of its own (`children`, laid out like the wall's own row). The wall's own
+// reflection is painted into the floor tiles instead (see Tile): as planes the length of the
+// walls, it ran the browser out of memory and it dropped surfaces.
+function Reflection({ children }) {
+  return (
+    <div className="refl" aria-hidden="true">
+      <div className="refl-row">{children}</div>
+    </div>
+  );
+}
+
+// A bay: a stretch of wall standing out from the rest, full height, for one photo to hang on
+// alone (in a solo room). Its sides show as you come round to it.
+function Bay() {
+  return (
+    <div className="bay" aria-hidden="true">
+      <div className="bay-side bay-l" />
+      <div className="bay-side bay-r" />
+    </div>
+  );
+}
+
 // One wall of the room: its surface, the floor's reflection of what hangs on it, the photos in
-// their slots, and on the entrance wall, the archway out.
-export function Wall({ side, len, S, groups, near, artist, offFor, onOpen, onZoom, door, style, wallRef }) {
+// their slots (each on a bay of its own, in a solo room), and on the entrance wall, the
+// archway out.
+export function Wall({ side, len, S, groups, near, solo, artist, offFor, onOpen, onZoom, door, style, wallRef }) {
   const one = groups.length === 1 && !door;
   return (
     <div ref={wallRef} className={`wall wall-${side}${one ? ' one' : ''}${door ? ' has-door' : ''}`} data-side={side} style={style}>
       {len > 0 && <Panels len={len} S={S} door={!!door} size={door ? GEO.panelNear : GEO.panel} />}
-      <div className="plane refl" aria-hidden="true">
-        <div className="refl-row">
-          {groups.map((g, gi) => (
-            <span key={gi} className="gpad refl-col">
-              <span className="ggap refl-frames">
-                {g.map((p) => <FrameReflection key={p.id} photo={p} />)}
-              </span>
-              <span className="lblpos" />
+      <Reflection>
+        {groups.map((g, gi) => (
+          <span key={gi} className="gpad refl-col">
+            <span className="ggap refl-frames">
+              {g.map((p) => <FrameReflection key={p.id} photo={p} />)}
             </span>
-          ))}
-          {door && (
-            <span className="refl-door">
-              <span className="door" />
-            </span>
-          )}
-        </div>
-      </div>
+            <span className="lblpos" />
+          </span>
+        ))}
+        {door && (
+          <span className="refl-door">
+            <span className="door" />
+          </span>
+        )}
+      </Reflection>
       {groups.map((g, gi) => (
         <div key={gi} className={g.includes(near) ? 'col gpad lit' : 'col gpad'} data-stop="photo" style={{ '--off': offFor(g) }}>
+          {solo && <Bay />}
           <div className="ggap p3 frames">
             {g.map((p) => <Frame key={p.id} photo={p} lit={p === near} onOpen={() => onOpen(p)} />)}
           </div>
@@ -150,11 +173,9 @@ export function Hallway({ S, D, theme }) {
     <>
       <div className="wall hall-wall" style={{ width: D, transform: placeFace(-T, 0, -90) }} aria-hidden="true">
         <Panels len={D} S={S} door size={GEO.panelNear} />
-        <div className="plane refl hall" />
       </div>
       <div className="wall hall hall-far" style={{ width: D, transform: placeFace(-depth, D, 90) }} aria-hidden="true">
         <Panels len={D} S={S} />
-        <div className="plane refl" />
       </div>
       <Slab kind="floor" S={S} L={depth - T} D={D} theme={theme} x0={-depth} cls="hall" edge={0.12} />
       <Slab kind="ceiling" S={S} L={depth - T} D={D} theme={theme} x0={-depth} cls="hall" edge={0.12} />
@@ -163,13 +184,19 @@ export function Hallway({ S, D, theme }) {
 }
 
 // The pillar just inside the door. Its front face, toward the door, carries the room's text.
+// Each face has its reflection in the floor, solid, so it hides the reflections of whatever the
+// pillar stands in front of, as the pillar hides the things themselves.
 export function Pillar({ room, site, onToggle, faces, S, pillarRef }) {
+  // The narrow sides are painted plain, no panels and no reflection: seen nearly edge on from
+  // the doorway, Safari would sort those pieces wrongly and draw them over the front face.
   const face = (name, extra) => {
     const f = faces[name];
+    const plain = name === 'sideN' || name === 'sideS';
     return (
       <div className={`face pface ${name}`} style={f && { width: f.len, transform: f.transform }}>
-        {f && <Panels len={f.len} S={S} />}
-        <div className="plane refl" aria-hidden="true" />
+        {f && !plain && <Panels len={f.len} S={S} />}
+        {f && !plain && <div className="refl pillar-refl" aria-hidden="true" />}
+        {f && plain && <div className="pside" aria-hidden="true" />}
         {extra}
       </div>
     );
@@ -177,7 +204,7 @@ export function Pillar({ room, site, onToggle, faces, S, pillarRef }) {
   return (
     <div ref={pillarRef} className="pillar">
       {face('front', (
-        <section className="col intro">
+        <section className="col intro ink">
           <button type="button" className="intro-inner" tabIndex={-1} onClick={onToggle} aria-label={`Read the introduction to ${room.name}`}>
             <span className="intro-room">
               Room {room.num}:
@@ -200,24 +227,39 @@ export function Pillar({ room, site, onToggle, faces, S, pillarRef }) {
 }
 
 // A floor or a ceiling, in tiles from x0 along. Each tile is a canvas, drawn once with its
-// share of the texture and the shading toward any wall it meets. A canvas is a texture on the
+// share of the texture, on the floor the walls' sheen in it (look.sheen), and the shading
+// toward any wall it meets. A canvas is a texture on the
 // GPU, so the browser never redraws it at the screen's resolution however close the camera
 // comes (a plain plane it would, at a cost of hundreds of megabytes near the eye). Each tile
 // says where it is, for hiding the ones right under or over the camera.
+// Loaded and decoded: Safari decodes big images in the background after they load, and until
+// it has, it can't make a pattern of one (it throws).
 const images = new Map();
 function loadImage(src) {
   if (!images.has(src)) {
-    images.set(src, new Promise((resolve) => {
-      const im = new Image();
-      im.onload = () => resolve(im);
-      im.onerror = () => resolve(null);
-      im.src = src;
-    }));
+    const im = new Image();
+    im.src = src;
+    images.set(src, im.decode().then(() => im, () => null));
   }
   return images.get(src);
 }
 
-function Tile({ w, h, S, look, ox, oy, dirs, dark, edge, className, style, ...rest }) {
+// a repeating pattern of an image, or null if the browser won't make one yet (the tile is then
+// left its plain colour, still shaded)
+function makePattern(ctx, im) {
+  try {
+    return ctx.createPattern(im, 'repeat');
+  } catch {
+    return null;
+  }
+}
+
+const phone = window.matchMedia('(max-width: 700px)');
+
+// '#rrggbb' at k times its strength, as rgb()
+const scaled = (hex, k) => `rgb(${[1, 3, 5].map((i) => Math.round(parseInt(hex.slice(i, i + 2), 16) * k)).join(',')})`;
+
+function Tile({ w, h, S, look, ox, oy, dirs, dark, edge, solid, className, style, ...rest }) {
   const ref = useRef(null);
   useEffect(() => {
     let live = true;
@@ -228,23 +270,46 @@ function Tile({ w, h, S, look, ox, oy, dirs, dark, edge, className, style, ...re
       const k = c.width / w; // canvas px per css px
       ctx.fillStyle = look.color;
       ctx.fillRect(0, 0, c.width, c.height);
-      if (im) {
+      const pat = im && makePattern(ctx, im);
+      if (pat) {
         const period = look.size * S; // the texture repeats every `period` css px, from the room's corner
-        const pat = ctx.createPattern(im, 'repeat');
         const ph = (v) => (((v % period) + period) % period) * k;
         pat.setTransform(new DOMMatrix().translate(-ph(ox), -ph(oy)).scale((period * k) / im.width));
         ctx.fillStyle = pat;
         ctx.fillRect(0, 0, c.width, c.height);
       }
-      const e = edge * k;
       const W = c.width;
       const H = c.height;
+      const from = (d, e) => (d === 'to bottom' ? ctx.createLinearGradient(0, 0, 0, e) : d === 'to top' ? ctx.createLinearGradient(0, H, 0, H - e) : d === 'to right' ? ctx.createLinearGradient(0, 0, e, 0) : ctx.createLinearGradient(W, 0, W - e, 0));
+      // the wall's reflection, seen through the polished floor: added light, fading out
+      if (look.sheen) {
+        ctx.globalCompositeOperation = 'lighter';
+        for (const d of dirs) {
+          const g = from(d, 0.6 * S * k);
+          g.addColorStop(0, look.sheen);
+          g.addColorStop(0.4, scaled(look.sheen, 0.55));
+          g.addColorStop(1, 'black');
+          ctx.fillStyle = g;
+          ctx.fillRect(0, 0, W, H);
+        }
+        ctx.globalCompositeOperation = 'source-over';
+      }
+      const e = edge * k;
       for (const d of dirs) {
-        const g = d === 'to bottom' ? ctx.createLinearGradient(0, 0, 0, e) : d === 'to top' ? ctx.createLinearGradient(0, H, 0, H - e) : d === 'to right' ? ctx.createLinearGradient(0, 0, e, 0) : ctx.createLinearGradient(W, 0, W - e, 0);
+        const g = from(d, e);
         g.addColorStop(0, `rgba(0,0,0,${dark})`);
         g.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, W, H);
+      }
+      // a solid floor: the room's dark mixed in as the see-through floor would show it, so it
+      // looks the same at full opacity
+      if (solid) {
+        const css = getComputedStyle(c);
+        ctx.globalAlpha = 1 - parseFloat(css.getPropertyValue('--floorop'));
+        ctx.fillStyle = css.getPropertyValue('--stagebg');
+        ctx.fillRect(0, 0, W, H);
+        ctx.globalAlpha = 1;
       }
     };
     if (look.img) loadImage(look.img).then(draw);
@@ -252,8 +317,12 @@ function Tile({ w, h, S, look, ox, oy, dirs, dark, edge, className, style, ...re
     return () => {
       live = false;
     };
-  }, [w, h, S, look, ox, oy, dirs, dark, edge]);
-  const px = GEO.tilePx;
+  }, [w, h, S, look, ox, oy, dirs, dark, edge, solid]);
+  // A texture gets 1.5 canvas px per css px, up to tilePx; a phone's small room needs far less
+  // than a desktop's, and canvases are memory a phone hasn't got to spare (with them all at
+  // full size the biggest room ran Safari out of it). A plain colour needs only a little
+  // canvas: its edge shading scales up smoothly.
+  const px = look.img ? Math.min(GEO.tilePx, Math.ceil(w * 1.5)) : 64;
   return <canvas ref={ref} width={px} height={Math.round((px * h) / w)} className={className} style={style} {...rest} />;
 }
 
@@ -261,19 +330,31 @@ export function Slab({ kind, S, L, D, theme, x0 = 0, cls = '', edge = 0.3 }) {
   if (!L) return null;
   const floor = kind === 'floor';
   const look = floor ? theme.floor : theme.ceil;
-  const T = GEO.tile * S;
-  const nx = Math.ceil(L / T);
+  const T = Math.max(GEO.tile * S, GEO.tileMin);
+  // Columns along the room, cut where the pillar's front and back stand: Safari orders 3D
+  // surfaces roughly by their middles, and a tile running under the pillar's face could come
+  // out in front of it.
+  const cuts = [x0, ...[GEO.pillar.x * S, (GEO.pillar.x + GEO.pillar.t) * S].filter((c) => c > x0 && c < x0 + L), x0 + L];
+  const cols = [];
+  for (let k = 1; k < cuts.length; k++) {
+    const n = Math.ceil((cuts[k] - cuts[k - 1]) / T - 0.01);
+    const cw = (cuts[k] - cuts[k - 1]) / n;
+    for (let i = 0; i < n; i++) cols.push([cuts[k - 1] + i * cw, cw]);
+  }
+  const nx = cols.length;
   const ny = Math.ceil(D / T) | 1; // an odd count across, so no seam runs down the middle
-  // the floor is see-through (the reflections show in it), so its tiles meet edge to edge:
-  // overlapped, the join would show twice as dense. The ceiling is solid and can overlap.
-  const lap = floor ? 0 : 2;
-  const w = L / nx;
+  // The floor is see-through (the reflections show in it), so its tiles meet edge to edge:
+  // overlapped, the join would show twice as dense. The ceiling is solid and can overlap. So
+  // is the floor on a phone, where there are no reflections and you see a lot of floor (and
+  // see-through tiles edge to edge can leave a hairline between them).
+  const solid = !floor || phone.matches;
+  const lap = solid ? 2 : 0;
   const h = D / ny;
   const y = (floor ? 0.78 - GEO.eye : 0.07 - GEO.eye) * S;
   const tiles = [];
   for (let j = 0; j < ny; j++) {
     for (let i = 0; i < nx; i++) {
-      const tx = x0 + i * w;
+      const [tx, w] = cols[i];
       const z0 = j * h;
       // which edges of this tile meet a wall (the ceiling is turned the other way, so its
       // local top is the far side)
@@ -293,6 +374,7 @@ export function Slab({ kind, S, L, D, theme, x0 = 0, cls = '', edge = 0.3 }) {
           oy={floor ? z0 : D - z0 - h}
           dirs={dirs}
           dark={floor ? 0.42 : 0.3}
+          solid={floor && solid}
           edge={edge * S}
           className={`plane tile ${floor ? 'ftile' : 'ctile'}${cls ? ` ${cls}` : ''}`}
           data-cx={(tx + w / 2).toFixed(1)}

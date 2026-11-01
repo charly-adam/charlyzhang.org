@@ -28,3 +28,19 @@ export function Lens() {
     </>
   );
 }
+
+// Black over the page until it's ready to be seen: while it loads, where you're going and how far
+// along it is (the line fills; it only shows if loading takes a moment).
+export function Curtain({ kicker, name, progress }) {
+  return (
+    <div className="curtain" aria-hidden="true">
+      <div className="loader">
+        <p className="loader-kicker">{kicker}</p>
+        <p className="loader-name">{name}</p>
+        <span className="loader-bar">
+          <span style={{ transform: `scaleX(${progress.toFixed(3)})` }} />
+        </span>
+      </div>
+    </div>
+  );
+}

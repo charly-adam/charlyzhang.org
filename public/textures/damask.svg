@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" height="140" viewBox="0 0 100 140">
+  <!-- Damask, a shade lighter than the wall: one motif in the middle and a quarter of one in
+       each corner, so it repeats as a half drop. -->
+  <defs>
+    <g id="half">
+      <path d="M0 -52C7 -43 13 -33 10 -22C21 -27 31 -18 26 -7C36 -3 37 10 26 15C33 25 23 37 11 31C15 41 8 51 0 58L0 42C5 36 6 28 2 22L0 22Z" />
+      <path d="M10 -22C22 -42 38 -40 36 -25C30 -31 20 -29 10 -22Z" />
+      <path d="M26 15C40 18 44 32 34 38C34 30 30 22 26 15Z" />
+    </g>
+    <g id="motif">
+      <use xlink:href="#half" />
+      <use xlink:href="#half" transform="scale(-1 1)" />
+    </g>
+  </defs>
+  <g fill="#ffd7c8" fill-opacity="0.06">
+    <use xlink:href="#motif" transform="translate(50 70) scale(0.78)" />
+    <use xlink:href="#motif" transform="translate(0 0) scale(0.78)" />
+    <use xlink:href="#motif" transform="translate(100 0) scale(0.78)" />
+    <use xlink:href="#motif" transform="translate(0 140) scale(0.78)" />
+    <use xlink:href="#motif" transform="translate(100 140) scale(0.78)" />
+  </g>
+</svg>

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { turnTo } from '../room/geometry.js';
 
 const easeInOut = (k) => (k < 0.5 ? 4 * k * k * k : 1 - (-2 * k + 2) ** 3 / 2);
+const resting = (r) => r.stops.filter((st) => !st.pass);
 
 
 /**
@@ -12,8 +13,10 @@ const easeInOut = (k) => (k < 0.5 ? 4 * k * k * k : 1 - (-2 * k + 2) ** 3 / 2);
  * on walks you that way, while the arrows, keys and a drag stay true to left and right. A
  * slight turn of the head follows the motion.
  *
- * A rail is { keys: [{ t, x, z, yaw }], T, stops: [{ t, kind, pose, ... }] }: keys are the
- * poses along the loop (the last repeats the first at t = T), stops where it settles.
+ * A rail is { keys: [{ t, x, z, yaw }], T, stops: [{ t, kind, pose, pass, ... }] }: keys are
+ * the poses along the loop (the last repeats the first at t = T), stops where it settles. A
+ * stop with `pass` is only walked through, never settled on (the corners of a room where every
+ * photo has a stop of its own).
  */
 export function useRailCamera({ stageRef, camRef, paused, onChoose, onPose }) {
   const s = useRef({
@@ -136,6 +139,7 @@ export function useRailCamera({ stageRef, camRef, paused, onChoose, onPose }) {
     if (!r || !r.stops.length) return null;
     let best = null;
     r.stops.forEach((st, i) => {
+      if (st.pass) return;
       for (let k = -1; k <= 1; k++) {
         const t = st.t + k * r.T;
         const d = Math.abs(t - v);
@@ -153,7 +157,7 @@ export function useRailCamera({ stageRef, camRef, paused, onChoose, onPose }) {
     const cur = s.tx;
     const base = Math.floor(cur / r.T) * r.T;
     const ts = [];
-    for (let k = -1; k <= 1; k++) r.stops.forEach((st) => ts.push(st.t + base + k * r.T));
+    for (let k = -1; k <= 1; k++) resting(r).forEach((st) => ts.push(st.t + base + k * r.T));
     ts.sort((a, b) => a - b);
     let behind = ts[0];
     let ahead = ts[ts.length - 1];
@@ -178,7 +182,7 @@ export function useRailCamera({ stageRef, camRef, paused, onChoose, onPose }) {
     const cur = s.tx;
     const base = Math.floor(cur / r.T) * r.T;
     const cands = [];
-    for (let k = -1; k <= 1; k++) r.stops.forEach((st) => cands.push(st.t + base + k * r.T));
+    for (let k = -1; k <= 1; k++) resting(r).forEach((st) => cands.push(st.t + base + k * r.T));
     cands.sort((a, b) => a - b);
     const n = dir > 0 ? cands.find((t) => t > cur + 4) : [...cands].reverse().find((t) => t < cur - 4);
     if (n !== undefined) goTo(n);
@@ -264,7 +268,7 @@ export function useRailCamera({ stageRef, camRef, paused, onChoose, onPose }) {
     };
 
     const onKey = (e) => {
-      if (pausedRef.current || s.mode !== 'rail' || e.altKey || e.ctrlKey || e.metaKey) return;
+      if (pausedRef.current || s.mode !== 'rail' || e.altKey || e.ctrlKey || e.metaKey || e.target.closest?.('dialog')) return;
       // the arrow keys walk you left and right along the wall you face
       if (e.key === 'ArrowRight' || e.key === 'PageDown') {
         e.preventDefault();
@@ -358,13 +362,19 @@ export function useRailCamera({ stageRef, camRef, paused, onChoose, onPose }) {
     run();
   }, [s, run]);
 
-  // Pick a side at the door: fly to that corner, then walk.
+  // Pick a side at the door: fly to that corner, then walk. If the corner is only walked
+  // through, fly on to the first stop that way.
   const enter = useCallback((dir, via, ms, then) => {
     const r = s.rail;
     if (s.mode !== 'door' || !r) return false;
     const name = dir < 0 ? 'WN' : 'SW';
-    const to = r.stops.find((st) => st.kind === 'corner' && st.name === name) || r.stops[0];
+    let to = r.stops.find((st) => st.kind === 'corner' && st.name === name) || r.stops[0];
     if (!to) return false;
+    if (to.pass) {
+      const live = resting(r);
+      const at = to.t;
+      to = dir < 0 ? live.find((st) => st.t > at) || live[0] : [...live].reverse().find((st) => st.t < at) || live[live.length - 1];
+    }
     s.dir = -dir; // left sets off clockwise, which is the way the loop is measured
     flyTo(to.pose, to.t, via, ms, then);
     return true;

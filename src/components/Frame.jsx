@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { TrackLight } from './Icons.jsx';
 
 // A framed, matted print hung on the wall: its own lamp, its beam and the light it throws on the
-// wall (and, with the room dark, its glow), cast shadow, frame with real depth. Wall things stay out of the Tab order: you walk with
+// wall (and, with the room dark, its glow), cast shadow, frame with real depth. The frame
+// itself is flat, so the print and its glass paint with it as one surface; its edges, turned
+// back to the wall, stand beside it. Wall things stay out of the Tab order: you walk with
 // the arrow keys and Enter walks up to what you're facing.
 // `lit` means the camera is up close on it: its lamp stays on and the full-size image loads in.
 export function Frame({ photo, lit, onOpen }) {
@@ -37,7 +39,6 @@ export function Frame({ photo, lit, onOpen }) {
         </defs>
         <path d="M50 0 L100 100 L0 100 Z" fill="url(#beam-g)" filter="url(#beam-b)" />
       </svg>
-      <div className="fshadow" aria-hidden="true" />
       <button type="button" className="frame" data-photo={photo.id} tabIndex={-1} onClick={onOpen} aria-label={`View ${photo.title}`}>
         <img
           className={photo.portrait ? 'imgP' : 'imgL'}
@@ -48,11 +49,11 @@ export function Frame({ photo, lit, onOpen }) {
           decoding="async"
           draggable="false"
         />
-        <span className="side sl" aria-hidden="true" />
-        <span className="side sr" aria-hidden="true" />
-        <span className="side st" aria-hidden="true" />
-        <span className="side sb" aria-hidden="true" />
       </button>
+      <span className="side sl" aria-hidden="true" />
+      <span className="side sr" aria-hidden="true" />
+      <span className="side st" aria-hidden="true" />
+      <span className="side sb" aria-hidden="true" />
     </div>
   );
 }
