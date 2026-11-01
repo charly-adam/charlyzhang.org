@@ -132,7 +132,7 @@ function Room({ room }) {
       const doorCol = cols.find((c) => c.dataset.stop === 'door');
       // the first photo is seen from the corner before, the last from the corner after; each
       // of the rest is a stop, square on to it with its neighbours in view either side. In a
-      // solo room every photo has a stop of its own, and the corners are only walked through.
+      // solo room every photo has a stop of its own, and the corners show two at once as well.
       const between = room.solo ? photoCols : photoCols.length > 2 ? photoCols.slice(1, -1) : [];
       const here = between.map((col) => {
         const f = col.querySelector('.frame') || col;
@@ -167,7 +167,8 @@ function Room({ room }) {
       const a = Math.min(amax, Math.max(0.5 * S, (reach + GEO.cornerPad * S) / k));
       const cx = wall.x0 + wall.len * wall.dir[0];
       const cz = wall.z0 + wall.len * wall.dir[1];
-      stops.push({ kind: 'corner', name: side + nextSide, pass: !!room.solo, pose: { x: cx + a * (wall.nrm[0] + nw.nrm[0]), z: cz + a * (wall.nrm[1] + nw.nrm[1]), yaw: wall.yaw + 45 } });
+      // (in a solo room, a corner with a bare wall either side shows only one: it's walked through)
+      stops.push({ kind: 'corner', name: side + nextSide, pass: !!room.solo && !(last && nfirst), pose: { x: cx + a * (wall.nrm[0] + nw.nrm[0]), z: cz + a * (wall.nrm[1] + nw.nrm[1]), yaw: wall.yaw + 45 } });
     });
     // distance along the loop: the walk plus the turn, the loop closing where it began
     const keys = [];

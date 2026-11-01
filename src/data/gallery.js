@@ -21,7 +21,7 @@
 //         'teal' and 'violet' (colored walls, gold frames),
 //         'salon' (claret damask walls, ornate gilt frames).
 // `solo: true` gives every photo a wall of its own: it hangs on a bay standing out from the
-// wall, bigger, with a stop of its own, and none is seen from a corner. For a few photos.
+// wall, bigger, with a stop of its own; the corners show two at once. For a few photos.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import sizes from './photo-sizes.json';
