@@ -1042,25 +1042,27 @@ a {
 .stage.at-door [data-unseen] {
   visibility: hidden;
 }
-/* a curtain over the room until it has had a moment to draw, and again as you walk out */
+/* a curtain over the page until it has loaded and had a moment to draw, and again as you walk
+   out. It only ever fades out: going to a new page it's black at once, never fading up over
+   the page it's covering. */
 .curtain {
   position: absolute;
   inset: 0;
   z-index: 30;
   background: #000;
   pointer-events: none;
-  transition: opacity 1s ease;
 }
 .stage.ready .curtain {
   opacity: 0;
+  transition: opacity 1s ease;
 }
 .stage.ready.leaving .curtain {
   opacity: 1;
   transition: opacity 0.8s ease 1.05s;
 }
 /* (the map goes to black on the way anywhere, so every change of place passes through the
-   dark) While a page loads: where you're going and a line that fills, faded in only if it takes
-   a moment. */
+   dark) While a page loads: where you're going and a line that fills, at least a second, however
+   quick the load. */
 .loader {
   position: absolute;
   inset: 0;
@@ -1070,8 +1072,6 @@ a {
   justify-content: center;
   gap: 10px;
   color: #f2f1ee;
-  opacity: 0;
-  animation: loader-in 0.5s ease 0.4s forwards;
 }
 .stage.leaving .loader {
   visibility: hidden;
@@ -1102,12 +1102,7 @@ a {
   height: 100%;
   background: #f2f1ee;
   transform-origin: 0 50%;
-  transition: transform 0.3s ease;
-}
-@keyframes loader-in {
-  to {
-    opacity: 1;
-  }
+  transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ---------- glass controls: step buttons and the dock ---------- */
@@ -1216,6 +1211,12 @@ body:has(.stage.t-teal, .stage.t-violet) .dock {
   transform: translateX(-50%);
   padding: 3px;
   border-radius: 999px;
+  transition: color 0.6s ease, opacity 0.6s ease 0.3s;
+}
+/* out of the way while a page loads, back as its curtain lifts */
+body:has(.stage:not(.ready)) .dock {
+  opacity: 0;
+  pointer-events: none;
 }
 .dock-home {
   display: grid;

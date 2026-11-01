@@ -265,7 +265,7 @@ function Room({ room }) {
   // the curtain lifts once the room has loaded and had a moment to draw
   useEffect(() => {
     if (!geo || !loaded || ready) return undefined;
-    const id = setTimeout(() => setReady(true), 300);
+    const id = setTimeout(() => setReady(true), 150);
     return () => clearTimeout(id);
   }, [geo, loaded, ready]);
 
@@ -461,7 +461,7 @@ function Room({ room }) {
         </div>
       </div>
       <Lens />
-      <Curtain kicker={`Room ${room.num}`} name={room.name} progress={progress} />
+      <Curtain key={room.slug} kicker={`Room ${room.num}`} name={room.name} progress={progress} />
       <EdgeArrows onLeft={() => arrow(-1)} onRight={() => arrow(1)} hidden={focus === 'intro' || flying || leaving} leftLabel={arrowLabels[0]} rightLabel={arrowLabels[1]} />
     </div>
   );
