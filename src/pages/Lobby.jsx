@@ -1,35 +1,21 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useContext, useEffect, useLayoutEffect, useRef } from 'react';
 import { roomList, site } from '../data/gallery.js';
-import { GalleryMap, MapThumb } from '../components/GalleryMap.jsx';
+import { MapContext, MapThumb } from '../components/GalleryMap.jsx';
 import { Lens, Shell } from '../components/Scene.jsx';
 
 const PHONE = '(max-width: 700px)';
 
 export default function Lobby() {
-  const navigate = useNavigate();
-  const [going, setGoing] = useState(null); // the room you've set off for: the lobby fades out
-  const [mapOpen, setMapOpen] = useState(false);
+  const openMap = useContext(MapContext);
   const stageRef = useRef(null);
-  const standRef = useRef(null);
   useDeskScale(stageRef);
   useLookAround(stageRef);
   useEffect(() => {
     document.title = `${site.name} · ${site.subtitle}`;
   }, []);
-  useEffect(() => {
-    if (!going) return undefined;
-    const id = setTimeout(() => navigate(going), 550);
-    return () => clearTimeout(id);
-  }, [going, navigate]);
-
-  const closeMap = () => {
-    setMapOpen(false);
-    standRef.current?.focus({ preventScroll: true });
-  };
 
   return (
-    <div ref={stageRef} className={going ? 'stage lobby t-white going' : 'stage lobby t-white'}>
+    <div ref={stageRef} className="stage lobby t-white">
       <div className="cam">
         <div className="world" style={{ width: '100%' }}>
           <Shell />
@@ -41,11 +27,10 @@ export default function Lobby() {
           <Charly />
         </div>
         <div className="dl dl-desk">
-          <Desk standRef={standRef} onMap={() => setMapOpen(true)} />
+          <Desk onMap={(e) => openMap('stand', e.currentTarget)} />
         </div>
       </div>
       <Lens />
-      {mapOpen && <GalleryMap going={!!going} onClose={closeMap} onWalk={(r) => setGoing(`/room/${r.slug}`)} />}
       <div className="curtain" aria-hidden="true" />
     </div>
   );
@@ -145,10 +130,11 @@ function Lettering() {
   );
 }
 
-// Charly behind the desk, in four cut-out layers stacked at one origin, cut off at the desk top
-// (only at the bottom, so his arms are free to move). He breathes; his head and arms move on
-// their own pivots.
-const LAYERS = ['arm-l', 'arm-r', 'torso', 'head'];
+// Charly behind the desk, in cut-out layers stacked at one origin (made by
+// scripts/cut-charly.js), cut off at the desk top (only at the bottom, so his arms are free to
+// move). He breathes; his head and arms move on their own pivots, the arms behind the torso and
+// in front of the underarms, which stay still.
+const LAYERS = ['underarm', 'arm-l', 'arm-r', 'torso', 'head'];
 function Charly() {
   return (
     <div className="charly" aria-hidden="true">
@@ -167,7 +153,7 @@ function Charly() {
 
 // The reception desk: pale quartz top, light-oak slats, and on it a welcome card and a stand
 // of folded maps.
-function Desk({ standRef, onMap }) {
+function Desk({ onMap }) {
   return (
     <>
       <div className="desk-shadow" aria-hidden="true" />
@@ -180,7 +166,7 @@ function Desk({ standRef, onMap }) {
         <p className="card-title">Welcome in</p>
         <p className="card-text">Take a map to find your way round.</p>
       </div>
-      <button ref={standRef} type="button" className="stand" onClick={onMap} aria-haspopup="dialog">
+      <button type="button" className="stand" onClick={onMap} aria-haspopup="dialog">
         <span className="stand-dot" aria-hidden="true" />
         <span className="stand-maps" aria-hidden="true">
           <span className="sheet sheet-1" />

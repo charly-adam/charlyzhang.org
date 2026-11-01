@@ -1,9 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import { createContext, useEffect, useRef, useState } from 'react';
 import { roomList, site } from '../data/gallery.js';
 import { Arrow, Pictogram } from './Icons.jsx';
 
-// Map tints follow each room's walls: white, teal, violet, and the grey of the spotlit rooms.
-const TINT = { white: '#ebe6d8', teal: '#c3d6d4', violet: '#cfc9de', spot: '#d9d4c8' };
+// openMap(from, opener): takes the map out, from the stand on the desk ('stand') or the home
+// button ('dock'); `opener` gets focus back when it's folded away. Provided by App.
+export const MapContext = createContext(() => {});
+
+// Map tints follow each room's walls: white, teal, violet, the grey of the spotlit rooms, and
+// the claret of the salon.
+const TINT = { white: '#ebe6d8', teal: '#c3d6d4', violet: '#cfc9de', spot: '#d9d4c8', salon: '#e2c4c0' };
 
 // The floor plan: rooms in a ring round the hall, four columns wide, the front desk at the
 // bottom in the middle. The ring has a slot top-left, top-right, two between them, and one in
@@ -36,6 +41,7 @@ export function planFor(list) {
 
 const plan = planFor(roomList);
 const gridStyle = { '--cols': plan.cols, '--rows': plan.rows };
+const DESK = 'desk';
 
 // The little plan printed on the folded maps in the stand.
 export function MapThumb() {
@@ -49,16 +55,39 @@ export function MapThumb() {
   );
 }
 
-// The map, unfolded over the lobby. Pick a room on the plan or in the key to read about it and
-// walk there. Escape, the fold button or a click off the paper folds it away.
-export function GalleryMap({ going, onClose, onWalk }) {
+function Here() {
+  return (
+    <span className="plan-here">
+      <span className="here-dot" aria-hidden="true" />
+      You are here
+    </span>
+  );
+}
+
+function KeyHere() {
+  return (
+    <>
+      <span className="here-dot" aria-hidden="true" />
+      <span className="sr-only">, you are here</span>
+    </>
+  );
+}
+
+// The map, over whatever page you're on: unfolded from the stand, or uncrumpled up out of the
+// home button. `here` is the room you're in (null at the front desk). Pick a room on the plan
+// or in the key to read about it and walk there: the map goes to black, and onGo(path) takes
+// you. Escape, the fold button or a click off the paper puts it away.
+export function GalleryMap({ from, here, onClose, onGo }) {
   const ref = useRef(null);
   const paperRef = useRef(null);
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
-  const [sel, setSel] = useState(null);
+  const goRef = useRef(onGo);
+  goRef.current = onGo;
+  const [sel, setSel] = useState(null); // a room's slug, or DESK
   const [folding, setFolding] = useState(false);
-  const fold = () => setFolding(true);
+  const [going, setGoing] = useState(null); // where you've set off for
+  const fold = () => !going && setFolding(true);
 
   useEffect(() => {
     const d = ref.current;
@@ -67,18 +96,52 @@ export function GalleryMap({ going, onClose, onWalk }) {
   }, []);
   useEffect(() => {
     if (!folding) return undefined;
-    // closed first, so the page is no longer inert when the lobby puts focus back on the stand
-    const id = setTimeout(() => ref.current?.close(), 280);
+    // closed first, so the page is no longer inert when focus goes back to the opener
+    const id = setTimeout(() => ref.current?.close(), from === 'dock' ? 380 : 280);
     return () => clearTimeout(id);
-  }, [folding]);
+  }, [folding, from]);
+  useEffect(() => {
+    if (!going) return undefined;
+    const id = setTimeout(() => goRef.current(going), 550);
+    return () => clearTimeout(id);
+  }, [going]);
 
   const room = roomList.find((r) => r.slug === sel) || null;
-  const pressed = (r) => (sel === r.slug ? 'true' : 'false');
+  const pressed = (key) => (sel === key ? 'true' : 'false');
+  const walk = (label, to) => (
+    <button type="button" className="walk" onClick={() => setGoing(to)} disabled={!!going}>
+      Walk to {label}
+      <Arrow size={16} />
+    </button>
+  );
+
+  let pick;
+  if (room) {
+    pick = (
+      <>
+        <p className="pick-room">Room {room.num}</p>
+        <p className="pick-name">{room.name}</p>
+        <p className="pick-blurb">{room.blurb}</p>
+        {room.slug === here ? <p className="pick-here">You are here.</p> : walk(room.name, `/room/${room.slug}`)}
+      </>
+    );
+  } else if (sel === DESK) {
+    pick = (
+      <>
+        <p className="pick-room">The lobby</p>
+        <p className="pick-name">Front desk</p>
+        <p className="pick-blurb">Where you came in. Charly&rsquo;s at the desk, with the maps.</p>
+        {here ? walk('the front desk', '/') : <p className="pick-here">You are here.</p>}
+      </>
+    );
+  } else {
+    pick = <p className="pick-blurb">Pick a room on the plan or in the list.</p>;
+  }
 
   return (
     <dialog
       ref={ref}
-      className={`map${folding ? ' folding' : ''}${going ? ' going' : ''}`}
+      className={`map from-${from}${folding ? ' folding' : ''}${going ? ' going' : ''}`}
       aria-labelledby="map-title"
       onCancel={(e) => {
         e.preventDefault();
@@ -111,9 +174,9 @@ export function GalleryMap({ going, onClose, onWalk }) {
               <button
                 key={r.slug}
                 type="button"
-                className="plan-room"
-                aria-pressed={pressed(r)}
-                aria-label={`Room ${r.num}, ${r.name}, ${r.photos.length} photographs`}
+                className={r.slug === here ? 'plan-room is-here' : 'plan-room'}
+                aria-pressed={pressed(r.slug)}
+                aria-label={`Room ${r.num}, ${r.name}, ${r.photos.length} photographs${r.slug === here ? ', you are here' : ''}`}
                 onClick={() => setSel(r.slug)}
                 style={{ gridColumn: col, gridRow: row, background: TINT[r.theme] }}
               >
@@ -129,6 +192,7 @@ export function GalleryMap({ going, onClose, onWalk }) {
                       {r.num} · {r.name}
                     </span>
                     <span className="plan-count">{r.photos.length} photos</span>
+                    {r.slug === here && <Here />}
                   </span>
                 </span>
               </button>
@@ -136,14 +200,18 @@ export function GalleryMap({ going, onClose, onWalk }) {
             <div className="plan-hall" aria-hidden="true" style={{ gridColumn: plan.middle, gridRow: `2 / span ${plan.rows - 2}` }}>
               Hall
             </div>
-            <div className="plan-desk" style={{ gridColumn: plan.middle, gridRow: plan.rows }}>
+            <button
+              type="button"
+              className="plan-desk"
+              aria-pressed={pressed(DESK)}
+              aria-label={`Front desk${here ? '' : ', you are here'}`}
+              onClick={() => setSel(DESK)}
+              style={{ gridColumn: plan.middle, gridRow: plan.rows }}
+            >
               <span className="plan-desk-top" aria-hidden="true" />
               <span className="plan-desk-name">Front desk</span>
-              <span className="plan-here">
-                <span className="here-dot" aria-hidden="true" />
-                You are here
-              </span>
-            </div>
+              {!here && <Here />}
+            </button>
             <div className="plan-door" aria-hidden="true" />
           </div>
 
@@ -153,32 +221,34 @@ export function GalleryMap({ going, onClose, onWalk }) {
             </p>
             <div className="key-rows" role="group" aria-labelledby="map-key">
               {roomList.map((r) => (
-                <button key={r.slug} type="button" className="key-row" aria-pressed={pressed(r)} onClick={() => setSel(r.slug)}>
+                <button key={r.slug} type="button" className="key-row" aria-pressed={pressed(r.slug)} onClick={() => setSel(r.slug)}>
                   <span className="key-num">{r.num}</span>
-                  <span className="key-name">{r.name}</span>
+                  <span className="key-name">
+                    {r.name}
+                    {r.slug === here && <KeyHere />}
+                  </span>
                   <span className="key-count">{r.photos.length}</span>
                 </button>
               ))}
+              <button type="button" className="key-row" aria-pressed={pressed(DESK)} onClick={() => setSel(DESK)}>
+                <span className="key-num" aria-hidden="true">
+                  ·
+                </span>
+                <span className="key-name">
+                  Front desk
+                  {!here && <KeyHere />}
+                </span>
+                <span className="key-count" />
+              </button>
             </div>
           </div>
 
-          <div className={room ? 'key-pick picked' : 'key-pick'} aria-live="polite">
-            {room ? (
-              <>
-                <p className="pick-room">Room {room.num}</p>
-                <p className="pick-name">{room.name}</p>
-                <p className="pick-blurb">{room.blurb}</p>
-                <button type="button" className="walk" onClick={() => onWalk(room)} disabled={going}>
-                  Walk to {room.name}
-                  <Arrow size={16} />
-                </button>
-              </>
-            ) : (
-              <p className="pick-blurb">Pick a room on the plan or in the list.</p>
-            )}
+          <div className={sel ? 'key-pick picked' : 'key-pick'} aria-live="polite">
+            {pick}
           </div>
         </div>
       </div>
+      <div className="map-veil" aria-hidden="true" />
     </dialog>
   );
 }

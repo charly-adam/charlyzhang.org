@@ -1,6 +1,7 @@
-import { useEffect, useLayoutEffect } from 'react';
-import { Navigate, Route, Routes } from 'react-router';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router';
 import Dock from './components/Dock.jsx';
+import { GalleryMap, MapContext } from './components/GalleryMap.jsx';
 import Lobby from './pages/Lobby.jsx';
 import Room from './pages/Room.jsx';
 
@@ -34,17 +35,34 @@ function useNoBrowserMenus() {
 export default function App() {
   useRoomScale();
   useNoBrowserMenus();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const here = pathname.startsWith('/room/') ? pathname.split('/')[2] : null;
+  const [map, setMap] = useState(null); // { from, opener } while the map is out
+  const openMap = useCallback((from, opener) => setMap({ from, opener }), []);
+  const closeMap = () => {
+    const opener = map?.opener;
+    setMap(null);
+    opener?.focus({ preventScroll: true });
+  };
+  const go = (to) => {
+    setMap(null);
+    navigate(to);
+  };
   return (
-    <div className="app">
-      <main className="main">
-        <Routes>
-          <Route path="/" element={<Lobby />} />
-          <Route path="/room/:slug" element={<Room />} />
-          <Route path="/room/:slug/:photoId" element={<Room />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
-      <Dock />
-    </div>
+    <MapContext.Provider value={openMap}>
+      <div className="app">
+        <main className="main">
+          <Routes>
+            <Route path="/" element={<Lobby />} />
+            <Route path="/room/:slug" element={<Room />} />
+            <Route path="/room/:slug/:photoId" element={<Room />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+        <Dock />
+        {map && <GalleryMap from={map.from} here={here} onClose={closeMap} onGo={go} />}
+      </div>
+    </MapContext.Provider>
   );
 }

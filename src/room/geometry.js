@@ -31,7 +31,7 @@ export const GEO = {
   // or it costs hundreds of megabytes (and Chrome drops surfaces when it runs out). The floor
   // and ceiling tiles are canvases, drawn once at a fixed size, which sidesteps that.
   tile: 0.5, // floor and ceiling tiles
-  tilePx: 512, // pixels across a tile's canvas
+  tilePx: 512, // pixels across a textured tile's canvas
   panel: 0.75, // wall panels
   panelNear: 0.3, // on the entrance wall, which you pass close by going in
   nearFloor: 0.6, // floor nearer than this can't be seen (you look 27° down at most), so it's hidden
@@ -99,10 +99,14 @@ export function localBox(el, root) {
   return { x, y, w: el.offsetWidth, h: el.offsetHeight };
 }
 
-// How far an element stands off its wall (frames do, a little).
+// How far an element stands off its wall (frames do, a little; more on a bay).
 export function depthOf(el) {
-  const m = getComputedStyle(el).transform;
-  return m && m !== 'none' ? new DOMMatrixReadOnly(m).m43 : 0;
+  let z = 0;
+  for (let n = el; n && !n.classList.contains('wall') && !n.classList.contains('face'); n = n.parentElement) {
+    const m = getComputedStyle(n).transform;
+    if (m && m !== 'none') z += new DOMMatrixReadOnly(m).m43;
+  }
+  return z;
 }
 
 // The short way round from heading a to heading b, in degrees (-180..180).

@@ -18,7 +18,10 @@
 // photos-originals. The icon is a pictogram from components/Icons.jsx. The lobby's wall, the
 // map and the dock all follow this list.
 // Themes: 'white' (bright, even light), 'spot' (spotlit, wood frames),
-//         'teal' and 'violet' (colored walls, gold frames).
+//         'teal' and 'violet' (colored walls, gold frames),
+//         'salon' (claret damask walls, ornate gilt frames).
+// `solo: true` gives every photo a wall of its own: it hangs on a bay standing out from the
+// wall, bigger, with a stop of its own, and none is seen from a corner. For a few photos.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import sizes from './photo-sizes.json';
@@ -29,7 +32,7 @@ export const site = {
 };
 
 export const rooms = [
-  { slug: 'favorites', name: 'Favorites', theme: 'white', icon: 'star', blurb: "A few of Charly's own favorites.", intro: '' },
+  { slug: 'favorites', name: 'Favorites', theme: 'salon', solo: true, icon: 'star', blurb: "A few of Charly's own favorites.", intro: '' },
   { slug: 'nature', name: 'Nature', theme: 'teal', icon: 'landscape', blurb: 'Parks, peaks and night skies.', intro: '' },
   { slug: 'birds', name: 'Birds', theme: 'white', icon: 'bird', blurb: 'Wetlands and refuges around the Bay and the Valley.', intro: '' },
   { slug: 'travel', name: 'Travel', theme: 'violet', icon: 'globe', blurb: 'Streets and cities abroad.', intro: '' },
@@ -140,12 +143,15 @@ export const photos = [
 // ── derived helpers (no need to edit below) ─────────────────────────────────
 
 // floor / ceil: the texture tiled over it (size in S, the room scale) and the colour it
-// shows until that loads.
+// shows until that loads. A floor's sheen is the wall's reflection in it, as light added near
+// the walls: (wall − stage colour) × (1 − floor opacity) / floor opacity × reflection opacity,
+// with those from the theme in index.css (none where it's too faint to see).
 export const themes = {
   white: { wall: '#efefec', boxBg: '#141414', boxFg: '#f4f3f0', floor: { img: '/textures/floor-stone.jpg', size: 0.77, color: '#b4b4b1' }, ceil: { img: null, size: 1, color: '#e4e4e1' } },
-  spot: { wall: '#acaca9', boxBg: '#141414', boxFg: '#f4f3f0', floor: { img: '/textures/floor-concrete.jpg', size: 1.05, color: '#4f4f4f' }, ceil: { img: '/textures/ceiling-tile.jpg', size: 0.27, color: '#dadad7' } },
-  teal: { wall: '#173e49', boxBg: '#eceae3', boxFg: '#173f4a', floor: { img: '/textures/floor-oak.jpg', size: 0.49, color: '#6b4e32' }, ceil: { img: null, size: 1, color: '#262828' } },
-  violet: { wall: '#24234c', boxBg: '#ecebf2', boxFg: '#24234a', floor: { img: '/textures/floor-walnut.jpg', size: 0.45, color: '#4a3326' }, ceil: { img: null, size: 1, color: '#1c1b25' } },
+  spot: { wall: '#acaca9', boxBg: '#141414', boxFg: '#f4f3f0', floor: { img: '/textures/floor-concrete.jpg', size: 1.05, color: '#4f4f4f', sheen: '#838380' }, ceil: { img: '/textures/ceiling-tile.jpg', size: 0.27, color: '#dadad7' } },
+  teal: { wall: '#173e49', boxBg: '#eceae3', boxFg: '#173f4a', floor: { img: '/textures/floor-oak.jpg', size: 0.49, color: '#6b4e32', sheen: '#000709' }, ceil: { img: null, size: 1, color: '#262828' } },
+  salon: { wall: '#4f1a23', boxBg: '#f1e6d6', boxFg: '#4f1a23', floor: { img: '/textures/floor-walnut.jpg', size: 0.45, color: '#3a2620' }, ceil: { img: null, size: 1, color: '#1c1214' } },
+  violet: { wall: '#24234c', boxBg: '#ecebf2', boxFg: '#24234a', floor: { img: '/textures/floor-walnut.jpg', size: 0.45, color: '#4a3326', sheen: '#070715' }, ceil: { img: null, size: 1, color: '#1c1b25' } },
 };
 
 export const roomList = rooms.map((r, i) => {

@@ -1,55 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router';
-import { roomList } from '../data/gallery.js';
+import { useContext } from 'react';
+import { MapContext } from './GalleryMap.jsx';
 import { Home } from './Icons.jsx';
 
-// Glass dock floating at the bottom: a home button that opens sideways into the rooms.
+// The glass home button floating at the bottom: it brings out the gallery map, wherever you are.
 export default function Dock() {
-  const { pathname } = useLocation();
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
-  const current = pathname.startsWith('/room/') ? pathname.split('/')[2] : '';
-
-  useEffect(() => {
-    if (!open) return undefined;
-    const onDown = (e) => {
-      if (!ref.current?.contains(e.target)) setOpen(false);
-    };
-    const onKey = (e) => {
-      if (e.key === 'Escape') setOpen(false);
-    };
-    window.addEventListener('pointerdown', onDown);
-    window.addEventListener('keydown', onKey);
-    return () => {
-      window.removeEventListener('pointerdown', onDown);
-      window.removeEventListener('keydown', onKey);
-    };
-  }, [open]);
-
-  const links = [
-    { to: '/', name: 'Lobby', active: pathname === '/' },
-    ...roomList.map((r) => ({ to: `/room/${r.slug}`, name: r.name, active: current === r.slug })),
-  ];
-  const half = Math.ceil(links.length / 2);
-  const side = (list, cls) => (
-    <div className={`dock-side ${cls}`} inert={!open}>
-      <div>
-        {list.map((l) => (
-          <Link key={l.to} to={l.to} className="dock-link" aria-current={l.active ? 'page' : undefined} onClick={() => setOpen(false)}>
-            {l.name}
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
-
+  const openMap = useContext(MapContext);
   return (
-    <nav ref={ref} aria-label="Galleries" className={open ? 'dock open' : 'dock'}>
-      {side(links.slice(0, half), 'dock-l')}
-      <button type="button" className="dock-home" aria-expanded={open} aria-label={open ? 'Close the room list' : 'Open the room list'} onClick={() => setOpen((o) => !o)}>
+    <nav aria-label="Galleries" className="dock">
+      <button type="button" className="dock-home" aria-haspopup="dialog" aria-label="Open the gallery map" onClick={(e) => openMap('dock', e.currentTarget)}>
         <Home />
       </button>
-      {side(links.slice(half), 'dock-r')}
     </nav>
   );
 }

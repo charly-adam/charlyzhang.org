@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="120" height="120" viewBox="0 0 120 120">
+  <!-- The salon frame's corner blocks, each with a rosette, for border-image sliced at 40 (the
+       edges are left clear: the moulding along them is the frame-edge-*.svg tiles, laid as
+       backgrounds, which repeat without seams). -->
+  <defs>
+    <linearGradient id="profile" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="40">
+      <stop offset="0" stop-color="#3d2a0d" /><stop offset="0.05" stop-color="#7d5a20" /><stop offset="0.12" stop-color="#f6dd90" />
+      <stop offset="0.22" stop-color="#d7ae56" /><stop offset="0.31" stop-color="#8c6524" /><stop offset="0.35" stop-color="#4e3711" />
+      <stop offset="0.37" stop-color="#a77d32" /><stop offset="0.5" stop-color="#d9b562" /><stop offset="0.63" stop-color="#8c6726" />
+      <stop offset="0.67" stop-color="#4e3711" /><stop offset="0.7" stop-color="#b48a3c" /><stop offset="0.84" stop-color="#ecd084" />
+      <stop offset="0.93" stop-color="#a37a2e" /><stop offset="1" stop-color="#3d2a0d" />
+    </linearGradient>
+    <radialGradient id="gild" cx="40%" cy="35%" r="70%">
+      <stop offset="0" stop-color="#fff0b8" /><stop offset="0.45" stop-color="#e2bd66" /><stop offset="1" stop-color="#8a6322" />
+    </radialGradient>
+    <linearGradient id="block" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f1d382" /><stop offset="0.5" stop-color="#c0943f" /><stop offset="1" stop-color="#6f4f1b" />
+    </linearGradient>
+    <g id="corner">
+      <rect width="40" height="40" fill="url(#block)" />
+      <rect x="2" y="2" width="36" height="36" fill="none" stroke="#3d2a0d" stroke-width="1.6" />
+      <rect x="4.5" y="4.5" width="31" height="31" fill="none" stroke="#fbe7a6" stroke-width="0.9" stroke-opacity="0.85" />
+      <rect x="7" y="7" width="26" height="26" fill="none" stroke="#5a3f13" stroke-width="0.8" />
+      <circle cx="20" cy="20" r="11.5" fill="#6b4b18" />
+      <g fill="url(#gild)" stroke="#4e3711" stroke-width="0.6">
+        <ellipse cx="20" cy="13" rx="3.1" ry="6.6" />
+        <ellipse cx="20" cy="13" rx="3.1" ry="6.6" transform="rotate(45 20 20)" />
+        <ellipse cx="20" cy="13" rx="3.1" ry="6.6" transform="rotate(90 20 20)" />
+        <ellipse cx="20" cy="13" rx="3.1" ry="6.6" transform="rotate(135 20 20)" />
+        <ellipse cx="20" cy="13" rx="3.1" ry="6.6" transform="rotate(180 20 20)" />
+        <ellipse cx="20" cy="13" rx="3.1" ry="6.6" transform="rotate(225 20 20)" />
+        <ellipse cx="20" cy="13" rx="3.1" ry="6.6" transform="rotate(270 20 20)" />
+        <ellipse cx="20" cy="13" rx="3.1" ry="6.6" transform="rotate(315 20 20)" />
+      </g>
+      <circle cx="20" cy="20" r="4.2" fill="url(#gild)" stroke="#3d2a0d" stroke-width="0.8" />
+      <circle cx="18.8" cy="18.8" r="1.2" fill="#fff6d2" />
+    </g>
+  </defs>
+  <use xlink:href="#corner" />
+  <use xlink:href="#corner" x="80" />
+  <use xlink:href="#corner" y="80" />
+  <use xlink:href="#corner" x="80" y="80" />
+</svg>

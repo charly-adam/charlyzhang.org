@@ -74,12 +74,12 @@ function Room({ room }) {
   const prevPhoto = near ? room.photos[(nearIndex - 1 + n) % n] : null;
   const nextPhoto = near ? room.photos[(nearIndex + 1) % n] : null;
 
-  // ── measuring: the long walls are as long as their photos need, and at least minL ──
+  // ── measuring: the walls are as long as their photos need, the long ones at least minL and
+  // the far one at least D ──
   useLayoutEffect(() => {
     const stage = stageRef.current;
     if (!stage) return;
     const S = Math.min(stage.clientHeight, stage.clientWidth / 1.6);
-    const D = GEO.D * S;
     const natural = (side) => {
       const w = wallRefs[side].current;
       if (!w) return 0;
@@ -88,7 +88,8 @@ function Room({ room }) {
       return 2 * GEO.inset * S + sum + Math.max(0, cols.length - 1) * GEO.gap * S;
     };
     const L = Math.max(GEO.minL * S, natural('N'), natural('S'));
-    setGeo((g) => (g && g.S === S && g.L === L ? g : { S, L, D }));
+    const D = Math.max(GEO.D * S, natural('E'));
+    setGeo((g) => (g && g.S === S && g.L === L && g.D === D ? g : { S, L, D }));
   });
 
   useEffect(() => {
@@ -120,8 +121,9 @@ function Room({ room }) {
       const photoCols = cols.filter((c) => c.dataset.stop === 'photo');
       const doorCol = cols.find((c) => c.dataset.stop === 'door');
       // the first photo is seen from the corner before, the last from the corner after; each
-      // of the rest is a stop, square on to it with its neighbours in view either side
-      const between = photoCols.length > 2 ? photoCols.slice(1, -1) : [];
+      // of the rest is a stop, square on to it with its neighbours in view either side. In a
+      // solo room every photo has a stop of its own, and the corners are only walked through.
+      const between = room.solo ? photoCols : photoCols.length > 2 ? photoCols.slice(1, -1) : [];
       const here = between.map((col) => {
         const f = col.querySelector('.frame') || col;
         const b = localBox(f, el);
@@ -155,7 +157,7 @@ function Room({ room }) {
       const a = Math.min(amax, Math.max(0.5 * S, (reach + GEO.cornerPad * S) / k));
       const cx = wall.x0 + wall.len * wall.dir[0];
       const cz = wall.z0 + wall.len * wall.dir[1];
-      stops.push({ kind: 'corner', name: side + nextSide, pose: { x: cx + a * (wall.nrm[0] + nw.nrm[0]), z: cz + a * (wall.nrm[1] + nw.nrm[1]), yaw: wall.yaw + 45 } });
+      stops.push({ kind: 'corner', name: side + nextSide, pass: !!room.solo, pose: { x: cx + a * (wall.nrm[0] + nw.nrm[0]), z: cz + a * (wall.nrm[1] + nw.nrm[1]), yaw: wall.yaw + 45 } });
     });
     // distance along the loop: the walk plus the turn, the loop closing where it began
     const keys = [];
@@ -187,6 +189,7 @@ function Room({ room }) {
     }
     cam.setDoor(doorPose, P);
     cam.setRail(rail, keep);
+    markUnseen(doorPose, walls, S, D);
     // The floor right under the camera and the ceiling right over it are never in view (you
     // look 27° down and 22° up at most), but the browser would still draw them at a huge
     // magnification. Hide those tiles as the camera moves.
@@ -209,6 +212,52 @@ function Room({ room }) {
     };
     cullRef.current(cam.getPose());
   }, [geo, room, tick]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // From the doorway you see into the room only through the arch, but the browser would draw
+  // everything in the view behind the entrance wall too, and in a big room that's more than it
+  // has memory for: it drops surfaces. So mark what can't be seen through the opening (wall
+  // panels, photo columns with their lamps, floor and ceiling tiles: each by its corners,
+  // projected through the arch from where you stand); CSS hides it until you go in.
+  const markUnseen = (pose, walls, S, D) => {
+    const eye = GEO.eye * S;
+    const ax = -GEO.hall.t * S; // the opening's outer face
+    const aw = (GEO.arch.w * S) / 2;
+    const top = (0.78 - GEO.arch.h) * S - eye; // its crown, down from the eye
+    const bottom = 0.78 * S - eye;
+    const seen = (pts) => {
+      let z0 = Infinity;
+      let z1 = -Infinity;
+      let y0 = Infinity;
+      let y1 = -Infinity;
+      for (const [x, y, z] of pts) {
+        if (x <= pose.x + 1) return true;
+        const t = (ax - pose.x) / (x - pose.x);
+        const pz = pose.z + (z - pose.z) * t;
+        z0 = Math.min(z0, pz);
+        z1 = Math.max(z1, pz);
+        y0 = Math.min(y0, y * t);
+        y1 = Math.max(y1, y * t);
+      }
+      return z1 > D / 2 - aw && z0 < D / 2 + aw && y1 > top && y0 < bottom;
+    };
+    const wallTop = 0.07 * S - eye;
+    ['N', 'E', 'S'].forEach((side) => {
+      const w = walls[side];
+      const el = wallRefs[side].current;
+      const at = (lx, y, out = 0) => [w.x0 + lx * w.dir[0] + out * w.nrm[0], y, w.z0 + lx * w.dir[1] + out * w.nrm[1]];
+      const span = (a, b, out) => [at(a, wallTop), at(b, wallTop), at(a, bottom), at(b, bottom), at(a, wallTop, out), at(b, wallTop, out), at(a, bottom, out), at(b, bottom, out)];
+      el.querySelectorAll(':scope > .panel').forEach((p) => p.toggleAttribute('data-unseen', !seen(span(p.offsetLeft, p.offsetLeft + p.offsetWidth, 0))));
+      // a column's lamp and its light reach out past it and off the wall
+      el.querySelectorAll(':scope > [data-stop="photo"]').forEach((c) => c.toggleAttribute('data-unseen', !seen(span(c.offsetLeft - 0.3 * S, c.offsetLeft + c.offsetWidth + 0.3 * S, 0.25 * S))));
+    });
+    worldRef.current.querySelectorAll('.tile').forEach((t) => {
+      const cx = +t.dataset.cx;
+      const cz = +t.dataset.cz;
+      const r = +t.dataset.r;
+      const y = t.classList.contains('ftile') ? bottom : wallTop;
+      t.toggleAttribute('data-unseen', !seen([[cx - r, y, cz - r], [cx + r, y, cz - r], [cx - r, y, cz + r], [cx + r, y, cz + r]]));
+    });
+  };
 
   // the curtain lifts once the room has had a moment to draw
   useEffect(() => {
@@ -332,7 +381,7 @@ function Room({ room }) {
   // to the previous / next photo. In the doorway the arrow keys pick a side.
   useEffect(() => {
     const onKey = (e) => {
-      if (e.altKey || e.ctrlKey || e.metaKey) return;
+      if (e.altKey || e.ctrlKey || e.metaKey || e.target.closest?.('dialog')) return;
       if (!focus) {
         const mode = cam.getMode();
         if (mode === 'fly') return;
@@ -388,8 +437,8 @@ function Room({ room }) {
   if (geo) Object.entries(pillarFor(S, D)).forEach(([k, f]) => (faces[k] = { ...f, transform: placeFace(f.x0, f.z0, f.rot) }));
 
   const door = { to: exit, next, onLeave: leave };
-  const wallProps = { S, near, artist: site.name, offFor, onOpen, onZoom: onZoomGroup };
-  const stageClass = `stage room t-${room.theme}${focus ? ' near' : ''}${near ? ' dark' : ''}${atIntro ? ' at-intro' : ''}${geo ? '' : ' unmeasured'}${ready ? ' ready' : ''}${leaving ? ' leaving' : ''}${entered ? ' in' : ' at-door'}`;
+  const wallProps = { S, near, solo: !!room.solo, artist: site.name, offFor, onOpen, onZoom: onZoomGroup };
+  const stageClass = `stage room t-${room.theme}${room.solo ? ' solo' : ''}${focus ? ' near' : ''}${near ? ' dark' : ''}${atIntro ? ' at-intro' : ''}${geo ? '' : ' unmeasured'}${ready ? ' ready' : ''}${leaving ? ' leaving' : ''}${entered ? ' in' : ' at-door'}`;
   const arrowLabels = near ? ['The photo to the left', 'The photo to the right'] : entered ? ['Walk left', 'Walk right'] : ['Go round to the left', 'Go round to the right'];
 
   return (
