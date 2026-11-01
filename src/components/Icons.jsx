@@ -11,10 +11,10 @@ const ICONS = {
   film: 'M4.5 3.5h15v17h-15Z M8.5 3.5v17 M15.5 3.5v17 M4.5 7.5h4 M4.5 11.5h4 M4.5 15.5h4 M15.5 7.5h4 M15.5 11.5h4 M15.5 15.5h4',
 };
 
-export function Pictogram({ name }) {
+export function Pictogram({ name, size = 24, className = 'pictogram' }) {
   return (
-    <span aria-hidden="true" className="pictogram">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f4f3f0" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round">
+    <span aria-hidden="true" className={className}>
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#f4f3f0" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round">
         <path d={ICONS[name] || ICONS.detail} />
       </svg>
     </span>

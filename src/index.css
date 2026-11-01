@@ -63,7 +63,6 @@ a {
   overflow: hidden;
 }
 .walltext-btn:hover .u,
-.signrow:hover .u,
 .label:hover .lt,
 .intro-inner:hover .intro-text,
 .light-btn:hover {
@@ -1135,68 +1134,870 @@ body:has(.dock.open) .turn {
   }
 }
 
-/* ---------- lobby: the directory sign ---------- */
-.lobby-col > * {
-  zoom: var(--k, 1);
+/* ---------- lobby: the front desk ----------
+   The wall, floor and ceiling are the room's own (Shell). The desk scene in front of them is
+   drawn at 1440 × 900 and scaled by --dk (set in Lobby.jsx), lined up so its floor line (702)
+   sits on the Shell's. Wall, floor, Charly and the desk sit at different depths and drift
+   against the pointer (--px, --py: -1..1); nearer layers drift further. */
+.stage.lobby {
+  --px: 0;
+  --py: 0;
+  --lx: var(--px); /* where Charly looks: the pointer, or the map stand while you're on it */
+  --top: calc((var(--H) - var(--S)) * 0.44 + var(--S) * 0.78 - 702px * var(--dk, 1));
+  --ease: 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-.lobby-col {
-  width: 100%;
-  flex-direction: column;
-  justify-content: center;
-  gap: 22px;
-  padding-left: 16px;
-  padding-right: 16px;
+.lobby .backwall,
+.lobby .ceil3d,
+.lobby .floor3d {
+  left: -60px;
+  right: -60px;
+  translate: calc(var(--px) * var(--dk) * -6px) calc(var(--py) * var(--dk) * -3px);
+  transition: translate var(--ease);
 }
-.sign {
-  width: min(540px, 92vw);
+.lobby .floor3d {
+  translate: calc(var(--px) * var(--dk) * -12px) calc(var(--py) * var(--dk) * -3px);
 }
-.sign-kicker {
+.lettering {
+  position: absolute;
+  left: calc(50% - 624px * var(--dk));
+  top: calc(var(--top) + 150px * var(--dk));
+  translate: calc(var(--px) * var(--dk) * -6px) calc(var(--py) * var(--dk) * -3px);
+  transition: translate var(--ease);
+}
+.words {
+  width: 330px;
+  zoom: var(--dk);
+  opacity: 0.92;
+}
+.words p {
   margin: 0;
+}
+.words-kicker {
   font-size: 12px;
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: #2a2a29;
 }
-.sign-title {
-  margin: 6px 0 18px;
-  font-size: 46px;
+.words-name {
+  margin: 10px 0 0;
+  font-size: 58px;
+  line-height: 0.98;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+.words-name span {
+  display: block;
+}
+.words .words-sub {
+  margin-top: 14px;
+  font-size: 22px;
+  color: #2a2a29;
+}
+.words-rule {
+  margin-top: 26px;
+  width: 44px;
+  height: 2px;
+  background: #141414;
+}
+.words .words-count {
+  margin-top: 18px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #3a3936;
+}
+.desk-scene {
+  position: absolute;
+  left: 50%;
+  top: var(--top);
+  width: 1440px;
+  height: 900px;
+  margin-left: -720px;
+  transform: scale(var(--dk, 1));
+  transform-origin: 50% 0;
+  pointer-events: none;
+}
+.desk-scene > .dl {
+  position: absolute;
+  inset: 0;
+  transition: translate var(--ease);
+}
+.dl-char {
+  translate: calc(var(--px) * -15px) calc(var(--py) * -5px);
+}
+.dl-desk {
+  translate: calc(var(--px) * -28px) calc(var(--py) * -9px);
+}
+.desk-scene p {
+  margin: 0;
+}
+
+/* Charly: four cut-outs (745 × 1000) shown 464 wide, back to front: arms, torso, head. The
+   pivots are in the source's pixels, as percentages so they scale with the image. His shadow
+   on the wall falls away from the light, against the drift. */
+.charly {
+  position: absolute;
+  left: 488px;
+  top: 282px;
+  width: 464px;
+  height: 312px;
+  clip-path: inset(-240px -240px 0 -240px);
+  filter: drop-shadow(calc(14px + var(--px) * 10px) 16px 22px rgba(0, 0, 0, 0.2));
+  transition: filter var(--ease);
+}
+.breathe {
+  position: absolute;
+  inset: 0;
+  animation: breathe 4.6s ease-in-out infinite;
+}
+.part {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 464px;
+  transition: transform 0.55s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+.part,
+.part .idle {
+  transform-origin: var(--pivot);
+}
+.part img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.head {
+  --pivot: 48.32% 16%; /* (360, 160) */
+  transform: rotate(calc(var(--lx) * 5deg)) translate(calc(var(--lx) * 3px), calc(var(--py) * 2px));
+}
+.head .idle {
+  animation: look 9s ease-in-out infinite;
+}
+.torso img {
+  transform-origin: 48.32% 56%; /* (360, 560) */
+  animation: chest 4.6s ease-in-out infinite;
+}
+.arm-l {
+  --pivot: 33.56% 20%; /* (250, 200) */
+  transform: rotate(calc(var(--px) * -1.5deg));
+}
+.arm-l .idle {
+  animation: sway-l 5.2s ease-in-out infinite;
+}
+.arm-r {
+  --pivot: 63.09% 20.5%; /* (470, 205) */
+  transform: rotate(calc(var(--px) * -1.5deg));
+}
+/* on arrival he waves once, then sways */
+.arm-r .idle {
+  animation: wave 1.7s 0.5s ease-in-out 1 both, sway-r 5.2s 2.4s ease-in-out infinite;
+}
+/* on the map stand he looks at it and lifts his right arm toward it */
+.stage.lobby:has(.stand:hover, .stand:focus-visible) {
+  --lx: 0.85;
+}
+.lobby:has(.stand:hover, .stand:focus-visible) .arm-r {
+  transform: rotate(-13deg);
+}
+.lobby:has(.stand:hover, .stand:focus-visible) .arm-l {
+  transform: rotate(4deg);
+}
+@keyframes breathe {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+@keyframes chest {
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+  50% {
+    transform: scale(1.006, 1.012);
+  }
+}
+@keyframes look {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  22% {
+    transform: rotate(-1.6deg) translateY(0.5px);
+  }
+  48% {
+    transform: rotate(0.6deg);
+  }
+  70% {
+    transform: rotate(1.8deg) translateY(0.5px);
+  }
+}
+@keyframes sway-l {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  50% {
+    transform: rotate(1.6deg);
+  }
+}
+@keyframes sway-r {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  50% {
+    transform: rotate(-1.6deg);
+  }
+}
+@keyframes wave {
+  0% {
+    transform: rotate(0);
+  }
+  20% {
+    transform: rotate(-16deg);
+  }
+  40% {
+    transform: rotate(-9deg);
+  }
+  60% {
+    transform: rotate(-17deg);
+  }
+  80% {
+    transform: rotate(-8deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
+}
+
+/* the desk */
+.desk-scene .dl-desk > * {
+  position: absolute;
+}
+.desk-shadow {
+  left: 286px;
+  top: 790px;
+  width: 868px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.32), transparent);
+}
+.desk-top {
+  left: 316px;
+  top: 560px;
+  width: 808px;
+  height: 34px;
+  clip-path: polygon(3.5% 0, 96.5% 0, 100% 100%, 0 100%);
+  background: url(/textures/wall-grain.png) 0 0/256px 256px, linear-gradient(#e7e6e1, #f7f6f2);
+}
+.desk-edge {
+  left: 310px;
+  top: 592px;
+  width: 820px;
+  height: 12px;
+  background: linear-gradient(#fbfaf7, #dedcd6);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.18);
+}
+.desk-front {
+  left: 322px;
+  top: 604px;
+  width: 796px;
+  height: 196px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(rgba(0, 0, 0, 0.22), transparent 14%, transparent 80%, rgba(0, 0, 0, 0.14)), repeating-linear-gradient(90deg, #c9a87e 0 30px, #b8966b 30px 32px);
+}
+.desk-plaque {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: #2b2016;
+  background: rgba(244, 239, 225, 0.86);
+}
+.desk-card {
+  left: 372px;
+  top: 518px;
+  width: 132px;
+  height: 62px;
+  box-sizing: border-box;
+  padding: 9px 11px;
+  background: #fbfaf6;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18), 0 8px 12px -6px rgba(0, 0, 0, 0.35);
+  transform: perspective(400px) rotateX(-12deg);
+}
+.card-title {
+  font-size: 11px;
+  font-weight: 600;
+}
+.desk-card .card-text {
+  margin-top: 4px;
+  font-size: 9.5px;
+  line-height: 1.35;
+  color: #3a3936;
+}
+
+/* the map stand: a button */
+.stand {
+  left: 936px;
+  top: 470px;
+  width: 150px;
+  height: 118px;
+  display: block;
+  pointer-events: auto;
+}
+.stand:focus-visible {
+  outline: 2px solid #141414;
+  outline-offset: 4px;
+}
+.stand > span {
+  position: absolute;
+}
+.stand-dot {
+  left: 62px;
+  top: -6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #c8402f;
+  animation: pulse 2.4s ease-out infinite;
+}
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(200, 64, 47, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 18px rgba(200, 64, 47, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(200, 64, 47, 0);
+  }
+}
+.stand-maps {
+  left: 20px;
+  top: 14px;
+  width: 110px;
+  height: 84px;
+  transition: transform 0.2s ease;
+}
+.stand:hover .stand-maps {
+  transform: translateY(-4px);
+}
+.sheet {
+  position: absolute;
+  width: 96px;
+  height: 74px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+.sheet-1 {
+  left: 4px;
+  top: 8px;
+  background: #ece5d3;
+  transform: rotate(-6deg);
+}
+.sheet-2 {
+  left: 10px;
+  top: 4px;
+  background: #f2ecdc;
+  transform: rotate(3deg);
+}
+.sheet-3 {
+  left: 7px;
+  top: 0;
+  height: 76px;
+  box-sizing: border-box;
+  padding: 8px;
+  background: #f6f1e3;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+.sheet-title {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.thumb {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--rows), minmax(0, 1fr));
+  gap: 3px;
+  height: 42px;
+  margin-top: 6px;
+}
+.th-white {
+  outline: 1px solid #b9b2a2;
+  outline-offset: -1px;
+}
+.thumb-desk {
+  background: #141414;
+}
+.stand-holder {
+  left: 12px;
+  top: 64px;
+  width: 126px;
+  height: 30px;
+  box-sizing: border-box;
+  background: linear-gradient(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.18));
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08), 0 6px 8px -4px rgba(0, 0, 0, 0.3);
+}
+.stand-label {
+  left: 0;
+  top: 100px;
+  width: 150px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.stand:hover .stand-label {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* phones: no parallax; the desk fills the width, the lettering sits above it */
+@media (max-width: 700px) {
+  .stage.lobby {
+    --S: var(--H);
+    --px: 0;
+    --py: 0;
+    --lx: 0;
+  }
+  .lobby .backwall,
+  .lobby .ceil3d,
+  .lobby .floor3d,
+  .lettering,
+  .desk-scene > .dl {
+    translate: none;
+  }
+  .lettering {
+    left: 24px;
+    top: calc(var(--H) * 0.11);
+  }
+  .words {
+    zoom: 0.8;
+  }
+}
+
+/* ---------- the gallery map, unfolded over the lobby ---------- */
+dialog.map {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  color: #141414;
+  background: none;
+}
+dialog.map::backdrop {
+  background: transparent;
+}
+.map.going {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.map-dim {
+  position: absolute;
+  inset: 0;
+  background: rgba(24, 23, 20, 0.5);
+  animation: dim 0.3s ease both;
+}
+.map.folding .map-dim {
+  animation: dim 0.28s ease reverse both;
+}
+@keyframes dim {
+  from {
+    opacity: 0;
+  }
+}
+.map p {
+  margin: 0;
+}
+.map button:focus-visible {
+  outline: 2px solid #141414;
+  outline-offset: 3px;
+}
+/* cream paper with its fold creases: two down, one across */
+.paper {
+  --tilt: -1deg;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(1080px, calc(100vw - 48px));
+  height: min(664px, calc(100dvh - 48px));
+  translate: -50% -50%;
+  box-sizing: border-box;
+  padding: 34px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  background:
+    linear-gradient(90deg, transparent calc(33.33% - 14px), rgba(0, 0, 0, 0.055) calc(33.33% - 1px), rgba(255, 255, 255, 0.55) 33.33%, transparent calc(33.33% + 16px)),
+    linear-gradient(90deg, transparent calc(66.66% - 14px), rgba(0, 0, 0, 0.055) calc(66.66% - 1px), rgba(255, 255, 255, 0.55) 66.66%, transparent calc(66.66% + 16px)),
+    linear-gradient(transparent calc(50% - 12px), rgba(0, 0, 0, 0.04) calc(50% - 1px), rgba(255, 255, 255, 0.5) 50%, transparent calc(50% + 14px)),
+    url(/textures/wall-grain.png),
+    #f4efe1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 40px 60px -20px rgba(0, 0, 0, 0.55);
+  animation: unfold 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.paper:focus {
+  outline: none;
+}
+.map.folding .paper {
+  animation: fold 0.28s cubic-bezier(0.5, 0, 0.75, 0) both;
+}
+@keyframes unfold {
+  0% {
+    opacity: 0.3;
+    transform: rotate(var(--tilt)) translateY(160px) scale(0.34, 0.5);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(var(--tilt)) translateY(0) scale(1);
+  }
+}
+@keyframes fold {
+  from {
+    transform: rotate(var(--tilt)) translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: rotate(var(--tilt)) translateY(160px) scale(0.34, 0.5);
+  }
+}
+.paper-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+.paper-kicker,
+.key-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #4a4436;
+}
+.paper-title {
+  margin: 6px 0 0;
+  font-size: 36px;
   line-height: 1;
   font-weight: 600;
   letter-spacing: -0.02em;
 }
-.sign-rows {
-  border-top: 2px solid #141414;
-  border-bottom: 2px solid #141414;
-}
-.signrow {
-  width: 100%;
-  box-sizing: border-box;
-  display: grid;
-  grid-template-columns: 32px 36px minmax(0, 1fr) auto;
+.paper-fold {
+  flex: none;
+  min-height: 44px;
+  display: flex;
   align-items: center;
-  gap: 18px;
-  padding: 12px 0;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
 }
-.signrow + .signrow {
-  border-top: 1px solid #141414;
+.paper-fold:hover,
+.key-row:hover .key-name {
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
-.pictogram {
+.paper-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 650px) minmax(240px, 1fr);
+  grid-template-rows: auto 1fr;
+  grid-template-areas: "plan key" "plan pick";
+  column-gap: 34px;
+}
+
+/* the floor plan */
+.plan {
+  grid-area: plan;
+  position: relative;
+  box-sizing: border-box;
+  border: 4px solid #1d1b17;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--rows), minmax(0, 1fr));
+  gap: 12px;
+}
+.plan-room {
+  position: relative;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 10px 11px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 6px;
+  border: 2px solid #1d1b17;
+}
+.plan-room:hover {
+  filter: brightness(0.96);
+}
+.plan-room[aria-pressed="true"] {
+  border-color: #c8402f;
+  box-shadow: inset 0 0 0 1px #c8402f, 0 0 0 1px #c8402f;
+}
+.plan-ticks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.plan-ticks > span {
+  width: 7px;
+  height: 3px;
+  background: #1d1b17;
+}
+.plan-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.plan-icon {
+  flex: none;
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  background: #141414;
+  width: 26px;
+  height: 26px;
+  background: #1d1b17;
 }
-.signrow-name {
-  font-size: 23px;
-  font-weight: 500;
+.plan-words {
+  min-width: 0;
+}
+.plan-num {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+.plan-count {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: #4a4436;
+}
+.plan-hall {
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #6b6352;
+  background: repeating-linear-gradient(45deg, transparent 0 9px, rgba(0, 0, 0, 0.05) 9px 10px);
+}
+.plan-desk {
+  border: 2px dashed #8a8170;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.plan-desk-top {
+  display: block;
+  width: 96px;
+  height: 14px;
+  border-radius: 7px 7px 2px 2px;
+  background: #1d1b17;
+}
+.plan-desk-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+.plan-here {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #a33222;
+}
+.here-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #c8402f;
+  box-shadow: 0 0 0 3px rgba(200, 64, 47, 0.25);
+}
+/* the way in, through the bottom wall */
+.plan-door {
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 70px;
+  height: 4px;
+  margin-left: -35px;
+  background: #f4efe1;
+}
+
+/* the key, and the room you picked */
+.map-key {
+  grid-area: key;
+  min-width: 0;
+}
+.key-rows {
+  margin-top: 8px;
+  border-top: 2px solid #1d1b17;
+}
+.key-row {
+  width: 100%;
+  min-height: 36px;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(29, 27, 23, 0.25);
+}
+.key-num {
+  font-size: 13px;
+}
+.key-name {
+  font-size: 15px;
+}
+.key-count {
+  font-size: 12px;
+  color: #4a4436;
+}
+.key-row[aria-pressed="true"] {
+  font-weight: 600;
+}
+.key-row[aria-pressed="true"] .key-num {
+  color: #a33222;
+}
+.key-pick {
+  grid-area: pick;
+  align-self: end;
+  padding-top: 16px;
+}
+.pick-room {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #4a4436;
+}
+.map .pick-name {
+  margin-top: 4px;
+  font-size: 24px;
+  font-weight: 600;
   letter-spacing: -0.01em;
 }
-.signrow-room {
-  font-size: 13px;
-  color: #3a3936;
+.pick-blurb {
+  font-size: 14px;
+  line-height: 1.45;
+  color: #2f2b24;
 }
+.map .pick-name + .pick-blurb {
+  margin-top: 6px;
+}
+.walk {
+  margin-top: 14px;
+  min-height: 44px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #f4efe1;
+  background: #141414;
+  transition: background 0.15s;
+}
+.walk:hover {
+  background: #2a2a28;
+}
+
+/* on a phone the map fills the screen: the plan above the key, scrolling, and the room you
+   picked kept in view at the bottom */
+@media (max-width: 700px) {
+  .paper {
+    --tilt: 0deg;
+    inset: 0;
+    width: auto;
+    height: auto;
+    translate: none;
+    padding: calc(14px + env(safe-area-inset-top)) 16px 0;
+    gap: 16px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .paper-title {
+    font-size: 30px;
+  }
+  .paper-body {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+  .plan {
+    padding: 10px;
+    gap: 8px;
+    grid-template-rows: repeat(var(--rows), 112px);
+  }
+  .plan-room {
+    padding: 7px 6px;
+  }
+  .plan-name {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  .plan-icon {
+    width: 22px;
+    height: 22px;
+  }
+  .plan-num {
+    font-size: 12.5px;
+  }
+  .plan-count {
+    font-size: 10.5px;
+  }
+  .plan-desk-top {
+    width: 64px;
+  }
+  .plan-here {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+  }
+  .key-row {
+    min-height: 44px;
+  }
+  .key-pick {
+    align-self: stretch;
+    margin: 0 -16px;
+    padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+    background: #f4efe1;
+  }
+  .key-pick.picked {
+    position: sticky;
+    bottom: 0;
+    box-shadow: 0 -1px 0 rgba(29, 27, 23, 0.25);
+  }
+}
+
 /* ---------- up close ----------
    The camera walks up to one thing on the wall. For a photo, first the lights go out: every other
    lamp clicks off in a quick ripple outward from it (--off, set per group) and the room falls

@@ -14,7 +14,9 @@
 // takes 3 when the count is odd and 2 when it's even, so the long walls always match; the room
 // grows with them.
 //
-// Add a room: add an entry to `rooms` (slug, name, theme, blurb) and a folder in photos-originals.
+// Add a room: add an entry to `rooms` (slug, name, theme, icon, blurb) and a folder in
+// photos-originals. The icon is a pictogram from components/Icons.jsx. The lobby's wall, the
+// map and the dock all follow this list.
 // Themes: 'white' (bright, even light), 'spot' (spotlit, wood frames),
 //         'teal' and 'violet' (colored walls, gold frames).
 // ─────────────────────────────────────────────────────────────────────────────
@@ -137,9 +139,6 @@ export const photos = [
 
 // ── derived helpers (no need to edit below) ─────────────────────────────────
 
-// Arrow direction on the lobby sign for each room, in order.
-const ARROWS = [0, -90, -45, -135, -45, 180, -135];
-
 // floor / ceil: the texture tiled over it (size in S, the room scale) and the colour it
 // shows until that loads.
 export const themes = {
@@ -164,7 +163,7 @@ export const roomList = rooms.map((r, i) => {
     if (p.pair && groups.length) groups[groups.length - 1].push(p);
     else groups.push([p]);
   });
-  return { ...r, num: i + 1, arrow: ARROWS[i % ARROWS.length], photos: list, groups };
+  return { ...r, num: i + 1, photos: list, groups };
 });
 
 export const getRoom = (slug) => roomList.find((r) => r.slug === slug);
