@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router';
 import Dock from './components/Dock.jsx';
 import { GalleryMap, MapContext } from './components/GalleryMap.jsx';
@@ -45,10 +45,20 @@ export default function App() {
     setMap(null);
     opener?.focus({ preventScroll: true });
   };
+  // Walking somewhere from the map: it's gone to black; it stays, black, until the new page is
+  // up behind it with its own curtain down (the router changes page a moment after asked, and
+  // closing the map first would show the page you're leaving), then it goes.
+  const going = useRef(null);
   const go = (to) => {
-    setMap(null);
+    going.current = to;
     navigate(to);
   };
+  useEffect(() => {
+    if (going.current && going.current === pathname) {
+      going.current = null;
+      setMap(null);
+    }
+  }, [pathname]);
   return (
     <MapContext.Provider value={openMap}>
       <div className="app">

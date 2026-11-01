@@ -70,8 +70,9 @@ function KeyHere() {
 
 // The map, over whatever page you're on: unfolded from the stand, or uncrumpled up out of the
 // home button. `here` is the room you're in (null at the front desk). Pick a room on the plan
-// or in the key to read about it and walk there: the map goes to black, and onGo(path) takes
-// you. Escape, the fold button or a click off the paper puts it away.
+// or in the key to read about it; a button to go there comes up in its box on the plan. Going,
+// the map goes to black and onGo(path) takes you (App closes the map once the new page is up
+// behind it). Escape, the fold button or a click off the paper puts it away.
 export function GalleryMap({ from, here, onClose, onGo }) {
   const ref = useRef(null);
   const paperRef = useRef(null);
@@ -103,10 +104,11 @@ export function GalleryMap({ from, here, onClose, onGo }) {
 
   const room = roomList.find((r) => r.slug === sel) || null;
   const pressed = (key) => (sel === key ? 'true' : 'false');
-  const walk = (label, to) => (
-    <button type="button" className="walk" onClick={() => setGoing(to)} disabled={!!going}>
-      Walk to {label}
-      <Arrow size={16} />
+  // the button to go there, in the box you picked
+  const goButton = (label, to) => (
+    <button type="button" className="plan-go" onClick={() => setGoing(to)} disabled={!!going}>
+      <span>Go to {label}</span>
+      <Arrow size={14} />
     </button>
   );
 
@@ -117,7 +119,7 @@ export function GalleryMap({ from, here, onClose, onGo }) {
         <p className="pick-room">Room {room.num}</p>
         <p className="pick-name">{room.name}</p>
         <p className="pick-blurb">{room.blurb}</p>
-        {room.slug === here ? <p className="pick-here">You are here.</p> : walk(room.name, `/room/${room.slug}`)}
+        {room.slug === here && <p className="pick-here">You are here.</p>}
       </>
     );
   } else if (sel === DESK) {
@@ -126,7 +128,7 @@ export function GalleryMap({ from, here, onClose, onGo }) {
         <p className="pick-room">The lobby</p>
         <p className="pick-name">Front desk</p>
         <p className="pick-blurb">Where you came in. Charly&rsquo;s at the desk, with the maps.</p>
-        {here ? walk('the front desk', '/') : <p className="pick-here">You are here.</p>}
+        {!here && <p className="pick-here">You are here.</p>}
       </>
     );
   } else {
@@ -166,47 +168,44 @@ export function GalleryMap({ from, here, onClose, onGo }) {
         <div className="paper-body">
           <div className="plan" style={gridStyle}>
             {plan.rooms.map(({ room: r, col, row }) => (
-              <button
-                key={r.slug}
-                type="button"
-                className={r.slug === here ? 'plan-room is-here' : 'plan-room'}
-                aria-pressed={pressed(r.slug)}
-                aria-label={`Room ${r.num}, ${r.name}, ${r.photos.length} photographs${r.slug === here ? ', you are here' : ''}`}
-                onClick={() => setSel(r.slug)}
-                style={{ gridColumn: col, gridRow: row, background: TINT[r.theme] }}
-              >
-                <span className="plan-ticks" aria-hidden="true">
-                  {r.photos.map((p) => (
-                    <span key={p.id} />
-                  ))}
-                </span>
-                <span className="plan-name" aria-hidden="true">
-                  <Pictogram name={r.icon} size={17} className="plan-icon" />
-                  <span className="plan-words">
-                    <span className="plan-num">
-                      {r.num} · {r.name}
-                    </span>
-                    <span className="plan-count">{r.photos.length} photos</span>
+              <div key={r.slug} className={sel === r.slug ? 'plan-room picked' : 'plan-room'} style={{ gridColumn: col, gridRow: row, background: TINT[r.theme] }}>
+                <button
+                  type="button"
+                  className="plan-pick"
+                  aria-pressed={pressed(r.slug)}
+                  aria-label={`Room ${r.num}, ${r.name}, ${r.photos.length} photographs${r.slug === here ? ', you are here' : ''}`}
+                  onClick={() => setSel(r.slug)}
+                >
+                  <span className="plan-ticks" aria-hidden="true">
+                    {r.photos.map((p) => (
+                      <span key={p.id} />
+                    ))}
                   </span>
-                </span>
+                  <span className="plan-name" aria-hidden="true">
+                    <Pictogram name={r.icon} size={17} className="plan-icon" />
+                    <span className="plan-words">
+                      <span className="plan-num">
+                        {r.num} · {r.name}
+                      </span>
+                      <span className="plan-count">{r.photos.length} photos</span>
+                    </span>
+                  </span>
+                </button>
+                {sel === r.slug && r.slug !== here && goButton(r.name, `/room/${r.slug}`)}
                 {r.slug === here && <Here />}
-              </button>
+              </div>
             ))}
             <div className="plan-hall" aria-hidden="true" style={{ gridColumn: plan.middle, gridRow: `2 / span ${plan.rows - 2}` }}>
               Hall
             </div>
-            <button
-              type="button"
-              className="plan-desk"
-              aria-pressed={pressed(DESK)}
-              aria-label={`Front desk${here ? '' : ', you are here'}`}
-              onClick={() => setSel(DESK)}
-              style={{ gridColumn: plan.middle, gridRow: plan.rows }}
-            >
-              <span className="plan-desk-top" aria-hidden="true" />
-              <span className="plan-desk-name">Front desk</span>
+            <div className={sel === DESK ? 'plan-desk picked' : 'plan-desk'} style={{ gridColumn: plan.middle, gridRow: plan.rows }}>
+              <button type="button" className="plan-pick" aria-pressed={pressed(DESK)} aria-label={`Front desk${here ? '' : ', you are here'}`} onClick={() => setSel(DESK)}>
+                <span className="plan-desk-top" aria-hidden="true" />
+                <span className="plan-desk-name">Front desk</span>
+              </button>
+              {sel === DESK && here && goButton('the front desk', '/')}
               {!here && <Here />}
-            </button>
+            </div>
             <div className="plan-door" aria-hidden="true" />
           </div>
 
