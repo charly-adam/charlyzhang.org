@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router';
 import { getRoom, nextRoom, site, themes } from '../data/gallery.js';
-import { Lens } from '../components/Scene.jsx';
+import { Curtain, Lens } from '../components/Scene.jsx';
 import { EdgeArrows, Hallway, Pillar, Slab, Track, Wall } from '../components/RoomBox.jsx';
 import { useRailCamera } from '../hooks/useRailCamera.js';
 import { useDolly } from '../hooks/useDolly.js';
+import { usePreload } from '../hooks/usePreload.js';
 import { GEO, WALL_ORDER, depthOf, distribute, localBox, pillarFor, placeFace, standAt, turnTo, wallsFor } from '../room/geometry.js';
 
 export default function RoomRoute() {
@@ -24,7 +25,7 @@ function Room({ room }) {
   const [flying, setFlying] = useState(false);
   const [leaving, setLeaving] = useState(false); // walking out through the arch
   const [geo, setGeo] = useState(null); // { S, L, D } in px, once the walls have been measured
-  const [ready, setReady] = useState(false); // the room has had a moment to draw; the curtain lifts
+  const [ready, setReady] = useState(false); // the room has loaded and had a moment to draw; the curtain lifts
   const [tick, setTick] = useState(0); // bumps on resize
   const stageRef = useRef(null);
   const dollyRef = useRef(null);
@@ -45,6 +46,8 @@ function Room({ room }) {
   const next = nextRoom(room);
   const exit = next ? `/room/${next.slug}` : '/';
   const hang = useMemo(() => distribute(room.groups), [room]);
+  // the photos as they hang on the wall, and the room's surfaces
+  const { done: loaded, progress } = usePreload(room.slug, [...room.photos.map((p) => p.wall), theme.floor.img, theme.ceil.img, '/textures/wall-grain.png', room.theme === 'salon' && '/textures/damask.svg']);
 
   // a new room: back to its doorway
   const [shown, setShown] = useState(room.slug);
@@ -259,12 +262,12 @@ function Room({ room }) {
     });
   };
 
-  // the curtain lifts once the room has had a moment to draw
+  // the curtain lifts once the room has loaded and had a moment to draw
   useEffect(() => {
-    if (!geo || ready) return undefined;
-    const id = setTimeout(() => setReady(true), 250);
+    if (!geo || !loaded || ready) return undefined;
+    const id = setTimeout(() => setReady(true), 300);
     return () => clearTimeout(id);
-  }, [geo, ready]);
+  }, [geo, loaded, ready]);
 
   // The stop a photo is seen from: its own, or for the first and last on a wall, the corner
   // view that takes it in.
@@ -458,7 +461,7 @@ function Room({ room }) {
         </div>
       </div>
       <Lens />
-      <div className="curtain" aria-hidden="true" />
+      <Curtain kicker={`Room ${room.num}`} name={room.name} progress={progress} />
       <EdgeArrows onLeft={() => arrow(-1)} onRight={() => arrow(1)} hidden={focus === 'intro' || flying || leaving} leftLabel={arrowLabels[0]} rightLabel={arrowLabels[1]} />
     </div>
   );

@@ -184,9 +184,9 @@ a {
   --ceilsize: 100% 100%;
   --endb: 0.78;
   --stagebg: #120a0b;
-  --fb: calc(var(--S) * 0.05);
-  --fside: #6e4f1c;
-  --mat: #efe5cf;
+  --fb: calc(var(--S) * 0.009);
+  --fside: #151413;
+  --mat: #f8f8f6;
   --bay: calc(var(--S) * 0.07); /* how far a bay stands out from the wall */
 }
 .t-salon .panel {
@@ -467,6 +467,18 @@ a {
   transform-origin: 50% 100%;
   transform: translateZ(-2px) scaleY(-1);
   transform-style: preserve-3d;
+}
+/* the pillar's reflection: its wall colour as the floor's sheen shows the walls', fading out,
+   and opaque, so nothing behind the pillar is reflected through it */
+.pillar-refl {
+  backface-visibility: hidden;
+  background: color-mix(in srgb, var(--wall1) calc(var(--reflop) * 100%), var(--stagebg));
+}
+.pillar-refl::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, transparent 0, color-mix(in srgb, var(--stagebg) 35%, transparent) 30%, color-mix(in srgb, var(--stagebg) 80%, transparent) 55%, var(--stagebg) 75%);
 }
 /* each frame's reflection is a small plane of its own, faded toward the room's dark the
    further it is below the floor line (see Reflection in RoomBox.jsx) */
@@ -835,25 +847,9 @@ a {
   transform-origin: 100% 50%;
   transform: rotateY(-90deg);
 }
-/* ornate gilt frames on a linen liner: the moulding along each side is a tile repeated as a
-   background (border-image tiles would show seams), the corner blocks a border-image */
+/* plain black frames on a white mat: the room carries the ornament, the photos stay calm */
 .t-salon .fw {
-  --ft: calc(var(--S) * 0.022);
-}
-.t-salon .frame {
-  padding: calc(var(--S) * 0.026);
-  border-color: transparent;
-  border-image: url(/textures/frame-corners.svg) 40 stretch;
-  background:
-    url(/textures/frame-edge-t.svg) 0 0 / auto var(--fb) repeat-x border-box,
-    url(/textures/frame-edge-b.svg) 0 100% / auto var(--fb) repeat-x border-box,
-    url(/textures/frame-edge-l.svg) 0 0 / var(--fb) auto repeat-y border-box,
-    url(/textures/frame-edge-r.svg) 100% 0 / var(--fb) auto repeat-y border-box,
-    var(--mat);
-  box-shadow: var(--fshadow), inset 0 4px 6px -3px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(0, 0, 0, 0.08);
-}
-.t-salon .frame img {
-  box-shadow: 0 0 0 calc(var(--S) * 0.0035) #caa250, 0 0 0 calc(var(--S) * 0.0055) #5e4316;
+  --ft: calc(var(--S) * 0.016);
 }
 .ggap {
   gap: calc(var(--S) * 0.028);
@@ -1062,18 +1058,55 @@ a {
   opacity: 1;
   transition: opacity 0.8s ease 1.05s;
 }
-/* the lobby, too, comes up out of black (the map goes to black on the way to anywhere), so
-   every change of place passes through the dark */
-.stage.lobby .curtain {
+/* (the map goes to black on the way anywhere, so every change of place passes through the
+   dark) While a page loads: where you're going and a line that fills, faded in only if it takes
+   a moment. */
+.loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #f2f1ee;
   opacity: 0;
-  animation: curtain-lift 0.8s ease;
+  animation: loader-in 0.5s ease 0.4s forwards;
 }
-@keyframes curtain-lift {
-  from {
-    opacity: 1;
-  }
+.stage.leaving .loader {
+  visibility: hidden;
+}
+.loader p {
+  margin: 0;
+}
+.loader-kicker {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #a8a6a0;
+}
+.loader-name {
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.loader-bar {
+  margin-top: 12px;
+  width: 140px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.16);
+}
+.loader-bar > span {
+  display: block;
+  height: 100%;
+  background: #f2f1ee;
+  transform-origin: 0 50%;
+  transition: transform 0.3s ease;
+}
+@keyframes loader-in {
   to {
-    opacity: 0;
+    opacity: 1;
   }
 }
 
@@ -1350,8 +1383,8 @@ body:has(.stage.t-teal, .stage.t-violet) .dock {
   --pivot: 63.09% 20.5%; /* (470, 205) */
   transform: rotate(calc(var(--px) * -1.5deg));
 }
-/* on arrival he waves once, then sways */
-.arm-r .idle {
+/* once the curtain lifts he waves once, then sways */
+.stage.ready .arm-r .idle {
   animation: wave 1.7s 0.5s ease-in-out 1 both, sway-r 5.2s 2.4s ease-in-out infinite;
 }
 /* on the map stand he looks at it and lifts his right arm toward it */
@@ -1974,10 +2007,11 @@ dialog.map::backdrop {
   text-transform: uppercase;
   color: #a33222;
 }
-.plan-words .plan-here {
-  margin-top: 5px;
+.plan-room > .plan-here {
+  margin-top: -2px;
   font-size: 10px;
   letter-spacing: 0.08em;
+  white-space: nowrap;
 }
 .key-name .here-dot {
   display: inline-block;
@@ -2149,7 +2183,7 @@ dialog.map::backdrop {
     letter-spacing: 0.08em;
   }
   /* in a room's narrow cell, just the dot, in its corner (the room's label says it) */
-  .plan-words .plan-here {
+  .plan-room > .plan-here {
     position: absolute;
     top: 7px;
     right: 7px;

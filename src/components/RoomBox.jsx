@@ -184,12 +184,15 @@ export function Hallway({ S, D, theme }) {
 }
 
 // The pillar just inside the door. Its front face, toward the door, carries the room's text.
+// Each face has its reflection in the floor, solid, so it hides the reflections of whatever the
+// pillar stands in front of, as the pillar hides the things themselves.
 export function Pillar({ room, site, onToggle, faces, S, pillarRef }) {
   const face = (name, extra) => {
     const f = faces[name];
     return (
       <div className={`face pface ${name}`} style={f && { width: f.len, transform: f.transform }}>
         {f && <Panels len={f.len} S={S} />}
+        {f && <div className="refl pillar-refl" aria-hidden="true" />}
         {extra}
       </div>
     );

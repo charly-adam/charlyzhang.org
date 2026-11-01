@@ -1,13 +1,22 @@
-import { useContext, useEffect, useLayoutEffect, useRef } from 'react';
+import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { roomList, site } from '../data/gallery.js';
 import { MapContext, MapThumb } from '../components/GalleryMap.jsx';
-import { Lens, Shell } from '../components/Scene.jsx';
+import { Curtain, Lens, Shell } from '../components/Scene.jsx';
+import { usePreload } from '../hooks/usePreload.js';
 
 const PHONE = '(max-width: 700px)';
 
 export default function Lobby() {
   const openMap = useContext(MapContext);
   const stageRef = useRef(null);
+  // Charly's layers come up together, not a limb at a time; he waves once the curtain lifts
+  const { done, progress } = usePreload('lobby', [...LAYERS.map((p) => `/lobby/charly-${p}.png`), '/textures/floor-stone.jpg', '/textures/wall-grain.png']);
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    if (!done) return undefined;
+    const id = setTimeout(() => setReady(true), 150);
+    return () => clearTimeout(id);
+  }, [done]);
   useDeskScale(stageRef);
   useLookAround(stageRef);
   useEffect(() => {
@@ -15,7 +24,7 @@ export default function Lobby() {
   }, []);
 
   return (
-    <div ref={stageRef} className="stage lobby t-white">
+    <div ref={stageRef} className={ready ? 'stage lobby t-white ready' : 'stage lobby t-white'}>
       <div className="cam">
         <div className="world" style={{ width: '100%' }}>
           <Shell />
@@ -31,7 +40,7 @@ export default function Lobby() {
         </div>
       </div>
       <Lens />
-      <div className="curtain" aria-hidden="true" />
+      <Curtain kicker={site.name} name={site.subtitle} progress={progress} />
     </div>
   );
 }

@@ -10,33 +10,28 @@ export const MapContext = createContext(() => {});
 // the claret of the salon.
 const TINT = { white: '#ebe6d8', teal: '#c3d6d4', violet: '#cfc9de', spot: '#d9d4c8', salon: '#e2c4c0' };
 
-// The floor plan: rooms in a ring round the hall, four columns wide, the front desk at the
-// bottom in the middle. The ring has a slot top-left, top-right, two between them, and one in
-// each outer column for every row below; it gets a row deeper for every two more rooms. With a
-// slot to spare, the two at the top in the middle become one wide room, for the room with the
-// most photos. The rest are handed out in this order: by the desk on the right, the top
-// corners, down the right-hand side, by the desk on the left, up the left-hand side, then the
-// top middle.
+// The floor plan: the rooms in a ring round the hall, four columns wide, the front desk at the
+// bottom in the middle. They go round in order, the way the doors lead from one to the next:
+// from beside the desk on the right, up the right-hand side, across the top and down the left.
+// The ring gets a row deeper for every two more rooms; any cells to spare go to the rooms with
+// the most photos, two cells each (side by side or one above the other, as the ring runs).
 export function planFor(list) {
   const cols = 4;
   const rows = Math.max(3, Math.ceil((list.length - 2) / 2));
-  const wide = 2 * rows + 2 > list.length;
-  const at = (col, row) => ({ col: String(col), row: String(row) });
-  const slots = [at(cols, rows), at(cols, 1), at(1, 1)];
-  for (let r = 2; r < rows; r++) slots.push(at(cols, r));
-  slots.push(at(1, rows));
-  for (let r = rows - 1; r >= 2; r--) slots.push(at(1, r));
-  if (!wide) slots.push(at(2, 1), at(3, 1));
-  const out = [];
-  let rest = list;
-  if (wide && list.length) {
-    const big = list.reduce((a, b) => (b.photos.length > a.photos.length ? b : a));
-    out.push({ room: big, col: '2 / span 2', row: '1' });
-    rest = list.filter((r) => r !== big);
-  }
-  rest.forEach((room, i) => out.push({ room, ...slots[i] }));
-  out.sort((a, b) => a.room.num - b.room.num);
-  return { cols, rows, rooms: out, middle: `2 / span ${cols - 2}` };
+  const ring = [];
+  for (let r = rows; r >= 1; r--) ring.push([cols, r]);
+  for (let c = cols - 1; c >= 1; c--) ring.push([c, 1]);
+  for (let r = 2; r <= rows; r++) ring.push([1, r]);
+  const spare = Math.max(0, ring.length - list.length);
+  const big = new Set([...list].sort((a, b) => b.photos.length - a.photos.length).slice(0, spare));
+  const span = (a, b) => (a === b ? String(a) : `${Math.min(a, b)} / span 2`);
+  let i = 0;
+  const rooms = list.map((room) => {
+    const [c0, r0] = ring[i++];
+    const [c1, r1] = big.has(room) ? ring[i++] : [c0, r0];
+    return { room, col: span(c0, c1), row: span(r0, r1) };
+  });
+  return { cols, rows, rooms, middle: `2 / span ${cols - 2}` };
 }
 
 const plan = planFor(roomList);
@@ -192,9 +187,9 @@ export function GalleryMap({ from, here, onClose, onGo }) {
                       {r.num} · {r.name}
                     </span>
                     <span className="plan-count">{r.photos.length} photos</span>
-                    {r.slug === here && <Here />}
                   </span>
                 </span>
+                {r.slug === here && <Here />}
               </button>
             ))}
             <div className="plan-hall" aria-hidden="true" style={{ gridColumn: plan.middle, gridRow: `2 / span ${plan.rows - 2}` }}>
