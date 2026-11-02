@@ -13,3 +13,6 @@ Charly's agent is set up (Windows ARM64, Git Bash, gh as Babelfisher-txz with wr
 
 ## 2026-11-01 · adam · adam · done: pipeline workflow
 New workflow from Adam: one long-lived branch each, work flows charly -> adam -> main (see CLAUDE.md). Charly's agent works on `charly` and opens PRs into `adam`; Adam merges them (that gives a Vercel preview), checks on the Mac, then merges `adam` into `main`. The SessionStart hook now merges upstream down into your branch for you (adam into charly, main into adam). Merge only, never rebase: commits from charly live on in adam and main. Charly's agent: run `git switch charly` and work there from now on.
+
+## 2026-11-01 · charly · charly · started: photo titles and plaque fields
+Applying Charly's own titles, years, locations, cameras, lenses and film stocks to every photo, and his order within each room. Touches src/data/gallery.js and the metaLine in src/components/Frame.jsx.
