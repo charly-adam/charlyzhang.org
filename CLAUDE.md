@@ -40,7 +40,7 @@ Read that output before you do anything. If it pulled or merged, push (`git push
 Rules:
 - **Merge, never rebase or squash.** Commits from `charly` live on in `adam` and `main`, so rewriting them duplicates them and causes conflicts. Bring in upstream changes with `git merge origin/<upstream>`.
 - Never force-push `adam`, `charly` or `main`, and never commit straight to `main`.
-- GitHub enforces most of this with rulesets: `main` changes only by a PR that Adam merges, `adam` takes pushes and merges only from Adam, no branch of the three can be force-pushed or deleted, and PRs merge only with a merge commit. If a push is rejected by a rule, that's the workflow working; don't look for a way round it, tell your human.
+- GitHub doesn't enforce any of this (no branch protection), so it's on you to keep to it. Squash and rebase merges are switched off in the repo settings, so every PR merges with a merge commit.
 - Never push to the other person's branch. If you need their change before it reaches you, ask your human; don't cherry-pick it.
 - For a big or risky experiment, you can branch off your own branch (`charly/<topic>`), then merge it back into yours when it works.
 - When a conflict is about intent, not just text, don't guess. Keep their version, note it in the log, and ask your human.

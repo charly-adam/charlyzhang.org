@@ -7,6 +7,7 @@ Chrome rasterises each 3D plane at the magnification of its nearest corner and a
 - frames are flat (print + glass one layer), edge faces are siblings in `.fw`; the shadow is a box-shadow on the frame.
 - at the doorway, anything the arch hides is marked `data-unseen` (projected through the opening, Room.jsx `markUnseen`) and hidden until you go in.
 - the arch reveal (`.pjl/.pjr/.parch`) is solid colour: seen edge-on by the camera, a textured face rasterises at a huge scale.
+- the hallway's floor and ceiling (`.hall`) are drawn at the doorway only in `tall` views (Room.jsx), where a real band of them shows past the entrance wall: a phone. Right under and over the camera they're huge; when a smaller P (0.95, Nov 2026) made every landscape screen count as tall, Retina Chrome dropped the entrance wall in Nature. A sliver past the wall's foot is left to the dark threshold.
 - rooms skip the backdrop-filter depth of field and the mix-blend-mode grain (each forces the scene into an extra surface).
 - no filter, mask-image or box-shadow blur on any 3D plane itself; no opacity on a preserve-3d container (it flattens everything into one surface) — put it on the leaf planes.
 
