@@ -92,7 +92,7 @@ function Bay() {
 // One wall of the room: its surface, the floor's reflection of what hangs on it, the photos in
 // their slots (each on a bay of its own, in a solo room), and on the entrance wall, the
 // archway out.
-export function Wall({ side, len, S, groups, near, solo, artist, offFor, onOpen, onZoom, door, style, wallRef }) {
+export function Wall({ side, len, S, groups, near, solo, offFor, onOpen, onZoom, door, style, wallRef }) {
   const one = groups.length === 1 && !door;
   return (
     <div ref={wallRef} className={`wall wall-${side}${one ? ' one' : ''}${door ? ' has-door' : ''}`} data-side={side} style={style}>
@@ -118,7 +118,7 @@ export function Wall({ side, len, S, groups, near, solo, artist, offFor, onOpen,
           <div className="ggap p3 frames">
             {g.map((p) => <Frame key={p.id} photo={p} lit={p === near} onOpen={() => onOpen(p)} />)}
           </div>
-          <WallLabel group={g} artist={artist} onZoom={() => onZoom(g)} />
+          <WallLabel group={g} onZoom={() => onZoom(g)} />
         </div>
       ))}
       {door && <DoorCol {...door} S={S} />}
@@ -127,8 +127,9 @@ export function Wall({ side, len, S, groups, near, solo, artist, offFor, onOpen,
 }
 
 // The archway in the middle of the entrance wall: the reveal through the wall (two jambs and
-// the curve of the arch in facets) and the sign for where it leads. Clicking it leaves the room.
-function DoorCol({ to, next, onLeave, S }) {
+// the curve of the arch in facets) and the sign: every room goes back out to the front desk.
+// Clicking it leaves the room.
+function DoorCol({ to, onLeave, S }) {
   const W = GEO.arch.w * S;
   const r = W / 2;
   const T = GEO.hall.t * S;
@@ -151,8 +152,8 @@ function DoorCol({ to, next, onLeave, S }) {
         <span className="door-sign">
           <Arrow />
           <span>
-            <span className="door-room">{next ? `Room ${next.num}` : 'Exit'}</span>
-            <span className="u door-name">{next ? next.name : 'Lobby'}</span>
+            <span className="door-room">Exit</span>
+            <span className="u door-name">Front desk</span>
           </span>
         </span>
         <span className="door" aria-hidden="true" />
@@ -186,7 +187,7 @@ export function Hallway({ S, D, theme }) {
 // The pillar just inside the door. Its front face, toward the door, carries the room's text.
 // Each face has its reflection in the floor, solid, so it hides the reflections of whatever the
 // pillar stands in front of, as the pillar hides the things themselves.
-export function Pillar({ room, site, onToggle, faces, S, pillarRef }) {
+export function Pillar({ room, onToggle, faces, S, pillarRef }) {
   // The narrow sides are painted plain, no panels and no reflection: seen nearly edge on from
   // the doorway, Safari would sort those pieces wrongly and draw them over the front face.
   const face = (name, extra) => {
@@ -211,7 +212,6 @@ export function Pillar({ room, site, onToggle, faces, S, pillarRef }) {
               <br />
               {room.name}
             </span>
-            <span className="intro-name">{site.name}</span>
             <span className="intro-text">
               {room.blurb}
               {room.intro ? ` ${room.intro}` : ''}

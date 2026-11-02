@@ -11,10 +11,10 @@ const ICONS = {
   film: 'M4.5 3.5h15v17h-15Z M8.5 3.5v17 M15.5 3.5v17 M4.5 7.5h4 M4.5 11.5h4 M4.5 15.5h4 M15.5 7.5h4 M15.5 11.5h4 M15.5 15.5h4',
 };
 
-export function Pictogram({ name, size = 24, className = 'pictogram' }) {
+export function Pictogram({ name, size = 24, className = 'pictogram', color = '#f4f3f0' }) {
   return (
     <span aria-hidden="true" className={className}>
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#f4f3f0" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round">
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round">
         <path d={ICONS[name] || ICONS.detail} />
       </svg>
     </span>
@@ -27,14 +27,6 @@ export function Arrow({ rotate = 0, size = 32, color = 'currentColor' }) {
       <g transform={`rotate(${rotate} 12 12)`}>
         <path d="M4 12h15M13 6l6 6-6 6" />
       </g>
-    </svg>
-  );
-}
-
-export function Home() {
-  return (
-    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3.5 11 12 4l8.5 7M6 9.5V20h4.5v-5.5h3V20H18V9.5" />
     </svg>
   );
 }

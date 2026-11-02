@@ -15,22 +15,32 @@
 export const roomScale = (w, h) => Math.min(h, w);
 
 export const GEO = {
-  P: 1.1, // perspective: the eye's distance from the picture plane
-  d: 1.1, // how far from a wall you stand to look at it (= P, so it's seen at scale 1); also
-  // the most a corner view stands off the walls by the pillar, so the walk stays clear of it
-  D: 3.0, // the room's depth, between the two long walls
-  minL: 3.0, // the room is at least this long
-  inset: 0.2, // bare wall before the first photo and after the last
-  gap: 0.06, // space between two photo slots: close, so several are in view at once
+  P: 0.95, // perspective: the eye's distance from the picture plane (the .room CSS repeats it)
+  d: 0.95, // how far from a wall you stand to look at it (= P, so it's seen at scale 1, and a
+  // 16:10 view takes in 1.6 S of wall); close, so the room can be small
+  // The room is as small as the walk allows, so photos sit near the corners: 2 d across plus the
+  // pillar between the two long walls' walks, and long enough that the far wall's walk passes
+  // behind the pillar (each with `clear` to spare): D = 2 d + pillar.w + 2 clear, minL =
+  // pillar.x + pillar.t + clear + d.
+  D: 2.52, // the room's depth, between the two long walls
+  minL: 2.4, // the room is at least this long
+  clear: 0.12, // how far the walk keeps off the pillar
+  inset: 0.1, // bare wall before the first photo and after the last
+  gap: 0.05, // space between two photo slots: close, so several are in view at once
+  maxGap: 0.07, // and on a wall with room to spare, at most this, so three slots and their labels
+  // fit in a 16:10 view
+  spareW: 0.35, // the share of a long wall's spare length left at its entrance end (Room.jsx)
   eye: 0.44, // eye level, down the wall strip (which runs 0..1 S)
-  pillar: { x: 1.3, t: 0.3, w: 0.6 }, // front face at x; thickness; width (centred across the room)
+  pillar: { x: 1.1, t: 0.22, w: 0.38 }, // front face at x (just behind you at the door's stop);
+  // thickness; width (centred across the room)
   arch: { w: 0.55, h: 0.58 }, // the archway in: its width; the height of its crown above the floor
   hall: { depth: 1.25, t: 0.15 }, // the hallway outside: how far back it runs; the wall's thickness
   doorCam: -0.8, // where you stand in the hallway, looking in through the arch (the .room CSS
   // vars --archw and --archh repeat the arch's size)
   turn: 0.6, // scroll distance per radian of turning at a corner
   cornerPad: 0.05, // spare wall past the photos a corner view takes in
-  cornerFar: 1.4, // a corner view by the far wall may stand this far off the walls
+  cornerFar: 1.4, // a corner view may stand at most this far off the walls, and never so far that
+  // it reaches the pillar (Room.jsx works that out)
   // Big surfaces are built from pieces: the browser only draws the pieces in view, and sizes
   // each piece's bitmap by how close its corner is, so a piece near the camera must be small
   // or it costs hundreds of megabytes (and Chrome drops surfaces when it runs out). The floor
@@ -49,18 +59,23 @@ export const GEO = {
 
 // Which photos hang where. Each group (a photo, or a pair under one label) is one slot.
 // The far wall takes 3 slots when the count is odd and 2 when it's even; once the long walls
-// have two each, the entrance wall gets one either side of the door; the rest split evenly.
-// Walking left from the door you meet them in order: N wall, far wall, S wall, then the
+// have seven each, the entrance wall gets one either side of the door; the rest split evenly
+// (a small room is filled along its long walls, so their photos reach the corners).
+// Walking left from the door you meet the walls in order: N wall, far wall, S wall, then the
 // entrance wall (below the door first, then above it).
+// Numbering starts on your left as you come in: with photos on the entrance wall, the first
+// hangs there beside the door (the slot on the corner with the N wall, which the walk reaches
+// last), then the N wall carries on from 2.
 export function distribute(groups) {
   const n = groups.length;
   const far = Math.min(n, n % 2 ? 3 : 2);
   let rest = n - far;
-  const ent = rest >= 6 ? 2 : 0;
+  const ent = rest >= 14 ? 2 : 0;
   rest -= ent;
   const side = rest / 2;
+  const hang = ent ? [...groups.slice(1), groups[0]] : groups;
   let i = 0;
-  const take = (k) => groups.slice(i, (i += k));
+  const take = (k) => hang.slice(i, (i += k));
   return { N: take(side), E: take(far), S: take(side), W: take(ent) };
 }
 

@@ -56,7 +56,7 @@ export default function App() {
           </Routes>
         </main>
         <Dock />
-        {map && <GalleryMap from={map.from} here={here} onClose={closeMap} onGo={go} />}
+        {map && <GalleryMap here={here} onClose={closeMap} onGo={go} />}
       </div>
     </MapContext.Provider>
   );
