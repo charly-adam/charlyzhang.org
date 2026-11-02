@@ -649,7 +649,10 @@ a {
   top: calc(50% - var(--S) * 0.31);
   width: calc(var(--S) * 0.7);
   margin-left: calc(var(--S) * -0.35);
-  height: calc(var(--S) * 0.189);
+  /* long enough to reach what the frame hangs on and no further: lampz / sin 52.5deg (0.189 S to
+     the wall; shorter to a bay, where a full-length beam ran through the bay's face and was cut
+     off in a hard line) */
+  height: calc(var(--lampz) / 0.7934);
   overflow: visible;
   transform-origin: 50% 0;
   transform: translateZ(var(--lampz)) rotateX(-52.5deg);
@@ -657,29 +660,29 @@ a {
      takes over (drawn in SVG: see Frame.jsx) */
   opacity: 0.85;
 }
-/* These boxes reach 0.12 S above the old top (-0.25 S from the frame's middle), so the ellipses
-   below sit wholly inside them: an ellipse that runs past its box leaves a hard straight edge.
-   The sway still pivots at the old top, where the lamp's light starts. Falloff is eased in
-   steps (about a Gaussian) rather than a straight line, so there is no visible rim. */
+/* Each ellipse below sits wholly inside its box: one that runs past the edge is cut off in a
+   hard straight line. The fade is eased (no visible rim) but kept close to the old linear
+   one in brightness. Keep these boxes this size: a bigger plane per frame costs tile memory
+   (see .agents/knowledge/room-walkaround-rendering.md). */
 .pool,
 .glow {
-  top: calc(50% - var(--S) * 0.37);
+  top: calc(50% - var(--S) * 0.25);
   width: 160%;
   margin-left: -80%;
-  height: calc(var(--S) * 0.62);
-  transform-origin: 50% calc(var(--S) * 0.12);
+  height: calc(var(--S) * 0.5);
+  transform-origin: 50% 0;
 }
 .pool {
   background:
-    radial-gradient(ellipse 34% 27.4% at 50% 54.8%, var(--pool) 0%, color-mix(in srgb, var(--pool) 88%, transparent) 18%, color-mix(in srgb, var(--pool) 62%, transparent) 36%, color-mix(in srgb, var(--pool) 36%, transparent) 54%, color-mix(in srgb, var(--pool) 15%, transparent) 72%, color-mix(in srgb, var(--pool) 4%, transparent) 88%, transparent 100%),
-    radial-gradient(ellipse 56% 48.4% at 50% 50.8%, var(--pool) 0%, color-mix(in srgb, var(--pool) 88%, transparent) 18%, color-mix(in srgb, var(--pool) 62%, transparent) 36%, color-mix(in srgb, var(--pool) 36%, transparent) 54%, color-mix(in srgb, var(--pool) 15%, transparent) 72%, color-mix(in srgb, var(--pool) 4%, transparent) 88%, transparent 100%);
+    radial-gradient(ellipse 34% 34% at 50% 44%, var(--pool) 0%, color-mix(in srgb, var(--pool) 92%, transparent) 22%, color-mix(in srgb, var(--pool) 74%, transparent) 42%, color-mix(in srgb, var(--pool) 50%, transparent) 60%, color-mix(in srgb, var(--pool) 29%, transparent) 75%, color-mix(in srgb, var(--pool) 12%, transparent) 88%, transparent 100%),
+    radial-gradient(ellipse 56% 50% at 50% 50%, var(--pool) 0%, color-mix(in srgb, var(--pool) 92%, transparent) 22%, color-mix(in srgb, var(--pool) 74%, transparent) 42%, color-mix(in srgb, var(--pool) 50%, transparent) 60%, color-mix(in srgb, var(--pool) 29%, transparent) 75%, color-mix(in srgb, var(--pool) 12%, transparent) 88%, transparent 100%);
   opacity: 0.75;
 }
 .glow {
   /* wide enough to take in the wall label beside the frame; drawn only with the room dark */
   width: 190%;
   margin-left: -95%;
-  background: radial-gradient(ellipse 47% 45.2% at 52% 54.8%, rgba(174, 174, 170, 0.97) 0%, rgba(170, 170, 166, 0.92) 20%, rgba(160, 160, 156, 0.78) 40%, rgba(142, 142, 138, 0.52) 58%, rgba(125, 125, 121, 0.27) 74%, rgba(115, 115, 111, 0.09) 88%, rgba(115, 115, 111, 0) 100%);
+  background: radial-gradient(ellipse 47% 46% at 52% 48%, rgba(174, 174, 170, 0.97) 0%, rgba(170, 170, 166, 0.92) 20%, rgba(160, 160, 156, 0.78) 40%, rgba(142, 142, 138, 0.52) 58%, rgba(125, 125, 121, 0.27) 74%, rgba(115, 115, 111, 0.09) 88%, rgba(115, 115, 111, 0) 100%);
   opacity: 0;
   visibility: hidden;
 }
