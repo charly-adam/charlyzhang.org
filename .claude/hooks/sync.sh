@@ -48,7 +48,8 @@ else
     elif ! clean; then
       echo "On $branch with uncommitted changes; origin/$up has $n commit(s) it doesn't. Commit, then: git merge origin/$up"
     elif git merge --no-edit --quiet "origin/$up" >/dev/null 2>&1; then
-      echo "Merged $n commit(s) from origin/$up into $branch. Not pushed yet: run git push."
+      if [ "$n" -eq 0 ]; then echo "Merged origin/$up (merge commits only) into $branch. Not pushed yet: run git push."
+      else echo "Merged $n commit(s) from origin/$up into $branch. Not pushed yet: run git push."; fi
       commits --no-merges -n 10 ORIG_HEAD..HEAD
     else
       git merge --abort 2>/dev/null
