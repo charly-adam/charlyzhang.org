@@ -16,3 +16,6 @@ New workflow from Adam: one long-lived branch each, work flows charly -> adam ->
 
 ## 2026-11-01 · charly · charly · started: photo titles and plaque fields
 Applying Charly's own titles, years, locations, cameras, lenses and film stocks to every photo, and his order within each room. Touches src/data/gallery.js and the metaLine in src/components/Frame.jsx.
+
+## 2026-11-01 · charly · charly · done: photo titles and plaque fields
+Ready for Adam (PR charly -> adam). Every photo has Charly's title, year, location, camera, lens and film stock, and each room hangs in his order. New `lens` and `film` fields on photos in gallery.js; `metaLine` in Frame.jsx now prints place · camera · lens · film and skips blanks, and the old P67 constant is gone. Photos are reordered by moving entries in the `photos` array, so file numbers (01.jpg...) no longer match hanging order; ids still follow the array. Two rooms had two photos set to position 1 (Nature: Half Dome, last light and Mission Peak; Film: Lifeguard tower in snow and Hot Tub at night); I hung the moved one first. Needs a look on the Mac: plaques are longer now, so check they still fit in the room and lightbox captions. Not checked visually on this side.

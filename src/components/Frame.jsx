@@ -70,9 +70,9 @@ export function FrameReflection({ photo }) {
   );
 }
 
-// "Title, year" and "place · camera", skipping whatever hasn't been filled in.
+// "Title, year" and "place · camera · lens · film", skipping whatever hasn't been filled in.
 export const titleLine = (p) => [p.title, p.year].filter(Boolean).join(', ');
-export const metaLine = (p) => [p.place, p.camera].filter(Boolean).join(' · ');
+export const metaLine = (p) => [p.place, p.camera, p.lens, p.film].filter(Boolean).join(' · ');
 
 // Small wall label printed beside a group of photos; clicking it walks up to the photo.
 export function WallLabel({ group, artist, onZoom }) {
