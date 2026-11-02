@@ -22,7 +22,7 @@ Read that output before you do anything. If it says the pull failed or `main` di
 3. **Claim the work.** Your first commit adds a `started` entry to [.agents/log.md](.agents/log.md). Push the branch right away (`git push -u origin HEAD`) so the other agent sees it.
 4. **Commit and push at each working step.** Unpushed work is invisible to the other agent.
 5. **Before the PR**, run `git fetch && git rebase origin/main`, fix any conflicts, and check that `npm run build` passes.
-6. **Open a PR into `main`** (`gh pr create`). Add a `done` entry to the log in the same PR. Merge only when your human says so. After the merge, delete the branch.
+6. **Open a PR into `main`** (`gh pr create`). Add a `done` entry to the log in the same PR. Merge only when your human says so. After the merge, delete the branch. Only Adam's commits deploy on Vercel, so Adam merges Charly's PRs (see [vercel-deploys.md](.agents/knowledge/vercel-deploys.md)).
 
 Rules:
 - Never commit straight to `main`, and never force-push it.
@@ -51,6 +51,7 @@ Lasting project facts go here, one topic per file: things you learned the hard w
 - [room-walkaround-rendering.md](.agents/knowledge/room-walkaround-rendering.md): Chrome tile memory limits for the 3D rooms: small planes, canvas tiles, doorway culling, and how to measure with LayerTree
 - [headless-chrome-3d-screenshots.md](.agents/knowledge/headless-chrome-3d-screenshots.md): screenshotting and driving the rooms in headless Chrome; keep the GPU on
 - [ios-safari-testing.md](.agents/knowledge/ios-safari-testing.md): testing in the Xcode iPhone/iPad simulator, and what Safari gets wrong with 3D planes
+- [vercel-deploys.md](.agents/knowledge/vercel-deploys.md): only Adam's commits deploy (Hobby plan); Charly's PRs fail the Vercel check on purpose and Adam merges them
 
 Read the relevant file before changing room surfaces, rendering or anything you will test visually.
 
