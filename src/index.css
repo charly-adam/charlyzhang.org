@@ -1692,7 +1692,7 @@ body:has(.stage:not(.ready)) .dock {
   stroke-linejoin: round;
 }
 /* his face takes the click (the rest of him lets clicks through) */
-.face {
+.charly-face {
   position: absolute;
   left: 186px;
   top: 0;
@@ -1705,7 +1705,7 @@ body:has(.stage:not(.ready)) .dock {
   cursor: pointer;
   pointer-events: auto;
 }
-.face:focus-visible {
+.charly-face:focus-visible {
   outline: none;
 }
 .stage.ready .bubble {
@@ -1771,6 +1771,40 @@ body:has(.stage:not(.ready)) .dock {
 }
 .sign:focus-visible {
   outline: none;
+}
+
+/* his name plate on the desk in front of him: engraved brass on a walnut block, tipped back */
+.desk-scene .dl-desk > .nameplate {
+  left: 640px;
+  top: 546px;
+  width: 160px;
+  height: 40px;
+  margin: 0;
+}
+.nameplate span {
+  position: absolute;
+  inset: 0 0 8px;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #3b2a0d;
+  text-shadow: 0 1px 0 rgba(255, 240, 190, 0.6);
+  background: linear-gradient(#f4df98, #d4a649 42%, #f0d27e 58%, #b38330);
+  box-shadow: inset 0 0 0 1px rgba(110, 76, 20, 0.55), inset 0 0 0 3px rgba(255, 236, 170, 0.35);
+  transform: perspective(300px) rotateX(-16deg);
+  transform-origin: 50% 100%;
+}
+.nameplate::after {
+  content: "";
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  bottom: 0;
+  height: 9px;
+  background: linear-gradient(#5a3a22, #3a2416);
+  box-shadow: 0 4px 6px -2px rgba(0, 0, 0, 0.35);
 }
 
 /* the umbrella stand on the floor left of the desk */

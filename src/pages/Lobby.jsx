@@ -130,7 +130,7 @@ function Lettering() {
             <span key={i}>{w}</span>
           ))}
         </h1>
-        <p className="words-sub">{site.subtitle}</p>
+        <p className="words-sub">{site.subtitle} Gallery</p>
         <div className="words-rule" aria-hidden="true" />
         <p className="words-count">
           {counted(roomList.length, 'gallery', 'galleries')}
@@ -210,12 +210,14 @@ function Charly() {
           <path d="M3 -2 L5 19 L22 -2" />
         </svg>
       </p>
-      <button type="button" className="face" tabIndex={-1} onClick={() => setSaid((n) => n + 1)} />
+      <button type="button" className="charly-face" tabIndex={-1} onClick={() => setSaid((n) => n + 1)} />
     </div>
   );
 }
 
-// A bucket for wet umbrellas on the floor left of the desk, with three in it, handles up.
+// A bucket for wet umbrellas on the floor left of the desk, with three in it, handles up. Drawn
+// back to front: the dark opening and the back of the rim, the umbrellas standing in it, then
+// the bucket's front, whose top edge is the near half of the rim, so they go down inside.
 function UmbrellaStand() {
   return (
     <svg className="umbrellas" viewBox="0 0 150 300" aria-hidden="true">
@@ -228,6 +230,8 @@ function UmbrellaStand() {
         </linearGradient>
       </defs>
       <ellipse cx="75" cy="296" rx="62" ry="6" fill="rgba(0,0,0,0.22)" />
+      <ellipse cx="75" cy="196" rx="53" ry="8" fill="#16171a" />
+      <path d="M22 196 A53 8 0 0 1 128 196" stroke="#7d8287" strokeWidth="2" fill="none" />
       {/* black, straight-handled, leaning left */}
       <g transform="rotate(-9 75 200)">
         <path d="M66 205 C61 160 66 120 72 74 L78 74 C84 120 89 160 84 205 Z" fill="#1d1e21" />
@@ -248,9 +252,9 @@ function UmbrellaStand() {
         <path d="M68 160 L82 160" stroke="#4e121b" strokeWidth="3" />
         <path d="M75 86 V60 C75 44 55 44 55 58" stroke="#6b4426" strokeWidth="5" strokeLinecap="round" fill="none" />
       </g>
-      {/* the bucket: brushed steel, its rim seen from just above */}
-      <path d="M22 196 L128 196 L119 292 Q75 300 31 292 Z" fill="url(#bucket)" />
-      <ellipse cx="75" cy="196" rx="53" ry="8" fill="#16171a" stroke="#7d8287" strokeWidth="2" />
+      {/* the bucket's front: brushed steel, up to the near half of its rim */}
+      <path d="M22 196 A53 8 0 0 0 128 196 L119 292 Q75 300 31 292 Z" fill="url(#bucket)" />
+      <path d="M22 196 A53 8 0 0 0 128 196" stroke="#9aa0a5" strokeWidth="2" fill="none" />
       <path d="M27 216 Q75 223 123 216" stroke="rgba(255,255,255,0.12)" strokeWidth="2" fill="none" />
       <path d="M30 282 Q75 289 120 282" stroke="rgba(0,0,0,0.35)" strokeWidth="2" fill="none" />
     </svg>
@@ -269,6 +273,9 @@ function Desk({ onMap }) {
       <div className="desk-front">
         <p className="desk-plaque">Information</p>
       </div>
+      <p className="nameplate" aria-hidden="true">
+        <span>{site.name}</span>
+      </p>
       <div className="desk-card">
         <p className="card-title">Welcome in</p>
         <p className="card-text">Take a map to find your way round.</p>

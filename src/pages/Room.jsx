@@ -96,9 +96,8 @@ function Room({ room }) {
     // one at a time. Space them as evenly as that, but no further apart than maxGap; the spare
     // wall goes to the two ends, where the corner views still take in the photo there. A corner
     // by the entrance can't stand as far back as one by the far wall (the pillar), so the end
-    // of a long wall by the entrance gets the smaller share (`spareW`). { gap, pad } in px.
-    // The far wall, with few photos and a corner at each end, keeps them evenly spread instead,
-    // so both corners take them in.
+    // of a long wall by the entrance gets the smaller share (`spareW`); the far wall's two ends
+    // share alike. { gap, pad } in px.
     const spacingFor = (side, len) => {
       const w = wallRefs[side].current;
       if (!w || room.solo) return null;
@@ -109,10 +108,11 @@ function Room({ room }) {
       const even = (len - 2 * inset - sum) / (cols.length + 1);
       const gap = Math.max(GEO.gap * S, Math.min(GEO.maxGap * S, even));
       const spare = Math.max(0, len - 2 * inset - sum - (cols.length - 1) * gap);
-      const left = side === 'N' ? GEO.spareW : 1 - GEO.spareW; // N runs from the entrance end, S towards it
+      // N runs from the entrance end, S towards it
+      const left = side === 'N' ? GEO.spareW : side === 'S' ? 1 - GEO.spareW : 0.5;
       return { gap: Math.round(gap), pad: Math.round(inset + spare * left) };
     };
-    const gaps = { N: spacingFor('N', L), E: null, S: spacingFor('S', L) };
+    const gaps = { N: spacingFor('N', L), E: spacingFor('E', D), S: spacingFor('S', L) };
     // a view tall enough to see past the top and bottom of the entrance wall from the doorway
     // (a phone) needs the hallway's floor and ceiling there
     const P = GEO.P * S;
