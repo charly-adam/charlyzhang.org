@@ -127,7 +127,7 @@ a {
   --wall1: #173e49;
   --fg: #eceae3;
   --fg2: #c4cdcd;
-  --pool: rgba(215, 240, 240, 0.34);
+  --pool: rgba(215, 240, 240, 0.48);
   --floorimg: url(/textures/floor-oak.jpg);
   --floorsize: calc(var(--S) * 0.49) calc(var(--S) * 0.49);
   --floorop: 0.8;
@@ -149,7 +149,7 @@ a {
   --wall1: #24234c;
   --fg: #ecebf2;
   --fg2: #c0bfd4;
-  --pool: rgba(232, 228, 255, 0.32);
+  --pool: rgba(232, 228, 255, 0.46);
   --floorimg: url(/textures/floor-walnut.jpg);
   --floorsize: calc(var(--S) * 0.45) calc(var(--S) * 0.45);
   --floorop: 0.66;
@@ -172,7 +172,7 @@ a {
   --wall1: #4a1720;
   --fg: #f3e7d3;
   --fg2: #d6c2a6;
-  --pool: rgba(255, 228, 186, 0.36);
+  --pool: rgba(255, 228, 186, 0.5);
   --floorimg: url(/textures/floor-walnut.jpg);
   --floorsize: calc(var(--S) * 0.45) calc(var(--S) * 0.45);
   --floorop: 0.95;
@@ -647,8 +647,10 @@ a {
 }
 .beam {
   top: calc(50% - var(--S) * 0.31);
-  width: calc(var(--S) * 0.7);
-  margin-left: calc(var(--S) * -0.35);
+  /* the cone spreads to a little wider than its own frame, so a narrow portrait gets a narrow
+     beam and a wide landscape a wide one */
+  width: 120%;
+  margin-left: -60%;
   /* long enough to reach what the frame hangs on and no further: lampz / sin 52.5deg (0.189 S to
      the wall; shorter to a bay, where a full-length beam ran through the bay's face and was cut
      off in a hard line) */
@@ -660,9 +662,10 @@ a {
      takes over (drawn in SVG: see Frame.jsx) */
   opacity: 0.85;
 }
-/* Each ellipse below sits wholly inside its box: one that runs past the edge is cut off in a
-   hard straight line. The fade is eased (no visible rim) but kept close to the old linear
-   one in brightness. Keep these boxes this size: a bigger plane per frame costs tile memory
+/* Each ellipse below sits wholly inside its box (centre ± radius within 0–100% both ways): one
+   that runs past an edge is cut off in a hard straight line. Both fade along the same eased
+   curve, so the pool in the room view has the round falloff of the glow up close. Keep these
+   boxes this size: a bigger plane per frame costs tile memory
    (see .agents/knowledge/room-walkaround-rendering.md). */
 .pool,
 .glow {
@@ -673,10 +676,9 @@ a {
   transform-origin: 50% 0;
 }
 .pool {
-  background:
-    radial-gradient(ellipse 34% 34% at 50% 44%, var(--pool) 0%, color-mix(in srgb, var(--pool) 92%, transparent) 22%, color-mix(in srgb, var(--pool) 74%, transparent) 42%, color-mix(in srgb, var(--pool) 50%, transparent) 60%, color-mix(in srgb, var(--pool) 29%, transparent) 75%, color-mix(in srgb, var(--pool) 12%, transparent) 88%, transparent 100%),
-    radial-gradient(ellipse 56% 50% at 50% 50%, var(--pool) 0%, color-mix(in srgb, var(--pool) 92%, transparent) 22%, color-mix(in srgb, var(--pool) 74%, transparent) 42%, color-mix(in srgb, var(--pool) 50%, transparent) 60%, color-mix(in srgb, var(--pool) 29%, transparent) 75%, color-mix(in srgb, var(--pool) 12%, transparent) 88%, transparent 100%);
-  opacity: 0.75;
+  /* the frame covers the middle, so the light holds up out to its edges and falls off beyond */
+  background: radial-gradient(ellipse 48% 48% at 50% 48%, var(--pool) 0%, color-mix(in srgb, var(--pool) 98%, transparent) 30%, color-mix(in srgb, var(--pool) 86%, transparent) 50%, color-mix(in srgb, var(--pool) 63%, transparent) 65%, color-mix(in srgb, var(--pool) 36%, transparent) 78%, color-mix(in srgb, var(--pool) 12%, transparent) 90%, transparent 100%);
+  opacity: 0.9;
 }
 .glow {
   /* wide enough to take in the wall label beside the frame; drawn only with the room dark */
