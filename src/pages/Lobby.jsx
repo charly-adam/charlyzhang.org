@@ -178,9 +178,15 @@ function Signage() {
 // move). He breathes; his head and arms move on their own pivots, the arms behind the torso and
 // in front of the underarms, which stay still. Once the curtain lifts he says welcome: a
 // speech bubble, and his jaw (a copy of his chin, cut along the line of his lips) flaps up and
-// down like a cut-out cartoon's, over a dark gap that shows when it drops.
+// down like a cut-out cartoon's, over a dark gap that shows when it drops. Click his face and he
+// says it again, in the next language round.
 const LAYERS = ['underarm', 'arm-l', 'arm-r', 'torso', 'head'];
+const WELCOMES = ['Welcome!', 'Bienvenue !', '¡Bienvenido!', 'Willkommen!', 'Benvenuto!', '欢迎！', 'ようこそ！', '환영합니다!', 'Bem-vindo!', 'Добро пожаловать!', 'Karibu!', 'Witaj!', 'Hoş geldiniz!', 'Velkommen!', 'स्वागत है!', 'Selamat datang!'];
 function Charly() {
+  // `said` counts the times he's said it: the first on his own, the rest when clicked; each
+  // remounts the jaw and the bubble so their animations run again
+  const [said, setSaid] = useState(0);
+  const again = said > 0 ? ' again' : '';
   return (
     <div className="charly" aria-hidden="true">
       <div className="breathe">
@@ -191,15 +197,63 @@ function Charly() {
               {p === 'head' && (
                 <>
                   <span className="mouth-gap" />
-                  <span className="jaw" />
+                  <span key={said} className={`jaw${again}`} />
                 </>
               )}
             </div>
           </div>
         ))}
       </div>
-      <p className="bubble">Welcome!</p>
+      <p key={said} className={`bubble${again}`}>
+        {WELCOMES[said % WELCOMES.length]}
+        <svg className="bubble-tail" viewBox="0 0 26 22" aria-hidden="true">
+          <path d="M3 -2 L5 19 L22 -2" />
+        </svg>
+      </p>
+      <button type="button" className="face" tabIndex={-1} onClick={() => setSaid((n) => n + 1)} />
     </div>
+  );
+}
+
+// A bucket for wet umbrellas on the floor left of the desk, with three in it, handles up.
+function UmbrellaStand() {
+  return (
+    <svg className="umbrellas" viewBox="0 0 150 300" aria-hidden="true">
+      <defs>
+        <linearGradient id="bucket" x1="0" x2="1">
+          <stop offset="0" stopColor="#2a2c2e" />
+          <stop offset="0.35" stopColor="#55595d" />
+          <stop offset="0.6" stopColor="#3a3d40" />
+          <stop offset="1" stopColor="#1f2022" />
+        </linearGradient>
+      </defs>
+      <ellipse cx="75" cy="296" rx="62" ry="6" fill="rgba(0,0,0,0.22)" />
+      {/* black, straight-handled, leaning left */}
+      <g transform="rotate(-9 75 200)">
+        <path d="M66 205 C61 160 66 120 72 74 L78 74 C84 120 89 160 84 205 Z" fill="#1d1e21" />
+        <path d="M70 150 L80 150" stroke="#3a3b3f" strokeWidth="3" />
+        <path d="M75 74 V40" stroke="#5b5f63" strokeWidth="3" />
+        <rect x="71" y="22" width="8" height="20" rx="3" fill="#2a2a2a" />
+      </g>
+      {/* navy, crook handle, upright */}
+      <g transform="rotate(3 75 200)">
+        <path d="M62 205 C57 150 64 104 71 58 L78 58 C85 104 92 150 87 205 Z" fill="#1f3556" />
+        <path d="M71 58 C75 90 75 150 70 205" stroke="#2b4670" strokeWidth="2" fill="none" />
+        <path d="M66 132 L83 132" stroke="#c9b37a" strokeWidth="3" />
+        <path d="M74.5 58 V30 C74.5 12 96 12 96 28" stroke="#8a5a32" strokeWidth="5" strokeLinecap="round" fill="none" />
+      </g>
+      {/* claret, crook handle, leaning right */}
+      <g transform="rotate(12 75 205)">
+        <path d="M64 205 C60 162 66 126 72 86 L78 86 C84 126 90 162 86 205 Z" fill="#7a1f2b" />
+        <path d="M68 160 L82 160" stroke="#4e121b" strokeWidth="3" />
+        <path d="M75 86 V60 C75 44 55 44 55 58" stroke="#6b4426" strokeWidth="5" strokeLinecap="round" fill="none" />
+      </g>
+      {/* the bucket: brushed steel, its rim seen from just above */}
+      <path d="M22 196 L128 196 L119 292 Q75 300 31 292 Z" fill="url(#bucket)" />
+      <ellipse cx="75" cy="196" rx="53" ry="8" fill="#16171a" stroke="#7d8287" strokeWidth="2" />
+      <path d="M27 216 Q75 223 123 216" stroke="rgba(255,255,255,0.12)" strokeWidth="2" fill="none" />
+      <path d="M30 282 Q75 289 120 282" stroke="rgba(0,0,0,0.35)" strokeWidth="2" fill="none" />
+    </svg>
   );
 }
 
@@ -208,6 +262,7 @@ function Charly() {
 function Desk({ onMap }) {
   return (
     <>
+      <UmbrellaStand />
       <div className="desk-shadow" aria-hidden="true" />
       <div className="desk-top" aria-hidden="true" />
       <div className="desk-edge" aria-hidden="true" />

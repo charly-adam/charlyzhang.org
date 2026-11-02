@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router';
-import { getRoom, nextRoom, site, themes } from '../data/gallery.js';
+import { getRoom, site, themes } from '../data/gallery.js';
 import { Curtain, Lens } from '../components/Scene.jsx';
 import { metaLine, titleLine } from '../components/Frame.jsx';
 import { EdgeArrows, Hallway, Pillar, Slab, Track, Wall } from '../components/RoomBox.jsx';
@@ -45,8 +45,6 @@ function Room({ room }) {
   geoRef.current = geo;
   const builtFor = useRef(null);
   const theme = themes[room.theme];
-  const next = nextRoom(room);
-  const exit = next ? `/room/${next.slug}` : '/';
   const hang = useMemo(() => distribute(room.groups), [room]);
   // the photos as they hang on the wall, and the room's surfaces
   const { done: loaded, progress } = usePreload(room.slug, [...room.photos.map((p) => p.wall), theme.floor.img, theme.ceil.img, '/textures/wall-grain.png', room.theme === 'salon' && '/textures/damask.svg']);
@@ -99,6 +97,8 @@ function Room({ room }) {
     // wall goes to the two ends, where the corner views still take in the photo there. A corner
     // by the entrance can't stand as far back as one by the far wall (the pillar), so the end
     // of a long wall by the entrance gets the smaller share (`spareW`). { gap, pad } in px.
+    // The far wall, with few photos and a corner at each end, keeps them evenly spread instead,
+    // so both corners take them in.
     const spacingFor = (side, len) => {
       const w = wallRefs[side].current;
       if (!w || room.solo) return null;
@@ -109,11 +109,10 @@ function Room({ room }) {
       const even = (len - 2 * inset - sum) / (cols.length + 1);
       const gap = Math.max(GEO.gap * S, Math.min(GEO.maxGap * S, even));
       const spare = Math.max(0, len - 2 * inset - sum - (cols.length - 1) * gap);
-      // N runs from the entrance end, S towards it, E has the far corners at both ends
-      const left = side === 'N' ? GEO.spareW : side === 'S' ? 1 - GEO.spareW : 0.5;
+      const left = side === 'N' ? GEO.spareW : 1 - GEO.spareW; // N runs from the entrance end, S towards it
       return { gap: Math.round(gap), pad: Math.round(inset + spare * left) };
     };
-    const gaps = { N: spacingFor('N', L), E: spacingFor('E', D), S: spacingFor('S', L) };
+    const gaps = { N: spacingFor('N', L), E: null, S: spacingFor('S', L) };
     // a view tall enough to see past the top and bottom of the entrance wall from the doorway
     // (a phone) needs the hallway's floor and ceiling there
     const P = GEO.P * S;
@@ -144,6 +143,15 @@ function Room({ room }) {
     const h = Math.atan(stage.clientWidth / 2 / P);
     const k = h >= Math.PI / 4 ? 1 : 1 - 1 / Math.tan(Math.PI / 4 + h);
     const byLeft = (a, b) => a.offsetLeft - b.offsetLeft;
+    // a corner with a bare wall either side would show one photo and a blank wall: it's walked
+    // through, and the photo it would have shown gets a stop of its own
+    const count = (side) => wallRefs[side].current.querySelectorAll('[data-stop="photo"]').length;
+    const passes = (a, b) => !(count(a) && count(b));
+    // how far a corner view may stand off the walls: never into the pillar (across the room, the
+    // walk keeps `clear` short of it; along it, a corner by the entrance stays in front of it and
+    // one by the far wall behind it)
+    const m = GEO.clear * S;
+    const acrossMax = D / 2 - (GEO.pillar.w * S) / 2 - m;
     const stops = [];
     WALL_ORDER.forEach((side, wi) => {
       const wall = walls[side];
@@ -151,10 +159,15 @@ function Room({ room }) {
       const cols = [...el.querySelectorAll('[data-stop]')].sort(byLeft);
       const photoCols = cols.filter((c) => c.dataset.stop === 'photo');
       const doorCol = cols.find((c) => c.dataset.stop === 'door');
-      // the first photo is seen from the corner before, the last from the corner after; each
-      // of the rest is a stop, square on to it with its neighbours in view either side. In a
-      // solo room every photo has a stop of its own, and the corners show two at once as well.
-      const between = room.solo ? photoCols : photoCols.length > 2 ? photoCols.slice(1, -1) : [];
+      const prevSide = WALL_ORDER[(wi + 3) % 4];
+      const nextSide = WALL_ORDER[(wi + 1) % 4];
+      // the first photo is seen from the corner before, the last from the corner after (unless
+      // they're walked through); each of the rest is a stop, square on to it with its neighbours
+      // in view either side. In a solo room every photo has a stop of its own, and the corners
+      // show two at once as well.
+      const from = passes(prevSide, side) ? 0 : 1;
+      const to = passes(side, nextSide) ? photoCols.length : photoCols.length - 1;
+      const between = room.solo ? photoCols : photoCols.slice(from, Math.max(from, to));
       const here = between.map((col) => {
         const f = col.querySelector('.frame') || col;
         const b = localBox(f, el);
@@ -169,7 +182,6 @@ function Room({ room }) {
       stops.push(...here);
       // the corner on to the next wall: stand back far enough to see the last photo here and the
       // first one there
-      const nextSide = WALL_ORDER[(wi + 1) % 4];
       const nw = walls[nextSide];
       const nel = wallRefs[nextSide].current;
       const nfirst = [...nel.querySelectorAll('[data-stop="photo"]')].sort(byLeft)[0];
@@ -183,13 +195,12 @@ function Room({ room }) {
         const b = localBox(displayed(nfirst.querySelector('.label')) || nfirst, nel);
         reach = Math.max(reach, b.x + b.w);
       }
-      // by the pillar the view keeps to the walk's distance, so it stays clear of it
-      const amax = (side === 'W' || nextSide === 'W' ? GEO.cornerNear : GEO.cornerFar) * S;
+      const alongMax = side === 'W' || nextSide === 'W' ? GEO.pillar.x * S - m : L - (GEO.pillar.x + GEO.pillar.t) * S - m;
+      const amax = Math.min(GEO.cornerFar * S, Math.max(acrossMax, alongMax));
       const a = Math.min(amax, Math.max(0.5 * S, (reach + GEO.cornerPad * S) / k));
       const cx = wall.x0 + wall.len * wall.dir[0];
       const cz = wall.z0 + wall.len * wall.dir[1];
-      // (in a solo room, a corner with a bare wall either side shows only one: it's walked through)
-      stops.push({ kind: 'corner', name: side + nextSide, pass: !!room.solo && !(last && nfirst), pose: { x: cx + a * (wall.nrm[0] + nw.nrm[0]), z: cz + a * (wall.nrm[1] + nw.nrm[1]), yaw: wall.yaw + 45 } });
+      stops.push({ kind: 'corner', name: side + nextSide, pass: passes(side, nextSide), pose: { x: cx + a * (wall.nrm[0] + nw.nrm[0]), z: cz + a * (wall.nrm[1] + nw.nrm[1]), yaw: wall.yaw + 45 } });
     });
     // distance along the loop: the walk plus the turn, the loop closing where it began
     const keys = [];
@@ -385,12 +396,12 @@ function Room({ room }) {
     setAtIntro(false);
     navigate(`/room/${room.slug}/${p.id}`);
   };
-  // out through the arch, the room fading to black behind you, then the lobby (or next room)
+  // out through the arch, the room fading to black behind you, then the front desk
   const leave = () => {
     const g = geoRef.current;
     if (!g || leaving || flying || focus) return;
     const to = { x: -0.6 * g.S, z: g.D / 2, yaw: 270 };
-    if (cam.leave(to, { x: 0.6 * g.S, z: g.D / 2 }, 1900, () => navigate(exit))) setLeaving(true);
+    if (cam.leave(to, { x: 0.6 * g.S, z: g.D / 2 }, 1900, () => navigate('/'))) setLeaving(true);
   };
   const stepBack = useCallback(() => {
     setAtIntro(false);
@@ -492,7 +503,7 @@ function Room({ room }) {
   const faces = {};
   if (geo) Object.entries(pillarFor(S, D)).forEach(([k, f]) => (faces[k] = { ...f, transform: placeFace(f.x0, f.z0, f.rot) }));
 
-  const door = { to: exit, next, onLeave: leave };
+  const door = { to: '/', onLeave: leave };
   const wallProps = { S, near, solo: !!room.solo, offFor, onOpen, onZoom: onZoomGroup };
   const stageClass = `stage room t-${room.theme}${room.solo ? ' solo' : ''}${focus ? ' near' : ''}${near ? ' dark' : ''}${atIntro ? ' at-intro' : ''}${geo ? '' : ' unmeasured'}${ready ? ' ready' : ''}${leaving ? ' leaving' : ''}${entered ? ' in' : ' at-door'}${geo?.tall ? ' tall' : ''}`;
   const arrowLabels = near ? ['The photo to the left', 'The photo to the right'] : entered ? ['Walk left', 'Walk right'] : ['Go round to the left', 'Go round to the right'];
@@ -507,7 +518,7 @@ function Room({ room }) {
             {WALL_ORDER.map((side) => (
               <Wall key={side} side={side} len={walls ? walls[side].len : 0} groups={hang[side]} style={wallStyle(side)} wallRef={wallRefs[side]} door={side === 'W' ? door : null} {...wallProps} />
             ))}
-            <Pillar room={room} site={site} onToggle={toggleIntro} faces={faces} S={S} pillarRef={pillarRef} />
+            <Pillar room={room} onToggle={toggleIntro} faces={faces} S={S} pillarRef={pillarRef} />
             <Slab kind="floor" S={S} L={L} D={D} theme={theme} />
             <Hallway S={S} D={D} theme={theme} />
           </div>

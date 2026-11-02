@@ -9,7 +9,7 @@
 //   2. Add an entry to `photos` below.
 //   3. `pair: true` hangs a photo right next to the one before it, sharing one wall label.
 //
-// Photos hang in order round the room, starting on your left as you come in. In a room of ten
+// Photos hang in order round the room, starting on your left as you come in. In a room of 17
 // or more, the first hangs on the entrance wall beside the door, on your left as you come in, and
 // the last beside it on your right; then along the left-hand wall, across the far wall and back along the right-hand wall.
 // The far wall takes 3 when the count is odd and 2 when it's even, so the long walls always
@@ -175,5 +175,3 @@ export const roomList = rooms.map((r, i) => {
 });
 
 export const getRoom = (slug) => roomList.find((r) => r.slug === slug);
-// The room the doorway at the end leads to; after the last room it leads back to the lobby.
-export const nextRoom = (room) => roomList[room.num] || null;

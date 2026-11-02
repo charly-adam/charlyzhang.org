@@ -245,7 +245,7 @@ a {
   -webkit-user-select: none;
 }
 .stage.room {
-  perspective: calc(var(--S) * 1.1);
+  perspective: calc(var(--S) * 0.95); /* GEO.P */
   --archw: calc(var(--S) * 0.55); /* the archway, as in GEO.arch */
   --archh: calc(var(--S) * 0.58);
 }
@@ -283,7 +283,7 @@ a {
   display: flex;
   justify-content: center;
   gap: calc(var(--S) * 0.06);
-  padding: 0 calc(var(--S) * 0.2);
+  padding: 0 calc(var(--S) * 0.1);
   transform-origin: 0 0;
   transform-style: preserve-3d;
 }
@@ -294,8 +294,8 @@ a {
 .wall,
 .wall .refl-row {
   justify-content: var(--wjust, space-evenly);
-  gap: var(--wgap, calc(var(--S) * 0.06));
-  padding-left: var(--wpad, calc(var(--S) * 0.2));
+  gap: var(--wgap, calc(var(--S) * 0.05));
+  padding-left: var(--wpad, calc(var(--S) * 0.1));
 }
 .wall.has-door {
   justify-content: space-between;
@@ -558,7 +558,7 @@ a {
   gap: calc(var(--S) * 0.06);
   height: 100%;
   box-sizing: border-box;
-  padding: 0 calc(var(--S) * 0.2);
+  padding: 0 calc(var(--S) * 0.1);
 }
 .wall.has-door .refl-row {
   justify-content: space-between;
@@ -831,11 +831,11 @@ a {
 /* a set height; the width follows the photo's own proportions (from its width/height attributes) */
 .imgL {
   width: auto;
-  height: calc(var(--S) * 0.22);
+  height: calc(var(--S) * 0.2);
 }
 .imgP {
   width: auto;
-  height: calc(var(--S) * 0.33);
+  height: calc(var(--S) * 0.3);
 }
 .gpad {
   padding-left: calc(var(--S) * 0.02);
@@ -926,7 +926,7 @@ a {
 .lblpos {
   flex: none;
   display: block;
-  width: calc(var(--S) * 0.1);
+  width: calc(var(--S) * 0.095);
   margin: calc(var(--S) * 0.18) 0 0 calc(var(--S) * 0.022);
 }
 
@@ -976,12 +976,10 @@ a {
   cursor: zoom-in;
 }
 .intro-room,
-.intro-name,
 .intro-text {
   display: block;
 }
-.intro-room,
-.intro-name {
+.intro-room {
   font-size: calc(var(--S) * 0.05);
   line-height: 1.1;
   letter-spacing: -0.015em;
@@ -989,13 +987,9 @@ a {
 .intro-room {
   font-weight: 600;
 }
-.intro-name {
-  margin-top: calc(var(--S) * 0.006);
-  font-weight: 700;
-}
 .intro-text {
   margin-top: calc(var(--S) * 0.04);
-  width: calc(var(--S) * 0.48);
+  width: calc(var(--S) * 0.28);
   font-size: calc(var(--S) * 0.024);
   line-height: 1.45;
 }
@@ -1681,25 +1675,38 @@ body:has(.stage:not(.ready)) .dock {
   transform: scale(0.6);
   transform-origin: 10% 100%;
 }
-/* the tail, pointing down and left to his mouth */
-.bubble::before,
-.bubble::after {
-  content: "";
+/* the tail, pointing down and left to his mouth: two strokes, its white covering the bubble's
+   border where they meet */
+.bubble-tail {
   position: absolute;
   left: 14px;
-  top: 100%;
-  border-style: solid;
+  top: calc(100% - 2px);
+  width: 26px;
+  height: 22px;
+  overflow: visible;
 }
-.bubble::before {
-  border-width: 18px 22px 0 0;
-  border-color: #141414 transparent transparent;
-  transform: skewX(-24deg);
+.bubble-tail path {
+  fill: #fff;
+  stroke: #141414;
+  stroke-width: 2;
+  stroke-linejoin: round;
 }
-.bubble::after {
-  margin: -3px 0 0 3px;
-  border-width: 14px 17px 0 0;
-  border-color: #fff transparent transparent;
-  transform: skewX(-24deg);
+/* his face takes the click (the rest of him lets clicks through) */
+.face {
+  position: absolute;
+  left: 186px;
+  top: 0;
+  width: 74px;
+  height: 108px;
+  padding: 0;
+  border: 0;
+  border-radius: 45%;
+  background: none;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.face:focus-visible {
+  outline: none;
 }
 .stage.ready .bubble {
   animation: bubble-in 0.35s cubic-bezier(0.3, 1.5, 0.5, 1) 0.7s both;
@@ -1709,6 +1716,13 @@ body:has(.stage:not(.ready)) .dock {
     opacity: 1;
     transform: scale(1);
   }
+}
+/* clicked: he says it again at once */
+.stage.ready .bubble.again {
+  animation-delay: 0s;
+}
+.stage.ready .jaw.again {
+  animation-delay: 0.05s;
 }
 
 /* wayfinding signs on the wall right of the desk: pictogram, name, arrow, in plain black */
@@ -1757,6 +1771,14 @@ body:has(.stage:not(.ready)) .dock {
 }
 .sign:focus-visible {
   outline: none;
+}
+
+/* the umbrella stand on the floor left of the desk */
+.desk-scene .dl-desk > .umbrellas {
+  left: 118px;
+  top: 486px;
+  width: 150px;
+  height: 300px;
 }
 
 /* the desk */
@@ -2028,8 +2050,9 @@ dialog.map::backdrop {
   outline: 2px solid #141414;
   outline-offset: 3px;
 }
-/* cream paper with its fold creases: two down, one across */
-.paper {
+/* cream paper with its fold creases: two down, one across. The wrapper carries it up out of the
+   brochure and tilts it; the paper fills it. */
+.paper-wrap {
   --tilt: -1deg;
   position: absolute;
   left: 50%;
@@ -2037,6 +2060,14 @@ dialog.map::backdrop {
   width: min(1080px, calc(100vw - 48px));
   height: min(664px, calc(100dvh - 48px));
   translate: -50% -50%;
+  transform-origin: 50% 100%;
+  transform-style: preserve-3d;
+  perspective: 2600px;
+  animation: rise 0.95s cubic-bezier(0.2, 0.75, 0.25, 1) both;
+}
+.paper {
+  position: absolute;
+  inset: 0;
   box-sizing: border-box;
   padding: 34px 40px;
   display: flex;
@@ -2049,87 +2080,118 @@ dialog.map::backdrop {
     url(/textures/wall-grain.png),
     #f4efe1;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 40px 60px -20px rgba(0, 0, 0, 0.55);
-  animation: unfold 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 .paper:focus {
   outline: none;
 }
-.map.folding .paper {
-  animation: fold 0.28s cubic-bezier(0.5, 0, 0.75, 0) both;
+/* While it opens or folds, the paper shows only its middle panel and the two flaps, copies of
+   the paper cut to a side panel each, turn over on the creases like the leaves of a book: the
+   right one first, then the left (the reverse, folding). Folded over the middle, a flap shows
+   its plain back. */
+.map.opening .paper-wrap > .paper,
+.map.folding .paper-wrap > .paper {
+  clip-path: inset(0 33.33% 0 33.33%);
 }
-/* From the brochure at the bottom it comes up folded, only its middle panel showing, about the
-   brochure's size; then its right-hand flap opens out, then its left, each in shadow until it
-   lies flat. Put away, it folds up again and goes back down into the brochure. */
-.map.from-dock .paper {
-  transform-origin: 50% 100%;
-  animation: brochure-open 0.9s cubic-bezier(0.2, 0.75, 0.25, 1) both;
+.map.folding .paper-wrap {
+  animation: sink 0.82s cubic-bezier(0.45, 0, 0.75, 0.35) both;
 }
-.map.from-dock.folding .paper {
-  animation: brochure-open 0.38s cubic-bezier(0.6, 0, 0.85, 0.35) reverse both;
-}
-.paper::after {
-  content: "";
+.flaps,
+.flap {
   position: absolute;
   inset: 0;
+  transform-style: preserve-3d;
   pointer-events: none;
-  opacity: 0;
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0.1) 33.33%, transparent 33.33%, transparent 66.66%, rgba(0, 0, 0, 0.1) 66.66%, rgba(0, 0, 0, 0.2));
 }
-.map.from-dock .paper::after {
-  animation: flaps 0.9s ease-out both;
+.flap-face {
+  box-shadow: none;
+  backface-visibility: hidden;
 }
-.map.from-dock.folding .paper::after {
-  animation: flaps 0.38s ease-in reverse both;
+.flap-back {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 33.34%;
+  background: url(/textures/wall-grain.png), #ebe4d2;
+  backface-visibility: hidden;
+  transform: rotateY(180deg);
 }
-@keyframes brochure-open {
+.flap-r {
+  transform-origin: 66.66% 50%;
+  animation: flap-r 0.95s cubic-bezier(0.35, 0.1, 0.25, 1) both;
+}
+.flap-r .flap-face {
+  clip-path: inset(0 0 0 66.66%);
+}
+.flap-r .flap-back {
+  left: 66.66%;
+}
+.flap-l {
+  transform-origin: 33.33% 50%;
+  animation: flap-l 0.95s cubic-bezier(0.35, 0.1, 0.25, 1) both;
+}
+.flap-l .flap-face {
+  clip-path: inset(0 66.66% 0 0);
+}
+.flap-l .flap-back {
+  left: 0;
+}
+.map.folding .flap-r {
+  animation: flap-r 0.82s cubic-bezier(0.45, 0, 0.75, 0.35) reverse both;
+}
+.map.folding .flap-l {
+  animation: flap-l 0.82s cubic-bezier(0.45, 0, 0.75, 0.35) reverse both;
+}
+/* up out of the brochure, folded, about its size; then flat and tilted while the flaps turn */
+@keyframes rise {
   0% {
     opacity: 0;
     transform: translateY(70vh) rotate(-3deg) scale(0.22);
-    clip-path: inset(0 33.33% 0 33.33%);
   }
-  10% {
+  8% {
     opacity: 1;
   }
-  42% {
+  40% {
     transform: translateY(0) rotate(-1.5deg) scale(1);
-    clip-path: inset(0 33.33% 0 33.33%);
-  }
-  68% {
-    clip-path: inset(0 0 0 33.33%);
   }
   100% {
     transform: rotate(var(--tilt)) scale(1);
-    clip-path: inset(0 0 0 0);
   }
 }
-@keyframes flaps {
-  0%,
-  42% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-@keyframes unfold {
+/* folding: the same, back the other way (its own name, or the browser would carry on the
+   finished rise rather than start again) */
+@keyframes sink {
   0% {
-    opacity: 0.3;
-    transform: rotate(var(--tilt)) translateY(160px) scale(0.34, 0.5);
+    transform: rotate(var(--tilt)) scale(1);
   }
   60% {
+    transform: translateY(0) rotate(-1.5deg) scale(1);
+  }
+  92% {
     opacity: 1;
   }
   100% {
-    transform: rotate(var(--tilt)) translateY(0) scale(1);
+    opacity: 0;
+    transform: translateY(70vh) rotate(-3deg) scale(0.22);
   }
 }
-@keyframes fold {
-  from {
-    transform: rotate(var(--tilt)) translateY(0) scale(1);
+/* folded over the middle, the right flap on top */
+@keyframes flap-r {
+  0%,
+  40% {
+    transform: translateZ(2px) rotateY(-180deg);
   }
-  to {
-    opacity: 0;
-    transform: rotate(var(--tilt)) translateY(160px) scale(0.34, 0.5);
+  72%,
+  100% {
+    transform: translateZ(0) rotateY(0);
+  }
+}
+@keyframes flap-l {
+  0%,
+  62% {
+    transform: translateZ(1px) rotateY(180deg);
+  }
+  100% {
+    transform: translateZ(0) rotateY(0);
   }
 }
 .paper-head {
@@ -2347,9 +2409,11 @@ dialog.map::backdrop {
 }
 
 /* the key, and the room you picked */
+/* the key and the note under it sit right of the second crease: kept off it */
 .map-key {
   grid-area: key;
   min-width: 0;
+  padding-left: 26px;
 }
 .key-rows {
   margin-top: 8px;
@@ -2386,6 +2450,7 @@ dialog.map::backdrop {
   grid-area: pick;
   align-self: end;
   padding-top: 16px;
+  padding-left: 26px;
 }
 .pick-room {
   font-size: 12px;
@@ -2415,12 +2480,22 @@ dialog.map::backdrop {
 /* on a phone the map fills the screen: the plan above the key, scrolling, and the room you
    tapped kept in view at the bottom as you go */
 @media (max-width: 700px) {
-  .paper {
+  .paper-wrap {
     --tilt: 0deg;
     inset: 0;
     width: auto;
     height: auto;
     translate: none;
+    perspective: none;
+  }
+  .flaps {
+    display: none;
+  }
+  .map.opening .paper-wrap > .paper,
+  .map.folding .paper-wrap > .paper {
+    clip-path: none;
+  }
+  .paper {
     padding: calc(14px + env(safe-area-inset-top)) 16px 0;
     gap: 16px;
     overflow-y: auto;
