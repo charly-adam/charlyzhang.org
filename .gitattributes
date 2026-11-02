@@ -1,0 +1,2 @@
+# Both agents add entries to the end of the log; union merge keeps both sides instead of conflicting.
+.agents/log.md merge=union
