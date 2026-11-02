@@ -16,12 +16,13 @@ export const roomScale = (w, h) => Math.min(h, w);
 
 export const GEO = {
   P: 1.1, // perspective: the eye's distance from the picture plane
-  d: 1.1, // how far from a wall you stand to look at it (= P, so it's seen at scale 1); also
-  // the most a corner view stands off the walls by the pillar, so the walk stays clear of it
+  d: 1.1, // how far from a wall you stand to look at it (= P, so it's seen at scale 1)
   D: 3.0, // the room's depth, between the two long walls
   minL: 3.0, // the room is at least this long
   inset: 0.2, // bare wall before the first photo and after the last
   gap: 0.06, // space between two photo slots: close, so several are in view at once
+  maxGap: 0.12, // and on a wall with room to spare, at most this, so three slots fit in a 16:10 view
+  spareW: 0.35, // the share of a long wall's spare length left at its entrance end (Room.jsx)
   eye: 0.44, // eye level, down the wall strip (which runs 0..1 S)
   pillar: { x: 1.3, t: 0.3, w: 0.6 }, // front face at x; thickness; width (centred across the room)
   arch: { w: 0.55, h: 0.58 }, // the archway in: its width; the height of its crown above the floor
@@ -31,6 +32,7 @@ export const GEO = {
   turn: 0.6, // scroll distance per radian of turning at a corner
   cornerPad: 0.05, // spare wall past the photos a corner view takes in
   cornerFar: 1.4, // a corner view by the far wall may stand this far off the walls
+  cornerNear: 1.15, // and one by the entrance wall this far: still short of the pillar (x 1.3, z 1.2)
   // Big surfaces are built from pieces: the browser only draws the pieces in view, and sizes
   // each piece's bitmap by how close its corner is, so a piece near the camera must be small
   // or it costs hundreds of megabytes (and Chrome drops surfaces when it runs out). The floor
@@ -49,18 +51,22 @@ export const GEO = {
 
 // Which photos hang where. Each group (a photo, or a pair under one label) is one slot.
 // The far wall takes 3 slots when the count is odd and 2 when it's even; once the long walls
-// have two each, the entrance wall gets one either side of the door; the rest split evenly.
-// Walking left from the door you meet them in order: N wall, far wall, S wall, then the
+// have three each, the entrance wall gets one either side of the door; the rest split evenly.
+// Walking left from the door you meet the walls in order: N wall, far wall, S wall, then the
 // entrance wall (below the door first, then above it).
+// Numbering starts on your left as you come in: with photos on the entrance wall, the first
+// hangs there beside the door (the slot on the corner with the N wall, which the walk reaches
+// last), then the N wall carries on from 2.
 export function distribute(groups) {
   const n = groups.length;
   const far = Math.min(n, n % 2 ? 3 : 2);
   let rest = n - far;
-  const ent = rest >= 6 ? 2 : 0;
+  const ent = rest >= 8 ? 2 : 0;
   rest -= ent;
   const side = rest / 2;
+  const hang = ent ? [...groups.slice(1), groups[0]] : groups;
   let i = 0;
-  const take = (k) => groups.slice(i, (i += k));
+  const take = (k) => hang.slice(i, (i += k));
   return { N: take(side), E: take(far), S: take(side), W: take(ent) };
 }
 

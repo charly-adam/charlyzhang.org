@@ -94,12 +94,33 @@ function Room({ room }) {
     };
     const L = Math.max(GEO.minL * S, natural('N'), natural('S'));
     const D = Math.max(GEO.D * S, natural('E'));
+    // On a wall longer than its photos need, they'd spread out evenly, so far apart that you see
+    // one at a time. Space them as evenly as that, but no further apart than maxGap; the spare
+    // wall goes to the two ends, where the corner views still take in the photo there. A corner
+    // by the entrance can't stand as far back as one by the far wall (the pillar), so the end
+    // of a long wall by the entrance gets the smaller share (`spareW`). { gap, pad } in px.
+    const spacingFor = (side, len) => {
+      const w = wallRefs[side].current;
+      if (!w || room.solo) return null;
+      const cols = [...w.querySelectorAll('[data-stop="photo"]')];
+      if (!cols.length) return null;
+      const inset = GEO.inset * S;
+      const sum = cols.reduce((a, c) => a + c.offsetWidth, 0);
+      const even = (len - 2 * inset - sum) / (cols.length + 1);
+      const gap = Math.max(GEO.gap * S, Math.min(GEO.maxGap * S, even));
+      const spare = Math.max(0, len - 2 * inset - sum - (cols.length - 1) * gap);
+      // N runs from the entrance end, S towards it, E has the far corners at both ends
+      const left = side === 'N' ? GEO.spareW : side === 'S' ? 1 - GEO.spareW : 0.5;
+      return { gap: Math.round(gap), pad: Math.round(inset + spare * left) };
+    };
+    const gaps = { N: spacingFor('N', L), E: spacingFor('E', D), S: spacingFor('S', L) };
     // a view tall enough to see past the top and bottom of the entrance wall from the doorway
     // (a phone) needs the hallway's floor and ceiling there
     const P = GEO.P * S;
     const out = (GEO.hall.t + GEO.doorCam) * -S; // from the doorway to the entrance wall
     const tall = (0.56 * stage.clientHeight) / P > ((0.78 - GEO.eye) * S) / out || (0.44 * stage.clientHeight) / P > ((GEO.eye - 0.07) * S) / out;
-    setGeo((g) => (g && g.S === S && g.L === L && g.D === D && g.tall === tall ? g : { S, L, D, tall }));
+    const sameGaps = (a) => a && ['N', 'E', 'S'].every((k) => a[k]?.gap === gaps[k]?.gap && a[k]?.pad === gaps[k]?.pad);
+    setGeo((g) => (g && g.S === S && g.L === L && g.D === D && g.tall === tall && sameGaps(g.gaps) ? g : { S, L, D, tall, gaps }));
   });
 
   useEffect(() => {
@@ -163,7 +184,7 @@ function Room({ room }) {
         reach = Math.max(reach, b.x + b.w);
       }
       // by the pillar the view keeps to the walk's distance, so it stays clear of it
-      const amax = side === 'W' || nextSide === 'W' ? d : GEO.cornerFar * S;
+      const amax = (side === 'W' || nextSide === 'W' ? GEO.cornerNear : GEO.cornerFar) * S;
       const a = Math.min(amax, Math.max(0.5 * S, (reach + GEO.cornerPad * S) / k));
       const cx = wall.x0 + wall.len * wall.dir[0];
       const cz = wall.z0 + wall.len * wall.dir[1];
@@ -463,7 +484,11 @@ function Room({ room }) {
   const L = geo ? geo.L : 0;
   const D = geo ? geo.D : 0;
   const walls = geo ? wallsFor(L, D) : null;
-  const wallStyle = (side) => (walls ? { width: walls[side].len, transform: placeFace(walls[side].x0, walls[side].z0, walls[side].rot) } : undefined);
+  const wallStyle = (side) => {
+    if (!walls) return undefined;
+    const sp = geo.gaps?.[side];
+    return { width: walls[side].len, transform: placeFace(walls[side].x0, walls[side].z0, walls[side].rot), ...(sp && { '--wgap': `${sp.gap}px`, '--wpad': `${sp.pad}px`, '--wjust': 'flex-start' }) };
+  };
   const faces = {};
   if (geo) Object.entries(pillarFor(S, D)).forEach(([k, f]) => (faces[k] = { ...f, transform: placeFace(f.x0, f.z0, f.rot) }));
 

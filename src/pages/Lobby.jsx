@@ -1,6 +1,8 @@
 import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { roomList, site } from '../data/gallery.js';
-import { MapContext, MapThumb } from '../components/GalleryMap.jsx';
+import { MapContext, MapThumb, planFor } from '../components/GalleryMap.jsx';
+import { Arrow, Pictogram } from '../components/Icons.jsx';
 import { Curtain, Lens, Shell } from '../components/Scene.jsx';
 import { usePreload } from '../hooks/usePreload.js';
 
@@ -31,6 +33,7 @@ export default function Lobby() {
         </div>
       </div>
       <Lettering />
+      <Signage />
       <div className="desk-scene">
         <div className="dl dl-char">
           <Charly />
@@ -139,10 +142,43 @@ function Lettering() {
   );
 }
 
+// Wayfinding on the back wall, right of the desk, like a museum's: each room's pictogram, its
+// name and an arrow the way it lies on the plan (the map's ring of rooms round the hall, seen
+// from the desk at the bottom: up the right-hand side, across the top, down the left). Each
+// sign takes you to its room, as the map does.
+const plan = planFor(roomList);
+const towards = ({ col, row }) => {
+  const c = parseInt(col, 10);
+  const top = parseInt(row, 10) === 1 && !String(row).includes('span');
+  if (c === plan.cols) return top ? -45 : 0;
+  if (c === 1) return top ? -135 : 180;
+  return -90;
+};
+function Signage() {
+  const navigate = useNavigate();
+  return (
+    <nav className="signage" aria-label="Galleries">
+      <div className="signs">
+        {plan.rooms.map((p) => (
+          <button key={p.room.slug} type="button" className="sign" onClick={() => navigate(`/room/${p.room.slug}`)}>
+            <Pictogram name={p.room.icon} size={24} className="sign-icon" color="#141414" />
+            <span className="sign-name">{p.room.name}</span>
+            <span className="sign-arrow">
+              <Arrow rotate={towards(p)} size={22} />
+            </span>
+          </button>
+        ))}
+      </div>
+    </nav>
+  );
+}
+
 // Charly behind the desk, in cut-out layers stacked at one origin (made by
 // scripts/cut-charly.js), cut off at the desk top (only at the bottom, so his arms are free to
 // move). He breathes; his head and arms move on their own pivots, the arms behind the torso and
-// in front of the underarms, which stay still.
+// in front of the underarms, which stay still. Once the curtain lifts he says welcome: a
+// speech bubble, and his jaw (a copy of his chin, cut along the line of his lips) flaps up and
+// down like a cut-out cartoon's, over a dark gap that shows when it drops.
 const LAYERS = ['underarm', 'arm-l', 'arm-r', 'torso', 'head'];
 function Charly() {
   return (
@@ -152,10 +188,17 @@ function Charly() {
           <div key={p} className={`part ${p}`}>
             <div className="idle">
               <img src={`/lobby/charly-${p}.png`} alt="" width="745" height="1000" draggable="false" />
+              {p === 'head' && (
+                <>
+                  <span className="mouth-gap" />
+                  <span className="jaw" />
+                </>
+              )}
             </div>
           </div>
         ))}
       </div>
+      <p className="bubble">Welcome!</p>
     </div>
   );
 }

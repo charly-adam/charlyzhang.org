@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="160" viewBox="0 0 200 160">
+  <!-- A loose flock in flight, a shade darker than the sky-blue wall: birds drawn as two
+       curved strokes, at different sizes and tilts so the repeat doesn't read as a grid.
+       The edges are clear of birds, so tiles meet without cutting one. -->
+  <g fill="none" stroke="#4f7488" stroke-opacity="0.16" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6">
+    <path d="M30 34c4-5 8-6 11-1c3-5 7-4 11 1" />
+    <path d="M62 22c3-4 6-4 8-1c2-3 5-3 8 1" transform="rotate(-8 70 22)" />
+    <path d="M118 48c5-7 10-8 14-1c4-7 9-6 14 1" />
+    <path d="M156 28c2-3 4-3 6-1c2-2 4-2 6 1" transform="rotate(10 162 28)" />
+    <path d="M86 92c4-5 8-6 11-1c3-5 7-4 11 1" transform="rotate(6 97 92)" />
+    <path d="M40 118c3-4 6-4 8-1c2-3 5-3 8 1" />
+    <path d="M140 122c5-6 10-7 13-1c3-6 8-5 13 1" transform="rotate(-5 153 122)" />
+    <path d="M170 86c2-3 4-3 6-1c2-2 4-2 6 1" />
+  </g>
+</svg>

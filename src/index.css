@@ -165,6 +165,36 @@ a {
   --fside: #8f6c2c;
   --mat: #f3f0e8;
 }
+/* the aviary: pale sky-blue walls with a faint flock flying across them, a light oak floor,
+   a white ceiling, pale ash frames */
+.t-sky {
+  --wall: linear-gradient(#b7d1e0 0, #c8dde9 36%, #c3d9e6 100%);
+  --wall0: #b7d1e0;
+  --wall1: #c8dde9;
+  --fg: #1b2d38;
+  --fg2: #3d5563;
+  --pool: rgba(255, 255, 248, 0.6);
+  --floorimg: url(/textures/floor-oak.jpg);
+  --floorsize: calc(var(--S) * 0.49) calc(var(--S) * 0.49);
+  --floorop: 0.62;
+  --reflop: 0.5;
+  --plh: calc(var(--S) * 0.022);
+  --plc: linear-gradient(#f6f8f9, #dfe6ea);
+  --ceilbg: linear-gradient(#e6eef3, #f5f8fa);
+  --ceilimg: linear-gradient(#eef3f6, #eef3f6);
+  --ceilsize: 100% 100%;
+  --endb: 0.86;
+  --stagebg: #e4ddd0;
+  --fb: calc(var(--S) * 0.008);
+  --fside: #bfa47c;
+  --mat: #fbfbf9;
+}
+.t-sky .panel {
+  background: url(/textures/wall-grain.png), url(/textures/birds.svg) 0 0 / calc(var(--S) * 0.42) auto, var(--wall);
+}
+.t-sky .frame {
+  border-color: #e4d2b2 #cfb892 #bba17a #d8c39f;
+}
 /* the salon: claret damask, a dark walnut floor, warm lamps, ornate gilt frames */
 .t-salon {
   --wall: linear-gradient(#2c0d13 0, #4a1720 30%, #521a24 70%, #461620 100%);
@@ -258,9 +288,14 @@ a {
   transform-style: preserve-3d;
 }
 /* photos hang evenly spaced across the wall, as long as the room is: the long walls take the
-   longer one's length, and a wall of few photos would otherwise bunch them in the middle */
-.wall {
-  justify-content: space-evenly;
+   longer one's length, and a wall of few photos would otherwise bunch them in the middle.
+   Room.jsx caps the spacing on a wall with length to spare (--wgap, --wpad, --wjust), and the
+   floor's reflection row follows the same values. */
+.wall,
+.wall .refl-row {
+  justify-content: var(--wjust, space-evenly);
+  gap: var(--wgap, calc(var(--S) * 0.06));
+  padding-left: var(--wpad, calc(var(--S) * 0.2));
 }
 .wall.has-door {
   justify-content: space-between;
@@ -796,15 +831,15 @@ a {
 /* a set height; the width follows the photo's own proportions (from its width/height attributes) */
 .imgL {
   width: auto;
-  height: calc(var(--S) * 0.235);
+  height: calc(var(--S) * 0.22);
 }
 .imgP {
   width: auto;
   height: calc(var(--S) * 0.33);
 }
 .gpad {
-  padding-left: calc(var(--S) * 0.035);
-  padding-right: calc(var(--S) * 0.035);
+  padding-left: calc(var(--S) * 0.02);
+  padding-right: calc(var(--S) * 0.02);
 }
 
 /* ---------- a solo room: every photo on a bay of its own ----------
@@ -891,8 +926,8 @@ a {
 .lblpos {
   flex: none;
   display: block;
-  width: calc(var(--S) * 0.113);
-  margin: calc(var(--S) * 0.18) 0 0 calc(var(--S) * 0.03);
+  width: calc(var(--S) * 0.1);
+  margin: calc(var(--S) * 0.18) 0 0 calc(var(--S) * 0.022);
 }
 
 /* wall labels: tiny print; clicking one walks up to its photo. A hair off the wall, so a lamp's
@@ -1135,9 +1170,8 @@ a {
   transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ---------- glass controls: step buttons and the dock ---------- */
-.glass,
-.dock {
+/* ---------- glass controls: the step buttons ---------- */
+.glass {
   color: #161616;
   background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
   -webkit-backdrop-filter: blur(10px) saturate(1.8) brightness(1.05);
@@ -1146,13 +1180,10 @@ a {
   box-shadow: inset 0 1px 0.5px rgba(255, 255, 255, 0.7), inset 0 -1px 0.5px rgba(255, 255, 255, 0.18), inset 0 0 16px rgba(255, 255, 255, 0.07), 0 8px 24px -12px rgba(0, 0, 0, 0.4);
   transition: color 0.6s ease;
 }
-.stage.dark .glass,
-body:has(.stage.dark) .dock,
-body:has(.stage.t-teal, .stage.t-violet) .dock {
+.stage.dark .glass {
   color: #f3f2ee;
 }
-.glass:focus-visible,
-.dock-home:focus-visible {
+.glass:focus-visible {
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
 }
 /* an arrow floating either side of the view; in the doorway each gives a little nudge now
@@ -1233,31 +1264,81 @@ body:has(.stage.t-teal, .stage.t-violet) .dock {
     animation: none;
   }
 }
+/* the folded brochure poking up from the bottom edge: its cover, with a second leaf of the fold
+   showing behind it. It rises as you point at it. */
 .dock {
   position: fixed;
   left: 50%;
-  bottom: calc(16px + env(safe-area-inset-bottom));
+  bottom: 0;
   z-index: 40;
   transform: translateX(-50%);
-  padding: 3px;
-  border-radius: 999px;
-  transition: color 0.6s ease, opacity 0.6s ease 0.3s;
+  transition: opacity 0.6s ease 0.3s;
 }
 /* out of the way while a page loads, back as its curtain lifts */
 body:has(.stage:not(.ready)) .dock {
   opacity: 0;
   pointer-events: none;
 }
-.dock-home {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  transition: background 0.2s;
+.brochure {
+  position: relative;
+  display: block;
+  width: 132px;
+  height: 96px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transform: translateY(calc(54px - env(safe-area-inset-bottom))) rotate(-3deg);
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-.dock-home:hover {
-  background: rgba(255, 255, 255, 0.22);
+.brochure:hover,
+.brochure:focus-visible {
+  transform: translateY(calc(30px - env(safe-area-inset-bottom))) rotate(-1.5deg);
+}
+.brochure:focus-visible {
+  outline: none;
+}
+.brochure:focus-visible .brochure-cover {
+  outline: 2px solid #141414;
+  outline-offset: 3px;
+}
+.brochure-leaf,
+.brochure-cover {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+}
+.brochure-leaf {
+  background: #e8e0cc;
+  transform: translate(7px, -5px) rotate(4deg);
+  box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.16);
+}
+.brochure-cover {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 12px;
+  text-align: left;
+  color: #141414;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.07), transparent 14%), url(/textures/wall-grain.png), #f4efe1;
+  box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.22);
+}
+.brochure-kicker {
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #6b6457;
+}
+.brochure-title {
+  margin-top: 2px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.brochure .thumb {
+  height: 30px;
+  margin-top: 7px;
+  gap: 2px;
 }
 
 /* ---------- phones ----------
@@ -1552,6 +1633,132 @@ body:has(.stage:not(.ready)) .dock {
   }
 }
 
+/* saying welcome: the bubble pops up by his head as the wave starts, and his jaw (a copy of his
+   chin cut along his lips: the source's (325, 127)–(392, 164)) drops and shuts four times over a
+   dark gap, all as percentages of the 745 × 1000 cut-out */
+.head .idle {
+  position: relative;
+}
+.mouth-gap,
+.jaw {
+  position: absolute;
+}
+.mouth-gap {
+  left: 45.5%;
+  top: 12.7%;
+  width: 5.6%;
+  height: 1.3%;
+  border-radius: 0 0 50% 50% / 0 0 100% 100%;
+  background: #3a1512;
+}
+.jaw {
+  inset: 0;
+  background: url(/lobby/charly-head.png) 0 0 / 100% 100%;
+  clip-path: polygon(43.6% 12.7%, 52.6% 12.7%, 52.4% 14.8%, 50.6% 16.4%, 45.9% 16.4%, 44% 14.8%);
+}
+.stage.ready .jaw {
+  animation: jabber 0.17s ease-in-out 0.85s 8 alternate both;
+}
+@keyframes jabber {
+  to {
+    translate: 0 4px;
+  }
+}
+.bubble {
+  position: absolute;
+  left: 268px;
+  top: -64px;
+  margin: 0;
+  padding: 10px 18px 11px;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #141414;
+  background: #fff;
+  border: 2px solid #141414;
+  border-radius: 22px;
+  opacity: 0;
+  transform: scale(0.6);
+  transform-origin: 10% 100%;
+}
+/* the tail, pointing down and left to his mouth */
+.bubble::before,
+.bubble::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  top: 100%;
+  border-style: solid;
+}
+.bubble::before {
+  border-width: 18px 22px 0 0;
+  border-color: #141414 transparent transparent;
+  transform: skewX(-24deg);
+}
+.bubble::after {
+  margin: -3px 0 0 3px;
+  border-width: 14px 17px 0 0;
+  border-color: #fff transparent transparent;
+  transform: skewX(-24deg);
+}
+.stage.ready .bubble {
+  animation: bubble-in 0.35s cubic-bezier(0.3, 1.5, 0.5, 1) 0.7s both;
+}
+@keyframes bubble-in {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* wayfinding signs on the wall right of the desk: pictogram, name, arrow, in plain black */
+.signage {
+  position: absolute;
+  left: calc(50% + 300px * var(--dk));
+  top: calc(var(--top) + 160px * var(--dk));
+  translate: calc(var(--px) * var(--dk) * -6px) calc(var(--py) * var(--dk) * -3px);
+  transition: translate var(--ease);
+}
+.signs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 250px;
+  zoom: var(--dk);
+}
+.sign {
+  display: grid;
+  grid-template-columns: 26px 1fr 22px;
+  align-items: center;
+  gap: 14px;
+  padding: 5px 0;
+  font: inherit;
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-align: left;
+  color: #141414;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.sign-icon {
+  display: flex;
+}
+.sign-arrow {
+  display: flex;
+  transition: translate 0.2s ease;
+}
+.sign:hover .sign-name,
+.sign:focus-visible .sign-name {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1.5px;
+}
+.sign:focus-visible {
+  outline: none;
+}
+
 /* the desk */
 .desk-scene .dl-desk > * {
   position: absolute;
@@ -1763,6 +1970,10 @@ body:has(.stage:not(.ready)) .dock {
   .words {
     zoom: 0.8;
   }
+  /* no room for the signs beside the desk; the brochure at the bottom has the map */
+  .signage {
+    display: none;
+  }
 }
 
 /* ---------- the gallery map, unfolded over the lobby ---------- */
@@ -1846,15 +2057,15 @@ dialog.map::backdrop {
 .map.folding .paper {
   animation: fold 0.28s cubic-bezier(0.5, 0, 0.75, 0) both;
 }
-/* From the home button it comes up crumpled, a ball of paper thrown up out of the button,
-   then opens out flat: its outline goes from crumpled to square, and the creases fade. Put
-   away, it crumples back down into the button. */
+/* From the brochure at the bottom it comes up folded, only its middle panel showing, about the
+   brochure's size; then its right-hand flap opens out, then its left, each in shadow until it
+   lies flat. Put away, it folds up again and goes back down into the brochure. */
 .map.from-dock .paper {
-  transform-origin: 50% 60%;
-  animation: uncrumple 0.85s cubic-bezier(0.2, 0.75, 0.25, 1) both;
+  transform-origin: 50% 100%;
+  animation: brochure-open 0.9s cubic-bezier(0.2, 0.75, 0.25, 1) both;
 }
 .map.from-dock.folding .paper {
-  animation: uncrumple 0.38s cubic-bezier(0.6, 0, 0.85, 0.35) reverse both;
+  animation: brochure-open 0.38s cubic-bezier(0.6, 0, 0.85, 0.35) reverse both;
 }
 .paper::after {
   content: "";
@@ -1862,46 +2073,38 @@ dialog.map::backdrop {
   inset: 0;
   pointer-events: none;
   opacity: 0;
-  background:
-    linear-gradient(115deg, transparent 30%, rgba(0, 0, 0, 0.16) 31%, rgba(255, 255, 255, 0.3) 33%, transparent 40%),
-    linear-gradient(35deg, transparent 52%, rgba(0, 0, 0, 0.14) 53%, rgba(255, 255, 255, 0.26) 55%, transparent 62%),
-    linear-gradient(170deg, transparent 18%, rgba(0, 0, 0, 0.12) 19%, rgba(255, 255, 255, 0.24) 21%, transparent 28%),
-    linear-gradient(80deg, transparent 66%, rgba(0, 0, 0, 0.14) 67%, rgba(255, 255, 255, 0.24) 69%, transparent 75%),
-    linear-gradient(140deg, transparent 72%, rgba(0, 0, 0, 0.12) 73%, rgba(255, 255, 255, 0.24) 75%, transparent 82%),
-    linear-gradient(10deg, transparent 40%, rgba(0, 0, 0, 0.1) 41%, rgba(255, 255, 255, 0.2) 43%, transparent 49%),
-    conic-gradient(from 20deg at 40% 55%, rgba(0, 0, 0, 0.1), transparent 25%, rgba(0, 0, 0, 0.12) 50%, transparent 75%, rgba(0, 0, 0, 0.1));
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0.1) 33.33%, transparent 33.33%, transparent 66.66%, rgba(0, 0, 0, 0.1) 66.66%, rgba(0, 0, 0, 0.2));
 }
 .map.from-dock .paper::after {
-  animation: creases 0.85s ease-out both;
+  animation: flaps 0.9s ease-out both;
 }
 .map.from-dock.folding .paper::after {
-  animation: creases 0.38s ease-in reverse both;
+  animation: flaps 0.38s ease-in reverse both;
 }
-@keyframes uncrumple {
+@keyframes brochure-open {
   0% {
     opacity: 0;
-    transform: translateY(55vh) scale(0.1) rotate(-40deg);
-    clip-path: polygon(10% 14%, 28% 3%, 47% 16%, 70% 2%, 92% 12%, 84% 31%, 98% 53%, 83% 75%, 93% 95%, 71% 84%, 50% 98%, 29% 85%, 5% 93%, 16% 70%, 2% 47%, 15% 28%);
+    transform: translateY(70vh) rotate(-3deg) scale(0.22);
+    clip-path: inset(0 33.33% 0 33.33%);
   }
-  12% {
+  10% {
     opacity: 1;
   }
-  40% {
-    transform: translateY(6vh) scale(0.24) rotate(10deg);
-    clip-path: polygon(10% 14%, 28% 3%, 47% 16%, 70% 2%, 92% 12%, 84% 31%, 98% 53%, 83% 75%, 93% 95%, 71% 84%, 50% 98%, 29% 85%, 5% 93%, 16% 70%, 2% 47%, 15% 28%);
+  42% {
+    transform: translateY(0) rotate(-1.5deg) scale(1);
+    clip-path: inset(0 33.33% 0 33.33%);
   }
-  72% {
-    transform: translateY(0) scale(1.02) rotate(-2.5deg);
-    clip-path: polygon(2% 4%, 26% 0.5%, 50% 4%, 74% 0.5%, 98% 3%, 96% 27%, 99.5% 50%, 96% 74%, 98% 97%, 74% 95%, 50% 99.5%, 26% 96%, 3% 98%, 4% 73%, 0.5% 50%, 4% 26%);
+  68% {
+    clip-path: inset(0 0 0 33.33%);
   }
   100% {
     transform: rotate(var(--tilt)) scale(1);
-    clip-path: polygon(0% 0%, 25% 0%, 50% 0%, 75% 0%, 100% 0%, 100% 25%, 100% 50%, 100% 75%, 100% 100%, 75% 100%, 50% 100%, 25% 100%, 0% 100%, 0% 75%, 0% 50%, 0% 25%);
+    clip-path: inset(0 0 0 0);
   }
 }
-@keyframes creases {
+@keyframes flaps {
   0%,
-  40% {
+  42% {
     opacity: 1;
   }
   100% {

@@ -2,13 +2,13 @@ import { createContext, useEffect, useRef, useState } from 'react';
 import { roomList, site } from '../data/gallery.js';
 import { Pictogram } from './Icons.jsx';
 
-// openMap(from, opener): takes the map out, from the stand on the desk ('stand') or the home
-// button ('dock'); `opener` gets focus back when it's folded away. Provided by App.
+// openMap(from, opener): takes the map out, from the stand on the desk ('stand') or the
+// brochure at the bottom ('dock'); `opener` gets focus back when it's folded away. Provided by App.
 export const MapContext = createContext(() => {});
 
 // Map tints follow each room's walls: white, teal, violet, the grey of the spotlit rooms, and
-// the claret of the salon.
-const TINT = { white: '#ebe6d8', teal: '#c3d6d4', violet: '#cfc9de', spot: '#d9d4c8', salon: '#e2c4c0' };
+// the claret of the salon, the pale blue of the aviary.
+const TINT = { white: '#ebe6d8', teal: '#c3d6d4', violet: '#cfc9de', spot: '#d9d4c8', salon: '#e2c4c0', sky: '#cde0ea' };
 
 // The floor plan: the rooms in a ring round the hall, four columns wide, the front desk at the
 // bottom in the middle. They go round in order, the way the doors lead from one to the next:
@@ -68,8 +68,8 @@ function KeyHere() {
   );
 }
 
-// The map, over whatever page you're on: unfolded from the stand, or uncrumpled up out of the
-// home button. `here` is the room you're in (null at the front desk). Point at a room on the
+// The map, over whatever page you're on: unfolded from the stand, or opened out of the folded
+// brochure. `here` is the room you're in (null at the front desk). Point at a room on the
 // plan or in the key to read about it; click it to go there. Going, the map goes to black and onGo(path) takes you (App closes the map once the new page is up
 // behind it). Escape, the fold button or a click off the paper puts it away.
 export function GalleryMap({ from, here, onClose, onGo }) {

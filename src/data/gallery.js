@@ -9,17 +9,19 @@
 //   2. Add an entry to `photos` below.
 //   3. `pair: true` hangs a photo right next to the one before it, sharing one wall label.
 //
-// Photos hang in order round the room: along the left-hand wall from the door, across the far
-// wall, back along the right-hand wall, and the last two either side of the door. The far wall
-// takes 3 when the count is odd and 2 when it's even, so the long walls always match; the room
-// grows with them.
+// Photos hang in order round the room, starting on your left as you come in. In a room of ten
+// or more, the first hangs on the entrance wall beside the door, on your left as you come in, and
+// the last beside it on your right; then along the left-hand wall, across the far wall and back along the right-hand wall.
+// The far wall takes 3 when the count is odd and 2 when it's even, so the long walls always
+// match; the room grows with them.
 //
 // Add a room: add an entry to `rooms` (slug, name, theme, icon, blurb) and a folder in
 // photos-originals. The icon is a pictogram from components/Icons.jsx. The lobby's wall, the
 // map and the dock all follow this list.
 // Themes: 'white' (bright, even light), 'spot' (spotlit, wood frames),
 //         'teal' and 'violet' (colored walls, gold frames),
-//         'salon' (claret damask walls, ornate gilt frames).
+//         'salon' (claret damask walls, ornate gilt frames),
+//         'sky' (pale blue walls with a faint flock of birds, light oak floor).
 // `solo: true` gives every photo a wall of its own: it hangs on a bay standing out from the
 // wall, bigger, with a stop of its own; the corners show two at once. For a few photos.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -34,7 +36,7 @@ export const site = {
 export const rooms = [
   { slug: 'favorites', name: 'Favorites', theme: 'salon', solo: true, icon: 'star', blurb: "A few of Charly's own favorites.", intro: '' },
   { slug: 'nature', name: 'Nature', theme: 'teal', icon: 'landscape', blurb: 'Parks, peaks and night skies.', intro: '' },
-  { slug: 'birds', name: 'Birds', theme: 'white', icon: 'bird', blurb: 'Wetlands and refuges around the Bay and the Valley.', intro: '' },
+  { slug: 'birds', name: 'Birds', theme: 'sky', icon: 'bird', blurb: 'Wetlands and refuges around the Bay and the Valley.', intro: '' },
   { slug: 'travel', name: 'Travel', theme: 'violet', icon: 'globe', blurb: 'Streets and cities abroad.', intro: '' },
   { slug: 'benches', name: 'Benches', theme: 'spot', icon: 'bench', blurb: 'Empty seats, facing the view.', intro: '' },
   { slug: 'cars', name: 'Cars', theme: 'spot', icon: 'car', blurb: 'Race days and student race teams.', intro: '' },
@@ -150,6 +152,7 @@ export const themes = {
   spot: { wall: '#acaca9', boxBg: '#141414', boxFg: '#f4f3f0', floor: { img: '/textures/floor-concrete.jpg', size: 1.05, color: '#4f4f4f', sheen: '#838380' }, ceil: { img: '/textures/ceiling-tile.jpg', size: 0.27, color: '#dadad7' } },
   teal: { wall: '#173e49', boxBg: '#eceae3', boxFg: '#173f4a', floor: { img: '/textures/floor-oak.jpg', size: 0.49, color: '#6b4e32', sheen: '#000709' }, ceil: { img: null, size: 1, color: '#262828' } },
   salon: { wall: '#4f1a23', boxBg: '#f1e6d6', boxFg: '#4f1a23', floor: { img: '/textures/floor-walnut.jpg', size: 0.45, color: '#3a2620' }, ceil: { img: null, size: 1, color: '#1c1214' } },
+  sky: { wall: '#c8dde9', boxBg: '#1b2d38', boxFg: '#f4f8fa', floor: { img: '/textures/floor-oak.jpg', size: 0.49, color: '#a98a66' }, ceil: { img: null, size: 1, color: '#eef3f6' } },
   violet: { wall: '#24234c', boxBg: '#ecebf2', boxFg: '#24234a', floor: { img: '/textures/floor-walnut.jpg', size: 0.45, color: '#4a3326', sheen: '#070715' }, ceil: { img: null, size: 1, color: '#1c1b25' } },
 };
 
