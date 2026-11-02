@@ -114,10 +114,14 @@ function Room({ room }) {
     };
     const gaps = { N: spacingFor('N', L), E: spacingFor('E', D), S: spacingFor('S', L) };
     // a view tall enough to see past the top and bottom of the entrance wall from the doorway
-    // (a phone) needs the hallway's floor and ceiling there
+    // (a phone) needs the hallway's floor and ceiling there. A landscape view sees a sliver past
+    // its foot (about 13% at P 0.95), which the dark threshold covers: drawing the floor and
+    // ceiling right under and over the camera for that blows Chrome's tile budget at Retina and
+    // it drops the entrance wall, so they come on only past `past`.
     const P = GEO.P * S;
     const out = (GEO.hall.t + GEO.doorCam) * -S; // from the doorway to the entrance wall
-    const tall = (0.56 * stage.clientHeight) / P > ((0.78 - GEO.eye) * S) / out || (0.44 * stage.clientHeight) / P > ((GEO.eye - 0.07) * S) / out;
+    const past = 1.2;
+    const tall = (0.56 * stage.clientHeight) / P > (past * (0.78 - GEO.eye) * S) / out || (0.44 * stage.clientHeight) / P > (past * (GEO.eye - 0.07) * S) / out;
     const sameGaps = (a) => a && ['N', 'E', 'S'].every((k) => a[k]?.gap === gaps[k]?.gap && a[k]?.pad === gaps[k]?.pad);
     setGeo((g) => (g && g.S === S && g.L === L && g.D === D && g.tall === tall && sameGaps(g.gaps) ? g : { S, L, D, tall, gaps }));
   });
