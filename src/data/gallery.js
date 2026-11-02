@@ -134,7 +134,7 @@ export const photos = [
   { room: 'film', file: '/photos/film/07.jpg', title: 'Bridge and vines', year: '2024', place: 'Nakdong River Estuary Eco Center, Busan', camera: 'Nikon F100', lens: '', film: 'ColorPlus 200', note: '' },
   { room: 'film', file: '/photos/film/08.jpg', title: 'Roses', year: '2024', place: 'San Jose Rose Garden', camera: 'Pentax 6x7', lens: '', film: 'Portra 400', note: '' },
   { room: 'film', file: '/photos/film/10.jpg', title: 'Roses against the sky', year: '2022', place: 'San Jose Rose Garden', camera: 'Nikon F3HP', lens: '', film: 'Portra 160', note: '' },
-  { room: 'film', file: '/photos/film/11.jpg', title: 'Dragon lanterns', year: '2023', place: 'Chinatown, San Francisco', camera: 'Nikon F3HP', lens: 'Zeiss Otus 55mm F1.4', film: 'Ilford HP5', note: '' },
+  { room: 'film', file: '/photos/film/11.jpg', title: 'Gum Lung', year: '2023', place: 'Chinatown, San Francisco', camera: 'Nikon F3HP', lens: 'Zeiss Otus 55mm F1.4', film: 'Ilford HP5', note: '' },
   { room: 'film', file: '/photos/film/12.jpg', title: 'Posts along the path', year: '2023', place: 'Byxbee Park', camera: 'Nikon F3HP', lens: '', film: 'Portra 400', note: '' },
   { room: 'film', file: '/photos/film/13.jpg', title: 'Skateboarder at San Jose City Hall', year: '2023', place: 'San Jose', camera: 'Nikon F3HP', lens: '', film: 'Portra 400', note: '' },
 ];

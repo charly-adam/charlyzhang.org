@@ -468,7 +468,7 @@ function Room({ room }) {
   if (geo) Object.entries(pillarFor(S, D)).forEach(([k, f]) => (faces[k] = { ...f, transform: placeFace(f.x0, f.z0, f.rot) }));
 
   const door = { to: exit, next, onLeave: leave };
-  const wallProps = { S, near, solo: !!room.solo, artist: site.name, offFor, onOpen, onZoom: onZoomGroup };
+  const wallProps = { S, near, solo: !!room.solo, offFor, onOpen, onZoom: onZoomGroup };
   const stageClass = `stage room t-${room.theme}${room.solo ? ' solo' : ''}${focus ? ' near' : ''}${near ? ' dark' : ''}${atIntro ? ' at-intro' : ''}${geo ? '' : ' unmeasured'}${ready ? ' ready' : ''}${leaving ? ' leaving' : ''}${entered ? ' in' : ' at-door'}${geo?.tall ? ' tall' : ''}`;
   const arrowLabels = near ? ['The photo to the left', 'The photo to the right'] : entered ? ['Walk left', 'Walk right'] : ['Go round to the left', 'Go round to the right'];
 

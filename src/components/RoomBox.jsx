@@ -92,7 +92,7 @@ function Bay() {
 // One wall of the room: its surface, the floor's reflection of what hangs on it, the photos in
 // their slots (each on a bay of its own, in a solo room), and on the entrance wall, the
 // archway out.
-export function Wall({ side, len, S, groups, near, solo, artist, offFor, onOpen, onZoom, door, style, wallRef }) {
+export function Wall({ side, len, S, groups, near, solo, offFor, onOpen, onZoom, door, style, wallRef }) {
   const one = groups.length === 1 && !door;
   return (
     <div ref={wallRef} className={`wall wall-${side}${one ? ' one' : ''}${door ? ' has-door' : ''}`} data-side={side} style={style}>
@@ -118,7 +118,7 @@ export function Wall({ side, len, S, groups, near, solo, artist, offFor, onOpen,
           <div className="ggap p3 frames">
             {g.map((p) => <Frame key={p.id} photo={p} lit={p === near} onOpen={() => onOpen(p)} />)}
           </div>
-          <WallLabel group={g} artist={artist} onZoom={() => onZoom(g)} />
+          <WallLabel group={g} onZoom={() => onZoom(g)} />
         </div>
       ))}
       {door && <DoorCol {...door} S={S} />}

@@ -33,8 +33,8 @@ export function Frame({ photo, lit, onOpen }) {
             <stop offset="0.72" stopColor="#fffbf1" stopOpacity="0.16" />
             <stop offset="1" stopColor="#fffbf1" stopOpacity="0" />
           </linearGradient>
-          <filter id="beam-b" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="4" />
+          <filter id="beam-b" x="-40%" y="-20%" width="180%" height="150%">
+            <feGaussianBlur stdDeviation="5" />
           </filter>
         </defs>
         <path d="M50 0 L100 100 L0 100 Z" fill="url(#beam-g)" filter="url(#beam-b)" />
@@ -75,11 +75,10 @@ export const titleLine = (p) => [p.title, p.year].filter(Boolean).join(', ');
 export const metaLine = (p) => [p.place, p.camera, p.lens, p.film].filter(Boolean).join(' · ');
 
 // Small wall label printed beside a group of photos; clicking it walks up to the photo.
-export function WallLabel({ group, artist, onZoom }) {
+export function WallLabel({ group, onZoom }) {
   const names = group.map((p) => p.title).join(' and ');
   return (
     <button type="button" className="label ink lblpos" tabIndex={-1} onClick={onZoom} aria-label={`View ${names}`}>
-      <span className="lt lbl-artist">{artist}</span>
       {group.map((p) => (
         <span key={p.id} className="lbl-entry">
           <span className="lt lbl-title">{titleLine(p)}</span>
