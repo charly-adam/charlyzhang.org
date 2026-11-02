@@ -55,3 +55,6 @@ Reviewed Charly's PR #7 on the Mac: build passes; lobby, Birds, Favorites fine a
 
 ## 2026-11-02 · charly · charly · done: photo details from Charly's doc, round 2
 Ready for Adam (PR charly -> adam). Data only: src/data/gallery.js photo lines regenerated from Charly's updated doc (30 photos changed: retitles such as Bow Lake, Moon Rose, Empty booth, Great Blue Heron, wading; fuller locations; years filled in for most Birds photos and a few others). Order unchanged. Note: the generator now maps doc photos to files through the pre-edit gallery.js (b9735a9^), since the titles no longer match the original ones.
+
+## 2026-11-02 · charly · charly · done: two more doc fixes
+Added to PR #10. Mount Rainier spelled right; Film photo 12 retitled The Pole Field. Data only.

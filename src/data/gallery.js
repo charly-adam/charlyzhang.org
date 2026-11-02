@@ -94,7 +94,7 @@ export const photos = [
   { room: 'travel', file: '/photos/travel/03.jpg', title: 'Starfield Library', year: '2024', place: 'Gangnam District, Seoul', camera: 'Nikon F100', lens: '', film: 'Ilford HP5', note: '' },
   { room: 'travel', file: '/photos/travel/04.jpg', title: 'Sidewalk above the traffic', year: '2024', place: 'Jung District, Seoul', camera: 'Nikon F100', lens: '', film: 'CineStill 400D', note: '' },
   { room: 'travel', file: '/photos/travel/05.jpg', title: 'Museo Nacional de Antropología', year: '2025', place: 'Mexico City', camera: 'Nikon L35AF', lens: '', film: 'ColorPlus 200', note: '' },
-  { room: 'travel', file: '/photos/travel/06.jpg', title: 'On the trail below the mountain', year: '2025', place: 'Paradise, Mount Rainer', camera: 'Nikon F100', lens: '', film: 'ColorPlus 200', note: '' },
+  { room: 'travel', file: '/photos/travel/06.jpg', title: 'On the trail below the mountain', year: '2025', place: 'Paradise, Mount Rainier', camera: 'Nikon F100', lens: '', film: 'ColorPlus 200', note: '' },
   { room: 'travel', file: '/photos/travel/07.jpg', title: 'The Seattle Great Wheel', year: '2025', place: 'Seattle', camera: 'Nikon F100', lens: '', film: 'T-Max 400', note: '' },
   { room: 'travel', file: '/photos/travel/08.jpg', title: 'Neon after rain', year: '2026', place: 'Muslim Dasi Residential Quarter, Xian', camera: 'Nikon L35AF', lens: '', film: 'CineStill 800T', note: '' },
   { room: 'travel', file: '/photos/travel/09.jpg', title: 'Fisherman on the Yangtze River', year: '2026', place: 'Chongqing', camera: 'Nikon L35AF', lens: '', film: 'T-Max 400', note: '' },
@@ -137,7 +137,7 @@ export const photos = [
   { room: 'film', file: '/photos/film/08.jpg', title: 'Roses', year: '2024', place: 'San Jose Rose Garden', camera: 'Pentax 6x7', lens: '', film: 'Portra 400', note: '' },
   { room: 'film', file: '/photos/film/10.jpg', title: 'Roses against the sky', year: '2022', place: 'San Jose Rose Garden', camera: 'Nikon F3HP', lens: '', film: 'Portra 160', note: '' },
   { room: 'film', file: '/photos/film/11.jpg', title: 'Gum Lung', year: '2023', place: 'Chinatown, San Francisco', camera: 'Nikon F3HP', lens: 'Zeiss Otus 55mm F1.4', film: 'Ilford HP5', note: '' },
-  { room: 'film', file: '/photos/film/12.jpg', title: 'Posts along the path', year: '2023', place: 'Byxbee Park', camera: 'Nikon F3HP', lens: '', film: 'Portra 400', note: '' },
+  { room: 'film', file: '/photos/film/12.jpg', title: 'The Pole Field', year: '2023', place: 'Byxbee Park', camera: 'Nikon F3HP', lens: '', film: 'Portra 400', note: '' },
   { room: 'film', file: '/photos/film/13.jpg', title: 'Skateboarder at San Jose City Hall', year: '2023', place: 'San Jose', camera: 'Nikon F3HP', lens: '', film: 'Portra 400', note: '' },
 ];
 
