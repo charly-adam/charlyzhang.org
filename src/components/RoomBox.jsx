@@ -420,7 +420,8 @@ function EnterMark({ S, D, onEnter }) {
       style={{ width: W, height: H, transformOrigin: '50% 50%', transform: `translate3d(${cx - W / 2}px,${y - H / 2}px,${D / 2}px) rotateY(-90deg) rotateX(90deg)` }}
     >
       <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        <path d="M50 62 V12 M29 33 L50 12 L71 33" />
+        {/* one filled outline, stem and head together, so the point is sharp and clean */}
+        <path d="M50 10 L72 32 L67 37 L53.5 23.5 V62 H46.5 V23.5 L33 37 L28 32 Z" />
         <text x="50" y="94" textAnchor="middle" textLength="84" lengthAdjust="spacing">ENTER</text>
       </svg>
     </button>

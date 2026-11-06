@@ -88,3 +88,6 @@ Checked in headless Chrome (1440x900 @1/@2, 390x844 @3). A faint hairline is lef
 
 ## 2026-11-06 · charly · charly · done: enter arrow style, whole archway goes in
 Pushed to charly; no PR yet. ENTER floor arrow: square caps and a mitred point like the lobby signs' Arrow, and its gentle pulse is back. The whole archway is a click target from the hallway (button.enter-door on the hall-wall, the arch's size; hidden once in). At the door the room's frames, labels and exit sign take no clicks (.stage.at-door), so a click on a photo seen through the arch goes in instead of zooming. Checked in headless Chrome (1440x900, 390x844).
+
+## 2026-11-06 · charly · charly · done: enter arrow as one shape, dark on pale floors
+Pushed to charly; no PR yet. The floor arrow was three stroked lines that the non-uniform SVG stretch pulled apart (the stem's square cap poked out past the tip); it's now one filled outline, stem and head together. On pale floors (themes white and sky) the mark is dark (--mark #2e2c28); elsewhere it stays off-white.

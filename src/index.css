@@ -1191,11 +1191,7 @@ a {
   width: 100%;
   height: 100%;
   overflow: visible;
-  fill: none;
-  stroke: #f3efe6;
-  stroke-width: 6;
-  stroke-linecap: square;
-  stroke-linejoin: miter;
+  fill: var(--mark, #f3efe6);
   opacity: 0.62;
   animation: enter-glow 2.6s ease-in-out 1s infinite;
 }
@@ -1213,9 +1209,12 @@ a {
     animation: none;
   }
 }
+/* on a pale floor, dark vinyl instead */
+.t-white .enter-mark,
+.t-sky .enter-mark {
+  --mark: #2e2c28;
+}
 .enter-mark text {
-  fill: #f3efe6;
-  stroke: none;
   font-family: inherit;
   font-size: 19px;
   font-weight: 600;
