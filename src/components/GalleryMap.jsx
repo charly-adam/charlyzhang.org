@@ -1,4 +1,4 @@
-import { createContext, useEffect, useRef, useState } from 'react';
+import { createContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { roomList, site } from '../data/gallery.js';
 import { Pictogram } from './Icons.jsx';
 
@@ -100,6 +100,12 @@ export function GalleryMap({ here, onClose, onGo }) {
     const id = setTimeout(() => setOpening(false), OPEN);
     return () => clearTimeout(id);
   }, []);
+  // the flaps come back to fold it up: scrolled as far down as the paper (a phone's scrolls)
+  useLayoutEffect(() => {
+    if (!folding) return;
+    const top = paperRef.current?.scrollTop || 0;
+    ref.current?.querySelectorAll('.flap-face').forEach((el) => (el.scrollTop = top));
+  }, [folding]);
   useEffect(() => {
     if (!folding) return undefined;
     // closed first, so the page is no longer inert when focus goes back to the opener

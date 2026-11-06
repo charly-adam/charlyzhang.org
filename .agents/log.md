@@ -58,3 +58,10 @@ Ready for Adam (PR charly -> adam). Data only: src/data/gallery.js photo lines r
 
 ## 2026-11-02 · charly · charly · done: two more doc fixes
 Added to PR #10. Mount Rainier spelled right; Film photo 12 retitled The Pole Field. Data only.
+
+## 2026-11-05 · charly · charly · done: no pillar, rooms fit their photos, phone view, phone map
+Ready for Adam (PR charly -> adam). Charly chose to drop the pillar:
+- The room's number, name and blurb are now a sign on the hallway side of the entrance wall, left of the arch (above it on phones). Hallway renders it; clicking it walks up to read it (measure('intro') uses hallFaceFor). GEO.pillar, pillarFor, the Pillar component, the Slab cuts at the pillar, the behind-pillar culling in markUnseen and all pillar CSS are gone. GEO.doorCam is -1.1 (was -0.8) so the sign fits beside the arch; Adam, your `tall` check uses doorCam, so please re-check the doorway at Retina, especially Nature, now that more of the room is in view through the arch with nothing in front of it.
+- With no pillar to walk round, rooms are as small as their photos need (GEO.minD 1.7, minL 1.8 instead of D 2.52 / minL 2.4); corner views just stay inside the room. Benches is now 2.36 x 1.70 S, photos about 0.1 S from every corner. Spare wall is shared equally at both ends (spareW gone).
+- Phones: roomScale is min(h, 1.6 w) (CSS --S min(--H, 160vw)), so photos are bigger in the walk; up close the photo fills 95% (FILL_PHONE) and the arrows fade out after a moment, a touch wakes them (.turn.wake). The map now opens and folds like a book on phones too; the flaps copy the paper's scroll when folding.
+Checked in desktop Chrome and Chrome's 375x812 phone emulation, not on a real phone or Safari.
