@@ -2,45 +2,40 @@
 // The room's shape, in units of S (the room scale: the height of a desktop view).
 //
 // Top-down, x runs along the room and z across it. The door is in the middle of the x = 0 wall
-// (W); the two long walls are N (z = 0) and S (z = D); the far wall is E (x = L). A pillar just
-// inside the door carries the room's text, facing the door. You walk a loop at distance `d`
-// from whichever wall you face, turning at the corners.
+// (W); the two long walls are N (z = 0) and S (z = D); the far wall is E (x = L). The room's text
+// is on the hallway side of the entrance wall, beside the arch, like a gallery's sign. You walk
+// a loop at distance `d` from whichever wall you face, turning at the corners.
 //
 // Yaw: 0 faces -z (the N wall), 90 faces +x (E), 180 faces +z (S), 270 faces -x (W).
 // ─────────────────────────────────────────────────────────────────────────────
 
 // The room's scale S for a view w × h: the height of a desktop view, or on a screen taller than
-// it's wide, its width. (Narrower than that, the room would sit in a band across the middle
-// of a phone, small, with the camera looking far up and down past its walls.)
-export const roomScale = (w, h) => Math.min(h, w);
+// it's wide, 1.6 times its width, so a phone sees about a photo and a half of wall at a time,
+// big enough to look at. (Any smaller, the room would sit small in a band across the middle of
+// a phone, with the camera looking far up and down past its walls.)
+export const roomScale = (w, h) => Math.min(h, 1.6 * w);
 
 export const GEO = {
   P: 0.95, // perspective: the eye's distance from the picture plane (the .room CSS repeats it)
   d: 0.95, // how far from a wall you stand to look at it (= P, so it's seen at scale 1, and a
   // 16:10 view takes in 1.6 S of wall); close, so the room can be small
-  // The room is as small as the walk allows, so photos sit near the corners: 2 d across plus the
-  // pillar between the two long walls' walks, and long enough that the far wall's walk passes
-  // behind the pillar (each with `clear` to spare): D = 2 d + pillar.w + 2 clear, minL =
-  // pillar.x + pillar.t + clear + d.
-  D: 2.52, // the room's depth, between the two long walls
-  minL: 2.4, // the room is at least this long
-  clear: 0.12, // how far the walk keeps off the pillar
+  // The room is as big as its photos need, so they sit near the corners, and no smaller than
+  // this (you stand d off a wall, so a room less than about 2 d across feels cramped)
+  minD: 1.7, // the room's depth, between the two long walls, at least
+  minL: 1.8, // its length, at least
   inset: 0.1, // bare wall before the first photo and after the last
   gap: 0.05, // space between two photo slots: close, so several are in view at once
   maxGap: 0.07, // and on a wall with room to spare, at most this, so three slots and their labels
   // fit in a 16:10 view
-  spareW: 0.35, // the share of a long wall's spare length left at its entrance end (Room.jsx)
   eye: 0.44, // eye level, down the wall strip (which runs 0..1 S)
-  pillar: { x: 1.1, t: 0.22, w: 0.38 }, // front face at x (just behind you at the door's stop);
-  // thickness; width (centred across the room)
   arch: { w: 0.55, h: 0.58 }, // the archway in: its width; the height of its crown above the floor
   hall: { depth: 1.25, t: 0.15 }, // the hallway outside: how far back it runs; the wall's thickness
-  doorCam: -0.8, // where you stand in the hallway, looking in through the arch (the .room CSS
-  // vars --archw and --archh repeat the arch's size)
+  doorCam: -1.1, // where you stand in the hallway, looking in through the arch, far enough back to
+  // read the room's sign beside it (the .room CSS vars --archw and --archh repeat the arch's size)
+  sign: { w: 0.3, gap: 0.06 }, // the room's sign on the hallway wall: its width; how far left of the arch
   turn: 0.6, // scroll distance per radian of turning at a corner
   cornerPad: 0.05, // spare wall past the photos a corner view takes in
-  cornerFar: 1.4, // a corner view may stand at most this far off the walls, and never so far that
-  // it reaches the pillar (Room.jsx works that out)
+  cornerFar: 1.4, // a corner view may stand at most this far off the walls (and stays in the room)
   // Big surfaces are built from pieces: the browser only draws the pieces in view, and sizes
   // each piece's bitmap by how close its corner is, so a piece near the camera must be small
   // or it costs hundreds of megabytes (and Chrome drops surfaces when it runs out). The floor
@@ -136,20 +131,10 @@ export function depthOf(el) {
 // The short way round from heading a to heading b, in degrees (-180..180).
 export const turnTo = (a, b) => ((((b - a) % 360) + 540) % 360) - 180;
 
-// The pillar's four faces, placed like walls (the front faces the door).
-export function pillarFor(S, D) {
-  const { x, t, w } = GEO.pillar;
-  const xP = x * S;
-  const tP = t * S;
-  const wP = w * S;
-  const z0 = D / 2 - wP / 2;
-  const z1 = D / 2 + wP / 2;
-  return {
-    front: { len: wP, x0: xP, z0, rot: -90, dir: [0, 1], nrm: [-1, 0], yaw: 90 },
-    back: { len: wP, x0: xP + tP, z0: z1, rot: 90, dir: [0, -1], nrm: [1, 0], yaw: 270 },
-    sideN: { len: tP, x0: xP + tP, z0, rot: 180, dir: [-1, 0], nrm: [0, -1], yaw: 180 },
-    sideS: { len: tP, x0: xP, z0: z1, rot: 0, dir: [1, 0], nrm: [0, 1], yaw: 0 },
-  };
+// The hallway side of the entrance wall, which carries the room's sign, placed like a wall
+// (facing the hallway, where you start).
+export function hallFaceFor(S, D) {
+  return { len: D, x0: -GEO.hall.t * S, z0: 0, rot: -90, dir: [0, 1], nrm: [-1, 0], yaw: 90 };
 }
 
 // Where to stand to look straight at the point (lx, ly) on a face from `dist` out, as a full
