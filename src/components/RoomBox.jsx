@@ -168,6 +168,16 @@ export function Hallway({ S, D, theme, room, onToggle, onEnter, hallRef }) {
     <>
       <div ref={hallRef} className="wall hall-wall" style={{ width: D, transform: placeFace(-T, 0, -90), '--sl': `${signLeft}px`, '--sc': `${D / 2}px` }}>
         <Panels len={D} S={S} door size={GEO.panelNear} />
+        {/* the whole archway takes you in too (from out here, the photos beyond it aren't for
+            clicking) */}
+        <button
+          type="button"
+          className="enter-door"
+          tabIndex={-1}
+          onClick={onEnter}
+          aria-label="Enter the room"
+          style={{ left: D / 2 - (GEO.arch.w * S) / 2, top: (0.78 - GEO.arch.h) * S, width: GEO.arch.w * S, height: GEO.arch.h * S }}
+        />
         <section className="intro hall-intro ink">
           <button type="button" className="intro-inner" tabIndex={-1} onClick={onToggle} aria-label={`Read the introduction to ${room.name}`}>
             <span className="intro-room">{room.name}</span>
@@ -410,7 +420,7 @@ function EnterMark({ S, D, onEnter }) {
       style={{ width: W, height: H, transformOrigin: '50% 50%', transform: `translate3d(${cx - W / 2}px,${y - H / 2}px,${D / 2}px) rotateY(-90deg) rotateX(90deg)` }}
     >
       <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        <path d="M50 8 V58 M30 30 L50 8 L70 30" />
+        <path d="M50 62 V12 M29 33 L50 12 L71 33" />
         <text x="50" y="94" textAnchor="middle" textLength="84" lengthAdjust="spacing">ENTER</text>
       </svg>
     </button>

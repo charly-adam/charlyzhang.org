@@ -85,3 +85,6 @@ Pushed to charly; no PR yet (Charly will ask).
 - Zoom twice as fast: dolly IN 850 / OUT 650 ms, lead-in 210 ms, lamp ripple 35 ms, lights back on sooner. Slab is memo'd and Tile's deps use dirs.join(): before, every route change redrew all floor/ceiling canvases and froze the start of each move ~0.4 s.
 - Data from Charly's doc: Lifeguard tower camera Pentax 6x7, "Skateboarder at City Hall"; also fixed "Pentax 67" -> "Pentax 6x7" for Bench above the lake and Ferrari GT car (in the doc too).
 Checked in headless Chrome (1440x900 @1/@2, 390x844 @3). A faint hairline is left where the arch springs.
+
+## 2026-11-06 · charly · charly · done: enter arrow style, whole archway goes in
+Pushed to charly; no PR yet. ENTER floor arrow: square caps and a mitred point like the lobby signs' Arrow, and its gentle pulse is back. The whole archway is a click target from the hallway (button.enter-door on the hall-wall, the arch's size; hidden once in). At the door the room's frames, labels and exit sign take no clicks (.stage.at-door), so a click on a photo seen through the arch goes in instead of zooming. Checked in headless Chrome (1440x900, 390x844).

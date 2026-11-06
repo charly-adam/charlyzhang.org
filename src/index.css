@@ -314,8 +314,29 @@ a {
 .label,
 .intro-inner,
 .doorbtn,
-.room3d .enter-mark {
+.room3d .enter-mark,
+.room3d .enter-door {
   pointer-events: auto;
+}
+/* the archway, seen from the hallway: a click anywhere in it goes in (RoomBox Hallway) */
+.enter-door {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transform: translateZ(1px);
+  backface-visibility: hidden;
+}
+.stage.in .enter-door {
+  display: none;
+}
+/* from the doorway the room's photos, labels and exit aren't for clicking: you go in first */
+.stage.at-door .room3d .frame,
+.stage.at-door .room3d .label,
+.stage.at-door .room3d .doorbtn {
+  pointer-events: none;
 }
 .frame,
 .label,
@@ -1152,7 +1173,8 @@ a {
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
 }
 /* the arrow on the hallway floor that takes you in (RoomBox EnterMark): a quiet vinyl floor
-   marking, a thin arrow over spaced-out capitals; gone once you're in */
+   marking, a square-cut arrow like the lobby's signs over spaced-out capitals, breathing a
+   little to catch the eye; gone once you're in */
 .enter-mark {
   left: 0;
   top: 0;
@@ -1171,10 +1193,25 @@ a {
   overflow: visible;
   fill: none;
   stroke: #f3efe6;
-  stroke-width: 4.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  stroke-width: 6;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
   opacity: 0.62;
+  animation: enter-glow 2.6s ease-in-out 1s infinite;
+}
+@keyframes enter-glow {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .enter-mark svg {
+    animation: none;
+  }
 }
 .enter-mark text {
   fill: #f3efe6;
