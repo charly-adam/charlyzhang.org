@@ -1,9 +1,8 @@
 # Room walk-around rendering rules
 
-Chrome rasterises each 3D plane at the magnification of its nearest corner and at device pixel ratio; past its tile memory budget it silently drops walls, floor, the pillar or photos (usually first in the biggest room's doorway view, where the whole room is in view). What holds now (Nov 2026):
+Chrome rasterises each 3D plane at the magnification of its nearest corner and at device pixel ratio; past its tile memory budget it silently drops walls, floor or photos (usually first in the biggest room's doorway view, where the whole room is in view). What holds now (Nov 2026):
 - floor/ceiling tiles are `<canvas>` (512px textured, 64px for a plain-colour ceiling), drawn once; walls are panels ~0.75 S (0.3 S on the entrance wall); tiles under/over the camera hidden per frame; hallway floor/ceiling/far wall `display: none` at the door.
 - floor reflections: only frames are reflected, each `.refl .fw` its own small plane; the wall's sheen is painted into the floor tile canvases (additive, `floor.sheen` in gallery.js themes). A wall-length reflection plane — even split into windowed pieces — blew the budget.
-- the pillar's faces each have a solid reflection plane (`.pillar-refl`): it's the only thing inside the room, so without it the far wall's frame reflections show through where the pillar stands.
 - frames are flat (print + glass one layer), edge faces are siblings in `.fw`; the shadow is a box-shadow on the frame.
 - at the doorway, anything the arch hides is marked `data-unseen` (projected through the opening, Room.jsx `markUnseen`) and hidden until you go in.
 - the arch reveal (`.pjl/.pjr/.parch`) is solid colour: seen edge-on by the camera, a textured face rasterises at a huge scale.

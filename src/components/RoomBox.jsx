@@ -165,15 +165,27 @@ function DoorCol({ to, onLeave, S }) {
 // The hallway outside the arch, where you start, finished like the room: the outside of the
 // entrance wall, the wall across from it, and its floor and ceiling. The floor and ceiling and
 // the far wall are under, over and behind you while you stand there, so they stay hidden until
-// you go in.
-export function Hallway({ S, D, theme }) {
+// you go in. Left of the arch hangs the room's sign, as in a gallery: its number, name and
+// blurb. Clicking it walks up to read it.
+export function Hallway({ S, D, theme, room, onToggle, hallRef }) {
   if (!S) return null;
   const T = GEO.hall.t * S;
   const depth = GEO.hall.depth * S;
+  const signLeft = D / 2 - (GEO.arch.w / 2 + GEO.sign.gap + GEO.sign.w) * S;
   return (
     <>
-      <div className="wall hall-wall" style={{ width: D, transform: placeFace(-T, 0, -90) }} aria-hidden="true">
+      <div ref={hallRef} className="wall hall-wall" style={{ width: D, transform: placeFace(-T, 0, -90), '--sl': `${signLeft}px`, '--sc': `${D / 2}px` }}>
         <Panels len={D} S={S} door size={GEO.panelNear} />
+        <section className="intro hall-intro ink">
+          <button type="button" className="intro-inner" tabIndex={-1} onClick={onToggle} aria-label={`Read the introduction to ${room.name}`}>
+            <span className="intro-kicker">Room {room.num}</span>
+            <span className="intro-room">{room.name}</span>
+            <span className="intro-text">
+              {room.blurb}
+              {room.intro ? ` ${room.intro}` : ''}
+            </span>
+          </button>
+        </section>
       </div>
       <div className="wall hall hall-far" style={{ width: D, transform: placeFace(-depth, D, 90) }} aria-hidden="true">
         <Panels len={D} S={S} />
@@ -181,48 +193,6 @@ export function Hallway({ S, D, theme }) {
       <Slab kind="floor" S={S} L={depth - T} D={D} theme={theme} x0={-depth} cls="hall" edge={0.12} />
       <Slab kind="ceiling" S={S} L={depth - T} D={D} theme={theme} x0={-depth} cls="hall" edge={0.12} />
     </>
-  );
-}
-
-// The pillar just inside the door. Its front face, toward the door, carries the room's text.
-// Each face has its reflection in the floor, solid, so it hides the reflections of whatever the
-// pillar stands in front of, as the pillar hides the things themselves.
-export function Pillar({ room, onToggle, faces, S, pillarRef }) {
-  // The narrow sides are painted plain, no panels and no reflection: seen nearly edge on from
-  // the doorway, Safari would sort those pieces wrongly and draw them over the front face.
-  const face = (name, extra) => {
-    const f = faces[name];
-    const plain = name === 'sideN' || name === 'sideS';
-    return (
-      <div className={`face pface ${name}`} style={f && { width: f.len, transform: f.transform }}>
-        {f && !plain && <Panels len={f.len} S={S} />}
-        {f && !plain && <div className="refl pillar-refl" aria-hidden="true" />}
-        {f && plain && <div className="pside" aria-hidden="true" />}
-        {extra}
-      </div>
-    );
-  };
-  return (
-    <div ref={pillarRef} className="pillar">
-      {face('front', (
-        <section className="col intro ink">
-          <button type="button" className="intro-inner" tabIndex={-1} onClick={onToggle} aria-label={`Read the introduction to ${room.name}`}>
-            <span className="intro-room">
-              Room {room.num}:
-              <br />
-              {room.name}
-            </span>
-            <span className="intro-text">
-              {room.blurb}
-              {room.intro ? ` ${room.intro}` : ''}
-            </span>
-          </button>
-        </section>
-      ))}
-      {face('back')}
-      {face('sideN')}
-      {face('sideS')}
-    </div>
   );
 }
 
@@ -331,10 +301,8 @@ export function Slab({ kind, S, L, D, theme, x0 = 0, cls = '', edge = 0.3 }) {
   const floor = kind === 'floor';
   const look = floor ? theme.floor : theme.ceil;
   const T = Math.max(GEO.tile * S, GEO.tileMin);
-  // Columns along the room, cut where the pillar's front and back stand: Safari orders 3D
-  // surfaces roughly by their middles, and a tile running under the pillar's face could come
-  // out in front of it.
-  const cuts = [x0, ...[GEO.pillar.x * S, (GEO.pillar.x + GEO.pillar.t) * S].filter((c) => c > x0 && c < x0 + L), x0 + L];
+  // columns along the room
+  const cuts = [x0, x0 + L];
   const cols = [];
   for (let k = 1; k < cuts.length; k++) {
     const n = Math.ceil((cuts[k] - cuts[k - 1]) / T - 0.01);
@@ -413,9 +381,9 @@ export function Track({ S, L, D }) {
 // The arrows floating either side of the view: at the door they pick a way round (and nudge
 // to catch the eye); after that they walk you left and right, and up close, to the photo
 // either side.
-export function EdgeArrows({ onLeft, onRight, hidden, leftLabel, rightLabel }) {
+export function EdgeArrows({ onLeft, onRight, hidden, wake, leftLabel, rightLabel }) {
   return (
-    <div className={hidden ? 'turn hide' : 'turn'} aria-hidden={hidden}>
+    <div className={`turn${hidden ? ' hide' : ''}${wake ? ' wake' : ''}`} aria-hidden={hidden}>
       <button type="button" className="turnbtn glass turn-l" onClick={onLeft} tabIndex={hidden ? -1 : 0} aria-label={leftLabel}>
         <Chevron dir={-1} size={26} />
       </button>

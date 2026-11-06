@@ -4,6 +4,7 @@ import { poseFacing, rotY, turnTo } from '../room/geometry.js';
 const IN = { ms: 1700, ease: bezier(0.62, 0, 0.18, 1) };
 const OUT = { ms: 1300, ease: bezier(0.5, 0, 0.2, 1) };
 const FILL = 0.8; // how much of the view the target fills when you're up close
+const FILL_PHONE = 0.95; // on a phone, where there's no wall label beside it, more
 const MAX_ZOOM = 2.8; // but never closer than this (small things like the room's title)
 
 // A CSS-style cubic-bezier timing function.
@@ -106,7 +107,8 @@ export function useDolly({ stageRef, dollyRef, targetId, measure, leadIn, resetK
       const P = getP();
       const atRest = !s.yaw && !s.x && !s.y && !s.z;
       // where the camera ends up: square on to the target, close enough for it to fill the view
-      const zoom = Math.min((FILL * H) / m.box.h, (FILL * W) / m.box.w, MAX_ZOOM);
+      const fill = window.matchMedia('(max-width: 700px)').matches ? FILL_PHONE : FILL;
+      const zoom = Math.min((fill * H) / m.box.h, (fill * W) / m.box.w, MAX_ZOOM);
       const end = poseFacing(m.face, m.box.x + m.box.w / 2, m.box.y + m.box.h / 2, m.depth + P / zoom, m.eye);
       const b = m.base.pose;
       rebase(b);
