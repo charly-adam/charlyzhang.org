@@ -76,3 +76,12 @@ Pushed to charly; no PR yet (Charly will ask for one when he's previewed it).
 - Phone stability: tiles 0.9 S on phones, canvases freed on unmount, per-frame view culling on phones (see room-walkaround-rendering.md). Hallway floor is solid (desktop now draws it at the door, since doorCam -1.1 makes landscape count as `tall`, and room reflections showed through it). Adam: worth a Retina look at the door now that the hall floor shows on desktop.
 - Phone lobby: the room signs are back, two columns under the lettering (smaller lettering, no counts, on short phones).
 Checked in headless Chrome (390x844 @3, 375x667, 1440x900), not on a real phone or Safari.
+
+## 2026-11-06 · charly · charly · done: quieter enter mark, seamless arch, map without numbers, faster zoom, doc fixes
+Pushed to charly; no PR yet (Charly will ask).
+- ENTER floor mark is a small thin-stroke arrow over spaced capitals (GEO.enter 0.15 S wide, 0.2 S deep), no pulse.
+- Arch: ArchPanel is now an ordinary full-height .panel (same paint/grain/pattern, background lined up) with the opening cut by clip-path: path(); it overlaps each neighbour by 1px, so no seam or see-through gap. The reveal has 48 facets (was 14), shaded from the left jamb's tone through the crown to the right jamb's (--m per facet). The SVG arch and its .arch .s0/.s1 CSS are gone. Adam: clip-path on a 3D plane is new here; worth a Retina/Safari look at the door.
+- Room numbers gone everywhere they showed: map plan (and its photo-count ticks; icon and name now centred in each box), map key and pick panel, the hallway sign, and the loading curtain (kicker is site.name). room.num still exists in data.
+- Zoom twice as fast: dolly IN 850 / OUT 650 ms, lead-in 210 ms, lamp ripple 35 ms, lights back on sooner. Slab is memo'd and Tile's deps use dirs.join(): before, every route change redrew all floor/ceiling canvases and froze the start of each move ~0.4 s.
+- Data from Charly's doc: Lifeguard tower camera Pentax 6x7, "Skateboarder at City Hall"; also fixed "Pentax 67" -> "Pentax 6x7" for Bench above the lake and Ferrari GT car (in the doc too).
+Checked in headless Chrome (1440x900 @1/@2, 390x844 @3). A faint hairline is left where the arch springs.

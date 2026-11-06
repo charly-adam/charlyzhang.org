@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { poseFacing, rotY, turnTo } from '../room/geometry.js';
 
-const IN = { ms: 1700, ease: bezier(0.62, 0, 0.18, 1) };
-const OUT = { ms: 1300, ease: bezier(0.5, 0, 0.2, 1) };
+const IN = { ms: 850, ease: bezier(0.62, 0, 0.18, 1) };
+const OUT = { ms: 650, ease: bezier(0.5, 0, 0.2, 1) };
 const FILL = 0.8; // how much of the view the target fills when you're up close
 const FILL_PHONE = 0.95; // on a phone, where there's no wall label beside it, more
 const MAX_ZOOM = 2.8; // but never closer than this (small things like the room's title)

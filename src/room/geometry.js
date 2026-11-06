@@ -33,7 +33,7 @@ export const GEO = {
   doorCam: -1.1, // where you stand in the hallway, looking in through the arch, far enough back to
   // read the room's sign beside it (the .room CSS vars --archw and --archh repeat the arch's size)
   sign: { w: 0.3, gap: 0.06 }, // the room's sign on the hallway wall: its width; how far left of the arch
-  enter: { x0: -0.44, x1: -0.165, w: 0.26 }, // the arrow on the hallway floor that takes you in: from
+  enter: { x0: -0.4, x1: -0.2, w: 0.15 }, // the arrow on the hallway floor that takes you in: from
   // and to (x; the hallway wall's outer face is at -hall.t), and its width. A desktop view sees
   // the floor from about -0.52 on, so it's all in view.
   turn: 0.6, // scroll distance per radian of turning at a corner

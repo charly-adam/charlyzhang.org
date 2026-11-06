@@ -416,7 +416,7 @@ function Room({ room }) {
     return { base, face: wallsRef.current[side], box, depth: depthOf(frame), eye };
   }, [stopFor]);
   // walking up to a photo waits a moment for the other lights to go out first
-  const leadIn = useCallback((id) => (id === 'intro' ? 0 : 420), []);
+  const leadIn = useCallback((id) => (id === 'intro' ? 0 : 210), []);
   const getP = useCallback(() => GEO.P * (geoRef.current?.S || 0), []);
   useDolly({ stageRef, dollyRef, targetId: focus, measure, leadIn, resetKey: room.slug, getPose: cam.getPose, jumpTo: cam.jumpTo, getP });
 
@@ -523,7 +523,7 @@ function Room({ room }) {
     const gi = room.groups.indexOf(g);
     const m = room.groups.length;
     const di = Math.abs(gi - litGroup.current);
-    return `${Math.min(di, m - di) * 70}ms`;
+    return `${Math.min(di, m - di) * 35}ms`;
   };
   const onZoomGroup = (g) => (g.includes(near) ? stepBack() : open(g[0]));
   const onOpen = (p) => (p === near ? stepBack() : open(p));
@@ -545,7 +545,7 @@ function Room({ room }) {
   const arrowLabels = near ? ['The photo to the left', 'The photo to the right'] : ['Walk left', 'Walk right'];
 
   return (
-    <div ref={stageRef} className={stageClass} style={{ '--on': switching ? '0.85s' : '0s' }} onClick={onStageClick} onPointerDown={() => {
+    <div ref={stageRef} className={stageClass} style={{ '--on': switching ? '0.43s' : '0s' }} onClick={onStageClick} onPointerDown={() => {
         if (!near) return;
         setWake(true);
         clearTimeout(wakeTimer.current);
@@ -571,7 +571,7 @@ function Room({ room }) {
           <span className="caption-meta">{metaLine(near)}</span>
         </p>
       )}
-      <Curtain key={room.slug} kicker={`Room ${room.num}`} name={room.name} progress={progress} />
+      <Curtain key={room.slug} kicker={site.name} name={room.name} progress={progress} />
       <EdgeArrows onLeft={() => arrow(-1)} onRight={() => arrow(1)} hidden={!entered || focus === 'intro' || flying || leaving} wake={wake} leftLabel={arrowLabels[0]} rightLabel={arrowLabels[1]} />
     </div>
   );

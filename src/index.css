@@ -345,7 +345,7 @@ a {
 /* lights out: the tiles are canvases with nothing to lay a shade over, so they dim instead */
 .ftile,
 .ctile {
-  transition: opacity 0.9s ease 0.7s;
+  transition: opacity 0.5s ease 0.35s;
 }
 .stage.dark .ftile,
 .stage.dark .ctile {
@@ -370,20 +370,6 @@ a {
   backface-visibility: hidden;
   background: url(/textures/wall-grain.png), var(--wall);
 }
-.panel.arch {
-  background: none;
-}
-.panel.arch svg {
-  position: absolute;
-  left: 0;
-  top: 0;
-}
-.arch .s0 {
-  stop-color: var(--wall0);
-}
-.arch .s1 {
-  stop-color: var(--wall1);
-}
 .panel::before {
   content: "";
   position: absolute;
@@ -393,9 +379,6 @@ a {
   height: var(--plh);
   background: var(--plc);
   box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.18), 0 -8px 12px -6px rgba(0, 0, 0, 0.18);
-}
-.panel.arch::before {
-  display: none;
 }
 .panel::after {
   content: "";
@@ -415,9 +398,6 @@ a {
 }
 .panel.first.last::after {
   background: var(--pl), var(--pr), var(--ptop), var(--pbot);
-}
-.panel.arch::after {
-  background: var(--ptop);
 }
 .world {
   position: absolute;
@@ -1076,7 +1056,7 @@ a {
   left: 0;
   top: 0;
   transform-origin: 0 0;
-  background: color-mix(in srgb, var(--wall1) 58%, black);
+  background: color-mix(in srgb, var(--wall1) var(--m, 58%), black);
 }
 /* the hallway: the outside of the entrance wall, the wall across from it, floor and ceiling,
    finished like the room. While you stand in it the far wall is behind you, and on a desktop
@@ -1171,8 +1151,8 @@ a {
 .glass:focus-visible {
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
 }
-/* the arrow on the hallway floor that takes you in (RoomBox EnterMark): light let into the
-   floor, breathing a little to catch the eye; gone once you're in */
+/* the arrow on the hallway floor that takes you in (RoomBox EnterMark): a quiet vinyl floor
+   marking, a thin arrow over spaced-out capitals; gone once you're in */
 .enter-mark {
   left: 0;
   top: 0;
@@ -1189,31 +1169,23 @@ a {
   width: 100%;
   height: 100%;
   overflow: visible;
-  fill: #f6f1e4;
-  animation: enter-glow 2.6s ease-in-out 1s infinite;
+  fill: none;
+  stroke: #f3efe6;
+  stroke-width: 4.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.62;
 }
 .enter-mark text {
+  fill: #f3efe6;
+  stroke: none;
   font-family: inherit;
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 19px;
+  font-weight: 600;
 }
 .stage.in .enter-mark {
   opacity: 0;
   pointer-events: none;
-}
-@keyframes enter-glow {
-  0%,
-  100% {
-    opacity: 0.78;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .enter-mark svg {
-    animation: none;
-  }
 }
 /* an arrow floating either side of the view, once you're in the room */
 .turn {
@@ -1381,7 +1353,7 @@ body:has(.stage:not(.ready)) .dock {
     color: #f3f2ee;
     text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
     pointer-events: none;
-    animation: caption-in 0.6s ease 1.5s both;
+    animation: caption-in 0.4s ease 0.75s both;
   }
   .caption-title {
     font-size: 16px;
@@ -2363,8 +2335,10 @@ dialog.map::backdrop {
   padding: 10px 11px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
+  align-items: center;
   gap: 6px;
+  text-align: center;
 }
 .plan-room:hover,
 .plan-desk:hover {
@@ -2381,20 +2355,12 @@ dialog.map::backdrop {
   border-color: #c8402f;
   box-shadow: inset 0 0 0 1px #c8402f, 0 0 0 1px #c8402f;
 }
-.plan-ticks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-.plan-ticks > span {
-  width: 7px;
-  height: 3px;
-  background: #1d1b17;
-}
+/* the room's pictogram over its name and count, in the middle of its box */
 .plan-name {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
 }
 .plan-icon {
   flex: none;
@@ -2517,14 +2483,11 @@ dialog.map::backdrop {
   min-height: 36px;
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: 22px minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
   padding: 7px 0;
   border-bottom: 1px solid rgba(29, 27, 23, 0.25);
-}
-.key-num {
-  font-size: 13px;
 }
 .key-name {
   font-size: 15px;
@@ -2535,9 +2498,6 @@ dialog.map::backdrop {
 }
 .key-row.picked {
   font-weight: 600;
-}
-.key-row.picked .key-num {
-  color: #a33222;
 }
 .key-pick {
   grid-area: pick;
@@ -2605,8 +2565,6 @@ dialog.map::backdrop {
     padding: 7px 6px;
   }
   .plan-name {
-    flex-direction: column;
-    align-items: flex-start;
     gap: 5px;
   }
   .plan-icon {
@@ -2667,10 +2625,10 @@ dialog.map::backdrop {
 .can-glow,
 .label,
 .frame::before {
-  transition: opacity 0.5s ease calc(0.75s + var(--off, 0ms));
+  transition: opacity 0.3s ease calc(0.38s + var(--off, 0ms));
 }
 .glow {
-  transition: opacity 0.5s ease calc(0.75s + var(--off, 0ms)), visibility 0s linear calc(1.25s + var(--off, 0ms));
+  transition: opacity 0.3s ease calc(0.38s + var(--off, 0ms)), visibility 0s linear calc(0.68s + var(--off, 0ms));
 }
 .shade,
 .refl .fw,
@@ -2682,7 +2640,7 @@ dialog.map::backdrop {
 .dof-b,
 .grain,
 .vignette::after {
-  transition: opacity 0.9s ease 0.7s;
+  transition: opacity 0.5s ease 0.35s;
 }
 /* lights off: a quick click per lamp, then the room */
 .stage.dark .beam,

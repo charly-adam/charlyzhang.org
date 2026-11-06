@@ -136,7 +136,6 @@ export function GalleryMap({ here, onClose, onGo }) {
   if (room) {
     about = (
       <>
-        <p className="pick-room">Room {room.num}</p>
         <p className="pick-name">{room.name}</p>
         <p className="pick-blurb">{room.blurb}</p>
         {room.slug === here && <p className="pick-here">You are here.</p>}
@@ -183,19 +182,14 @@ export function GalleryMap({ here, onClose, onGo }) {
               <button
                 type="button"
                 className="plan-pick"
-                aria-label={r.slug === here ? `Room ${r.num}, ${r.name}, ${r.photos.length} photographs, you are here` : `Go to room ${r.num}, ${r.name}, ${r.photos.length} photographs`}
+                aria-label={r.slug === here ? `${r.name}, ${r.photos.length} photographs, you are here` : `Go to ${r.name}, ${r.photos.length} photographs`}
                 {...pick(r.slug, `/room/${r.slug}`, r.slug === here)}
               >
-                <span className="plan-ticks" aria-hidden="true">
-                  {r.photos.map((p) => (
-                    <span key={p.id} />
-                  ))}
-                </span>
                 <span className="plan-name" aria-hidden="true">
                   <Pictogram name={r.icon} size={17} className="plan-icon" />
                   <span className="plan-words">
                     <span className="plan-num">
-                      {r.num} · {r.name}
+                      {r.name}
                     </span>
                     <span className="plan-count">{r.photos.length} photos</span>
                   </span>
@@ -224,7 +218,6 @@ export function GalleryMap({ here, onClose, onGo }) {
           <div className="key-rows" role="group" aria-labelledby={copy ? undefined : 'map-key'}>
             {roomList.map((r) => (
               <button key={r.slug} type="button" className={sel === r.slug ? 'key-row picked' : 'key-row'} {...pick(r.slug, `/room/${r.slug}`, r.slug === here)}>
-                <span className="key-num">{r.num}</span>
                 <span className="key-name">
                   {r.name}
                   {r.slug === here && <KeyHere />}
@@ -233,9 +226,6 @@ export function GalleryMap({ here, onClose, onGo }) {
               </button>
             ))}
             <button type="button" className={sel === DESK ? 'key-row picked' : 'key-row'} {...pick(DESK, '/', !here)}>
-              <span className="key-num" aria-hidden="true">
-                ·
-              </span>
               <span className="key-name">
                 Front desk
                 {!here && <KeyHere />}

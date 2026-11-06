@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { Link } from 'react-router';
 import { Arrow, Chevron } from './Icons.jsx';
 import { Frame, FrameReflection, WallLabel } from './Frame.jsx';
@@ -39,28 +39,18 @@ export function Panels({ len, S, door, size = GEO.panel }) {
   );
 }
 
-// The wall over the archway, from the ceiling line down to where the arch springs, with the
-// round top of the opening cut out of it (drawn in SVG, so no mask is needed).
+// The wall round the archway: a panel like the rest, painted the same (its paint, grain and
+// pattern lined up with the panels beside it), with the opening cut out of it, round at the top.
+// It reaches a pixel over each neighbour, so no hairline shows between them.
 function ArchPanel({ left, S }) {
   const W = GEO.arch.w * S;
   const r = W / 2;
-  const H = (0.71 - (GEO.arch.h - GEO.arch.w / 2)) * S;
-  const d = `M0 0H${W}V${H}H${W / 2 + r}A${r} ${r} 0 0 0 ${W / 2 - r} ${H}H0Z`;
+  const H = 0.71 * S; // a panel's height
+  const spring = H - GEO.arch.h * S + r; // where the round top springs, down the panel
+  const x0 = left - 1;
+  const d = `M0 0H${W + 2}V${H}H${W + 1}V${spring}A${r} ${r} 0 0 0 1 ${spring}V${H}H0Z`;
   return (
-    <div className="panel arch" style={{ left, width: W, height: H }} aria-hidden="true">
-      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
-        <defs>
-          <linearGradient id="arch-g" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" className="s0" />
-            <stop offset="1" className="s1" />
-          </linearGradient>
-          <pattern id="arch-grain" patternUnits="userSpaceOnUse" width="256" height="256">
-            <image href="/textures/wall-grain.png" width="256" height="256" />
-          </pattern>
-        </defs>
-        <path d={d} fill="url(#arch-g)" />
-        <path d={d} fill="url(#arch-grain)" />
-      </svg>
+    <div className="panel arch" style={{ left: x0, width: W + 2, clipPath: `path('${d}')`, backgroundPosition: `${-x0}px 0, ${-x0}px 0, 0 0` }} aria-hidden="true">
       <div className="shade" />
     </div>
   );
@@ -134,12 +124,15 @@ function DoorCol({ to, onLeave, S }) {
   const r = W / 2;
   const T = GEO.hall.t * S;
   const spring = GEO.arch.h * S - r;
-  const N = 14;
+  const N = 48; // facets round the curve: enough that it reads as round
   const c = 2 * r * Math.tan(Math.PI / (2 * N)) + 1; // a facet, a hair over so they meet
   const facets = [];
   for (let i = 0; i < N; i++) {
     const th = 180 - (i + 0.5) * (180 / N);
-    facets.push(<div key={i} className="parch" style={{ width: c, height: T, transform: `translate3d(${W / 2}px,${r}px,0) rotateZ(${90 - th}deg) translate3d(${-c / 2}px,${-r}px,0) rotateX(-90deg)` }} />);
+    // shaded from the left jamb's tone, through the darker underside at the crown, to the
+    // right jamb's, so no step shows where the curve springs (the shades are in index.css)
+    const m = th >= 90 ? 58 + (24 * (th - 90)) / 90 : 58 + (4 * (90 - th)) / 90;
+    facets.push(<div key={i} className="parch" style={{ '--m': `${m.toFixed(1)}%`, width: c, height: T, transform: `translate3d(${W / 2}px,${r}px,0) rotateZ(${90 - th}deg) translate3d(${-c / 2}px,${-r}px,0) rotateX(-90deg)` }} />);
   }
   return (
     <section className="col door-w" data-stop="door">
@@ -165,8 +158,7 @@ function DoorCol({ to, onLeave, S }) {
 // The hallway outside the arch, where you start, finished like the room: the outside of the
 // entrance wall, the wall across from it, and its floor and ceiling. The floor and ceiling and
 // the far wall are under, over and behind you while you stand there, so they stay hidden until
-// you go in. Left of the arch hangs the room's sign, as in a gallery: its number, name and
-// blurb. Clicking it walks up to read it. On the floor before the arch, an arrow that takes you in.
+// you go in. Left of the arch hangs the room's sign, as in a gallery: its name and blurb. Clicking it walks up to read it. On the floor before the arch, an arrow that takes you in.
 export function Hallway({ S, D, theme, room, onToggle, onEnter, hallRef }) {
   if (!S) return null;
   const T = GEO.hall.t * S;
@@ -178,7 +170,6 @@ export function Hallway({ S, D, theme, room, onToggle, onEnter, hallRef }) {
         <Panels len={D} S={S} door size={GEO.panelNear} />
         <section className="intro hall-intro ink">
           <button type="button" className="intro-inner" tabIndex={-1} onClick={onToggle} aria-label={`Read the introduction to ${room.name}`}>
-            <span className="intro-kicker">Room {room.num}</span>
             <span className="intro-room">{room.name}</span>
             <span className="intro-text">
               {room.blurb}
@@ -307,11 +298,13 @@ function Tile({ w, h, S, look, ox, oy, dirs, dark, edge, solid, className, style
     return () => {
       live = false;
     };
-  }, [w, h, S, look, ox, oy, dirs, dark, edge, solid, px, py]);
+  }, [w, h, S, look, ox, oy, dirs.join(), dark, edge, solid, px, py]); // eslint-disable-line react-hooks/exhaustive-deps
   return <canvas ref={ref} width={px} height={py} className={className} style={style} {...rest} />;
 }
 
-export function Slab({ kind, S, L, D, theme, x0 = 0, cls = '', edge = 0.3 }) {
+// (memo: a floor's tiles are drawn once; walking up to a photo re-renders the room, and redrawing
+// every canvas then held up the move by a good part of a second)
+export const Slab = memo(function Slab({ kind, S, L, D, theme, x0 = 0, cls = '', edge = 0.3 }) {
   if (!L) return null;
   const floor = kind === 'floor';
   const look = floor ? theme.floor : theme.ceil;
@@ -378,7 +371,7 @@ export function Slab({ kind, S, L, D, theme, x0 = 0, cls = '', edge = 0.3 }) {
     }
   }
   return tiles;
-}
+});
 
 // The lighting track: four strips just under the ceiling, 0.15 S in from the walls.
 export function Track({ S, L, D }) {
@@ -397,8 +390,9 @@ export function Track({ S, L, D }) {
   ];
 }
 
-// The arrow on the hallway floor, pointing in through the arch, with ENTER under it: lying
-// flat between you and the arch (GEO.enter), its letters drawn tall so they read at that slant.
+// The arrow on the hallway floor, pointing in through the arch, with ENTER under it: a small
+// vinyl floor marking, as in a museum, lying flat between you and the arch (GEO.enter), its
+// letters drawn tall so they read at that slant.
 // Clicking it takes you in.
 function EnterMark({ S, D, onEnter }) {
   const { x0, x1, w } = GEO.enter;
@@ -416,8 +410,8 @@ function EnterMark({ S, D, onEnter }) {
       style={{ width: W, height: H, transformOrigin: '50% 50%', transform: `translate3d(${cx - W / 2}px,${y - H / 2}px,${D / 2}px) rotateY(-90deg) rotateX(90deg)` }}
     >
       <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        <path d="M50 4 L84 40 L63 40 L63 64 L37 64 L37 40 L16 40 Z" />
-        <text x="50" y="94" textAnchor="middle" textLength="76" lengthAdjust="spacingAndGlyphs">ENTER</text>
+        <path d="M50 8 V58 M30 30 L50 8 L70 30" />
+        <text x="50" y="94" textAnchor="middle" textLength="84" lengthAdjust="spacing">ENTER</text>
       </svg>
     </button>
   );
