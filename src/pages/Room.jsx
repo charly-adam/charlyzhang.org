@@ -28,7 +28,7 @@ function Room({ room }) {
   const wakeTimer = useRef(0);
   const [entered, setEntered] = useState(!!photoId); // past the doorway (a deep link lands inside)
   const [flying, setFlying] = useState(false);
-  const [leaving, setLeaving] = useState(false); // walking out through the arch
+  const [leaving, setLeaving] = useState(false); // going out: the room fades to black
   const [geo, setGeo] = useState(null); // { S, L, D, tall } in px, once the walls have been measured
   const [ready, setReady] = useState(false); // the room has loaded and had a moment to draw; the curtain lifts
   const [tick, setTick] = useState(0); // bumps on resize
@@ -75,10 +75,11 @@ function Room({ room }) {
   const chooseRef = useRef(null);
   const cam = useRailCamera({ stageRef, camRef, paused: !!focus || flying || leaving, onChoose: (dir) => chooseRef.current?.(dir), onPose: (p) => cullRef.current?.(p) });
 
-  // up close, the arrows go to the photo either side (they hang in order round the room)
+  // up close, the arrows go to the photo either side. They hang in order round the room from
+  // your right as you come in, so on any wall the next one is on the left.
   const n = room.photos.length;
-  const prevPhoto = near ? room.photos[(nearIndex - 1 + n) % n] : null;
-  const nextPhoto = near ? room.photos[(nearIndex + 1) % n] : null;
+  const leftPhoto = near ? room.photos[(nearIndex + 1) % n] : null;
+  const rightPhoto = near ? room.photos[(nearIndex - 1 + n) % n] : null;
 
   // ── measuring: the walls are as long as their photos need, the long ones at least minL and
   // the far one at least minD ──
@@ -238,20 +239,71 @@ function Room({ room }) {
     const up = (0.44 * stage.clientHeight) / P;
     const nearFloor = Math.min(GEO.nearFloor * S, (0.9 * (0.78 - GEO.eye) * S) / down);
     const nearCeil = Math.min(GEO.nearCeil * S, (0.9 * (GEO.eye - 0.07) * S) / up);
-    const tiles = [...worldRef.current.querySelectorAll('.tile')].map((el) => ({
-      el,
-      cx: +el.dataset.cx,
-      cz: +el.dataset.cz,
-      r: +el.dataset.r,
-      R: el.classList.contains('ftile') ? nearFloor : nearCeil,
-      hidden: false,
-    }));
+    const tiles = [...worldRef.current.querySelectorAll('.tile')].map((el) => {
+      const cx = +el.dataset.cx;
+      const cz = +el.dataset.cz;
+      const hw = parseFloat(el.style.width) / 2;
+      const hh = parseFloat(el.style.height) / 2;
+      const c = [[cx - hw, cz - hh], [cx + hw, cz - hh], [cx + hw, cz + hh], [cx - hw, cz + hh]];
+      return { el, cx, cz, hw, hh, r: +el.dataset.r, edges: c.map((a, i) => [...a, ...c[(i + 1) % 4]]), R: el.classList.contains('ftile') ? nearFloor : nearCeil, hidden: el.style.visibility === 'hidden' };
+    });
+    // On a phone the view takes in a narrow slice of the room (S is 1.6 times the screen's
+    // width), but Safari would still draw all of it and run out of memory, dropping photos and
+    // floor. So there, whatever is well outside the view is hidden too: wall panels and photo
+    // columns (with their lamps' light), and floor and ceiling tiles, each tested against a
+    // wedge `spare` wider than the view either side, so it's drawn before it turns into view.
+    const narrow = window.matchMedia('(max-width: 700px)').matches;
+    const spare = (30 * Math.PI) / 180;
+    const wk = Math.tan(Math.min((80 * Math.PI) / 180, Math.atan(stage.clientWidth / 2 / P) + spare));
+    // does the segment a–b (x, z) cross the wedge in front of pose p?
+    const cross = (p, f, rt, ax, az, bx, bz) => {
+      const af = (ax - p.x) * f[0] + (az - p.z) * f[1];
+      const ar = (ax - p.x) * rt[0] + (az - p.z) * rt[1];
+      const bf = (bx - p.x) * f[0] + (bz - p.z) * f[1];
+      const br = (bx - p.x) * rt[0] + (bz - p.z) * rt[1];
+      let t0 = 0;
+      let t1 = 1;
+      for (const s of [1, -1]) {
+        const g0 = af * wk - s * ar;
+        const g1 = bf * wk - s * br;
+        if (g0 < 0 && g1 < 0) return false;
+        if (g0 < 0) t0 = Math.max(t0, g0 / (g0 - g1));
+        else if (g1 < 0) t1 = Math.min(t1, g0 / (g0 - g1));
+      }
+      return t0 <= t1;
+    };
+    const items = [];
+    worldRef.current.querySelectorAll('[data-off]').forEach((n) => n.removeAttribute('data-off'));
+    if (narrow) {
+      WALL_ORDER.forEach((side) => {
+        const w = walls[side];
+        const el = wallRefs[side].current;
+        const at = (lx, out) => [w.x0 + lx * w.dir[0] + out * w.nrm[0], w.z0 + lx * w.dir[1] + out * w.nrm[1]];
+        const add = (node, a, b, out) => items.push({ el: node, segs: [[...at(a, 0), ...at(b, 0)], ...(out ? [[...at(a, out), ...at(b, out)]] : [])], off: false });
+        el.querySelectorAll(':scope > .panel').forEach((n) => add(n, n.offsetLeft, n.offsetLeft + n.offsetWidth, 0));
+        el.querySelectorAll(':scope > [data-stop="photo"]').forEach((n) => add(n, n.offsetLeft - 0.3 * S, n.offsetLeft + n.offsetWidth + 0.3 * S, 0.3 * S));
+      });
+    }
     cullRef.current = (p) => {
+      const a = (p.yaw * Math.PI) / 180;
+      const f = [Math.sin(a), -Math.cos(a)];
+      const rt = [Math.cos(a), Math.sin(a)];
       for (const t of tiles) {
-        const hide = Math.hypot(p.x - t.cx, p.z - t.cz) + t.r < t.R;
+        let hide = Math.hypot(p.x - t.cx, p.z - t.cz) + t.r < t.R;
+        if (!hide && narrow) {
+          const inside = Math.abs(p.x - t.cx) <= t.hw && Math.abs(p.z - t.cz) <= t.hh;
+          hide = !inside && !t.edges.some((e) => cross(p, f, rt, ...e));
+        }
         if (hide !== t.hidden) {
           t.hidden = hide;
           t.el.style.visibility = hide ? 'hidden' : '';
+        }
+      }
+      for (const it of items) {
+        const off = !it.segs.some((e) => cross(p, f, rt, ...e));
+        if (off !== it.off) {
+          it.off = off;
+          it.el.toggleAttribute('data-off', off);
         }
       }
     };
@@ -381,13 +433,17 @@ function Room({ room }) {
     setAtIntro(false);
     navigate(`/room/${room.slug}/${p.id}`);
   };
-  // out through the arch, the room fading to black behind you, then the front desk
+  // going out: the room fades to black, then the front desk. (Walking out through the arch
+  // would show the hallway, a closed box that isn't the lobby you came from.)
   const leave = () => {
-    const g = geoRef.current;
-    if (!g || leaving || flying || focus) return;
-    const to = { x: -0.6 * g.S, z: g.D / 2, yaw: 270 };
-    if (cam.leave(to, { x: 0.6 * g.S, z: g.D / 2 }, 1900, () => navigate('/'))) setLeaving(true);
+    if (!geoRef.current || leaving || flying || focus) return;
+    setLeaving(true);
   };
+  useEffect(() => {
+    if (!leaving) return undefined;
+    const id = setTimeout(() => navigate('/'), 650);
+    return () => clearTimeout(id);
+  }, [leaving, navigate]);
   const stepBack = useCallback(() => {
     setAtIntro(false);
     if (photoId) navigate(`/room/${room.slug}`);
@@ -398,23 +454,22 @@ function Room({ room }) {
     if (photoId) navigate(`/room/${room.slug}`);
     setAtIntro(true);
   };
-  // in the doorway: pick a side and set off
-  const choose = (side) => {
+  // in the doorway: go in, turning to the right, where the first photo hangs
+  const goIn = () => {
     const g = geoRef.current;
-    if (!g || entered || flying || focus) return;
-    if (cam.enter(side, { x: 0.6 * g.S, z: g.D / 2 }, FLY_MS, () => setFlying(false))) {
+    if (!g || entered || flying || focus || leaving) return;
+    if (cam.enter(1, { x: 0.6 * g.S, z: g.D / 2 }, FLY_MS, () => setFlying(false))) {
       setFlying(true);
       setEntered(true);
     }
   };
-  chooseRef.current = choose;
+  chooseRef.current = goIn;
 
-  // the arrows either side: pick a way at the door; then left and right along the wall you
-  // face, or up close, the photo either side
+  // the arrows either side (inside the room): left and right along the wall you face, or up
+  // close, the photo either side
   const arrow = (way) => {
-    if (focus === 'intro' || flying || leaving) return;
-    if (near) return open(way < 0 ? prevPhoto : nextPhoto);
-    if (!entered) return choose(way);
+    if (focus === 'intro' || flying || leaving || !entered) return;
+    if (near) return open(way < 0 ? leftPhoto : rightPhoto);
     cam.step(way);
   };
 
@@ -426,7 +481,7 @@ function Room({ room }) {
   });
 
   // Enter walks up to whatever you're facing; up close, Escape steps back and the arrow keys move
-  // to the previous / next photo. In the doorway the arrow keys pick a side.
+  // to the photo either side. In the doorway Enter, Space or the up arrow go in.
   useEffect(() => {
     const onKey = (e) => {
       if (e.altKey || e.ctrlKey || e.metaKey || e.target.closest?.('dialog')) return;
@@ -434,9 +489,7 @@ function Room({ room }) {
         const mode = cam.getMode();
         if (mode === 'fly') return;
         if (mode === 'door') {
-          if (e.key === 'ArrowLeft') choose(-1);
-          else if (e.key === 'ArrowRight') choose(1);
-          else if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest?.('button, a')) toggleIntro();
+          if (e.key === 'ArrowUp' || ((e.key === 'Enter' || e.key === ' ') && !e.target.closest?.('button, a'))) goIn();
           else return;
           e.preventDefault();
           return;
@@ -451,8 +504,8 @@ function Room({ room }) {
         return;
       }
       if (e.key === 'Escape') stepBack();
-      else if (e.key === 'ArrowLeft' && prevPhoto) open(prevPhoto);
-      else if (e.key === 'ArrowRight' && nextPhoto) open(nextPhoto);
+      else if (e.key === 'ArrowLeft' && leftPhoto) open(leftPhoto);
+      else if (e.key === 'ArrowRight' && rightPhoto) open(rightPhoto);
       else return;
       e.preventDefault();
     };
@@ -489,7 +542,7 @@ function Room({ room }) {
   const door = { to: '/', onLeave: leave };
   const wallProps = { S, near, solo: !!room.solo, offFor, onOpen, onZoom: onZoomGroup };
   const stageClass = `stage room t-${room.theme}${room.solo ? ' solo' : ''}${focus ? ' near' : ''}${near ? ' dark' : ''}${atIntro ? ' at-intro' : ''}${geo ? '' : ' unmeasured'}${ready ? ' ready' : ''}${leaving ? ' leaving' : ''}${entered ? ' in' : ' at-door'}${geo?.tall ? ' tall' : ''}`;
-  const arrowLabels = near ? ['The photo to the left', 'The photo to the right'] : entered ? ['Walk left', 'Walk right'] : ['Go round to the left', 'Go round to the right'];
+  const arrowLabels = near ? ['The photo to the left', 'The photo to the right'] : ['Walk left', 'Walk right'];
 
   return (
     <div ref={stageRef} className={stageClass} style={{ '--on': switching ? '0.85s' : '0s' }} onClick={onStageClick} onPointerDown={() => {
@@ -497,7 +550,7 @@ function Room({ room }) {
         setWake(true);
         clearTimeout(wakeTimer.current);
         wakeTimer.current = setTimeout(() => setWake(false), 2500);
-      }} role="region" aria-label={`${room.name}. Pick a side at the door, then scroll, drag or use the arrow keys to walk round the room.`}>
+      }} role="region" aria-label={`${room.name}. Go in at the door, then scroll, drag or use the arrow keys to walk round the room.`}>
       <div ref={dollyRef} className="dolly">
         <div ref={camRef} className="cam">
           <div ref={worldRef} className="room3d">
@@ -507,7 +560,7 @@ function Room({ room }) {
               <Wall key={side} side={side} len={walls ? walls[side].len : 0} groups={hang[side]} style={wallStyle(side)} wallRef={wallRefs[side]} door={side === 'W' ? door : null} {...wallProps} />
             ))}
             <Slab kind="floor" S={S} L={L} D={D} theme={theme} />
-            <Hallway S={S} D={D} theme={theme} room={room} onToggle={toggleIntro} hallRef={hallRef} />
+            <Hallway S={S} D={D} theme={theme} room={room} onToggle={toggleIntro} onEnter={goIn} hallRef={hallRef} />
           </div>
         </div>
       </div>
@@ -519,7 +572,7 @@ function Room({ room }) {
         </p>
       )}
       <Curtain key={room.slug} kicker={`Room ${room.num}`} name={room.name} progress={progress} />
-      <EdgeArrows onLeft={() => arrow(-1)} onRight={() => arrow(1)} hidden={focus === 'intro' || flying || leaving} wake={wake} leftLabel={arrowLabels[0]} rightLabel={arrowLabels[1]} />
+      <EdgeArrows onLeft={() => arrow(-1)} onRight={() => arrow(1)} hidden={!entered || focus === 'intro' || flying || leaving} wake={wake} leftLabel={arrowLabels[0]} rightLabel={arrowLabels[1]} />
     </div>
   );
 }

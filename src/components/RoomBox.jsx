@@ -103,7 +103,7 @@ export function Wall({ side, len, S, groups, near, solo, offFor, onOpen, onZoom,
             <span className="ggap refl-frames">
               {g.map((p) => <FrameReflection key={p.id} photo={p} />)}
             </span>
-            <span className="lblpos" />
+            <WallLabel group={g} ghost />
           </span>
         ))}
         {door && (
@@ -166,8 +166,8 @@ function DoorCol({ to, onLeave, S }) {
 // entrance wall, the wall across from it, and its floor and ceiling. The floor and ceiling and
 // the far wall are under, over and behind you while you stand there, so they stay hidden until
 // you go in. Left of the arch hangs the room's sign, as in a gallery: its number, name and
-// blurb. Clicking it walks up to read it.
-export function Hallway({ S, D, theme, room, onToggle, hallRef }) {
+// blurb. Clicking it walks up to read it. On the floor before the arch, an arrow that takes you in.
+export function Hallway({ S, D, theme, room, onToggle, onEnter, hallRef }) {
   if (!S) return null;
   const T = GEO.hall.t * S;
   const depth = GEO.hall.depth * S;
@@ -190,6 +190,7 @@ export function Hallway({ S, D, theme, room, onToggle, hallRef }) {
       <div className="wall hall hall-far" style={{ width: D, transform: placeFace(-depth, D, 90) }} aria-hidden="true">
         <Panels len={D} S={S} />
       </div>
+      <EnterMark S={S} D={D} onEnter={onEnter} />
       <Slab kind="floor" S={S} L={depth - T} D={D} theme={theme} x0={-depth} cls="hall" edge={0.12} />
       <Slab kind="ceiling" S={S} L={depth - T} D={D} theme={theme} x0={-depth} cls="hall" edge={0.12} />
     </>
@@ -231,12 +232,31 @@ const scaled = (hex, k) => `rgb(${[1, 3, 5].map((i) => Math.round(parseInt(hex.s
 
 function Tile({ w, h, S, look, ox, oy, dirs, dark, edge, solid, className, style, ...rest }) {
   const ref = useRef(null);
+  // A texture gets 1.5 canvas px per css px, up to tilePx; a phone's small room needs far less
+  // than a desktop's, and canvases are memory a phone hasn't got to spare (with them all at
+  // full size the biggest room ran Safari out of it). A plain colour needs only a little
+  // canvas: its edge shading scales up smoothly.
+  const px = look.img ? Math.min(GEO.tilePx, Math.ceil(w * 1.5)) : 64;
+  const py = Math.round((px * h) / w);
+  // Safari keeps a canvas's memory until it's collected, long after the room has gone, and it
+  // has a hard limit on canvas memory in all: past it a canvas stays blank (a dark patch in
+  // the floor). So a tile gives its memory back as it goes.
+  useEffect(
+    () => () => {
+      const c = ref.current;
+      if (c) c.width = c.height = 0;
+    },
+    [],
+  );
   useEffect(() => {
     let live = true;
     const draw = (im) => {
       const c = ref.current;
       if (!c || !live) return;
+      if (c.width !== px) c.width = px;
+      if (c.height !== py) c.height = py;
       const ctx = c.getContext('2d');
+      if (!ctx) return;
       const k = c.width / w; // canvas px per css px
       ctx.fillStyle = look.color;
       ctx.fillRect(0, 0, c.width, c.height);
@@ -287,20 +307,17 @@ function Tile({ w, h, S, look, ox, oy, dirs, dark, edge, solid, className, style
     return () => {
       live = false;
     };
-  }, [w, h, S, look, ox, oy, dirs, dark, edge, solid]);
-  // A texture gets 1.5 canvas px per css px, up to tilePx; a phone's small room needs far less
-  // than a desktop's, and canvases are memory a phone hasn't got to spare (with them all at
-  // full size the biggest room ran Safari out of it). A plain colour needs only a little
-  // canvas: its edge shading scales up smoothly.
-  const px = look.img ? Math.min(GEO.tilePx, Math.ceil(w * 1.5)) : 64;
-  return <canvas ref={ref} width={px} height={Math.round((px * h) / w)} className={className} style={style} {...rest} />;
+  }, [w, h, S, look, ox, oy, dirs, dark, edge, solid, px, py]);
+  return <canvas ref={ref} width={px} height={py} className={className} style={style} {...rest} />;
 }
 
 export function Slab({ kind, S, L, D, theme, x0 = 0, cls = '', edge = 0.3 }) {
   if (!L) return null;
   const floor = kind === 'floor';
   const look = floor ? theme.floor : theme.ceil;
-  const T = Math.max(GEO.tile * S, GEO.tileMin);
+  // (a phone's room is drawn bigger than its screen is wide, so its tiles are bigger too: as
+  // many as a room the screen's width would have, not two and a half times as many canvases)
+  const T = Math.max(GEO.tile * S, phone.matches ? GEO.tilePhone * S : GEO.tileMin);
   // columns along the room
   const cuts = [x0, x0 + L];
   const cols = [];
@@ -315,7 +332,9 @@ export function Slab({ kind, S, L, D, theme, x0 = 0, cls = '', edge = 0.3 }) {
   // overlapped, the join would show twice as dense. The ceiling is solid and can overlap. So
   // is the floor on a phone, where there are no reflections and you see a lot of floor (and
   // see-through tiles edge to edge can leave a hairline between them).
-  const solid = !floor || phone.matches;
+  // (the hallway's floor is solid too: from the doorway you'd see the room's reflections
+  // under it, through it, out of place)
+  const solid = !floor || phone.matches || cls === 'hall';
   const lap = solid ? 2 : 0;
   const h = D / ny;
   const y = (floor ? 0.78 - GEO.eye : 0.07 - GEO.eye) * S;
@@ -378,9 +397,34 @@ export function Track({ S, L, D }) {
   ];
 }
 
-// The arrows floating either side of the view: at the door they pick a way round (and nudge
-// to catch the eye); after that they walk you left and right, and up close, to the photo
-// either side.
+// The arrow on the hallway floor, pointing in through the arch, with ENTER under it: lying
+// flat between you and the arch (GEO.enter), its letters drawn tall so they read at that slant.
+// Clicking it takes you in.
+function EnterMark({ S, D, onEnter }) {
+  const { x0, x1, w } = GEO.enter;
+  const W = w * S; // across the hallway
+  const H = (x1 - x0) * S; // along it, toward the arch
+  const cx = ((x0 + x1) / 2) * S;
+  const y = (0.78 - GEO.eye) * S - 1;
+  return (
+    <button
+      type="button"
+      className="plane enter-mark"
+      tabIndex={-1}
+      onClick={onEnter}
+      aria-label="Enter the room"
+      style={{ width: W, height: H, transformOrigin: '50% 50%', transform: `translate3d(${cx - W / 2}px,${y - H / 2}px,${D / 2}px) rotateY(-90deg) rotateX(90deg)` }}
+    >
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M50 4 L84 40 L63 40 L63 64 L37 64 L37 40 L16 40 Z" />
+        <text x="50" y="94" textAnchor="middle" textLength="76" lengthAdjust="spacingAndGlyphs">ENTER</text>
+      </svg>
+    </button>
+  );
+}
+
+// The arrows floating either side of the view, inside the room: they walk you left and right,
+// and up close, to the photo either side.
 export function EdgeArrows({ onLeft, onRight, hidden, wake, leftLabel, rightLabel }) {
   return (
     <div className={`turn${hidden ? ' hide' : ''}${wake ? ' wake' : ''}`} aria-hidden={hidden}>

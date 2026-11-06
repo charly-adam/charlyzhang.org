@@ -65,3 +65,14 @@ Ready for Adam (PR charly -> adam). Charly chose to drop the pillar:
 - With no pillar to walk round, rooms are as small as their photos need (GEO.minD 1.7, minL 1.8 instead of D 2.52 / minL 2.4); corner views just stay inside the room. Benches is now 2.36 x 1.70 S, photos about 0.1 S from every corner. Spare wall is shared equally at both ends (spareW gone).
 - Phones: roomScale is min(h, 1.6 w) (CSS --S min(--H, 160vw)), so photos are bigger in the walk; up close the photo fills 95% (FILL_PHONE) and the arrows fade out after a moment, a touch wakes them (.turn.wake). The map now opens and folds like a book on phones too; the flaps copy the paper's scroll when folding.
 Checked in desktop Chrome and Chrome's 375x812 phone emulation, not on a real phone or Safari.
+
+## 2026-11-05 · charly · charly · done: enter arrow, order from the right, phone stability, phone directory
+Pushed to charly; no PR yet (Charly will ask for one when he's previewed it).
+- Doorway: no side arrows or swipe. An ENTER arrow lies on the hallway floor (RoomBox EnterMark, GEO.enter); clicking it, Enter/Space/Up or a scroll down goes in, always to the right (cam.enter(1)). Inside, the arrows walk left/right as before.
+- Hanging order starts on the right: distribute() fills S (right to left as you face it), then E, then N; with entrance photos (Nature) photo 1 is beside the door on the S side. Up close, the left arrow is photo n+1, the right n-1 (physical sides).
+- Exit fades the room to black and goes to '/'; cam.leave is gone.
+- Plaques: a line per detail (metaParts); labels are as wide as their longest line (max 0.16 S), with an invisible copy in the reflection row so reflections stay aligned.
+- Benches "1st and 9th swapped": the same images were renumbered on Nov 1 and photos/ is cached for a week, so browsers showed old 03-wall.jpg (now 09). Photo URLs now carry ?v=<hash> (photo-sizes.json `v`; compress-photos.js writes it).
+- Phone stability: tiles 0.9 S on phones, canvases freed on unmount, per-frame view culling on phones (see room-walkaround-rendering.md). Hallway floor is solid (desktop now draws it at the door, since doorCam -1.1 makes landscape count as `tall`, and room reflections showed through it). Adam: worth a Retina look at the door now that the hall floor shows on desktop.
+- Phone lobby: the room signs are back, two columns under the lettering (smaller lettering, no counts, on short phones).
+Checked in headless Chrome (390x844 @3, 375x667, 1440x900), not on a real phone or Safari.

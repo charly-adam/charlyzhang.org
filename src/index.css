@@ -313,7 +313,8 @@ a {
 .frame,
 .label,
 .intro-inner,
-.doorbtn {
+.doorbtn,
+.room3d .enter-mark {
   pointer-events: auto;
 }
 .frame,
@@ -336,6 +337,10 @@ a {
 }
 .ftile {
   opacity: var(--floorop);
+}
+/* the hallway's floor is solid (RoomBox.jsx): you'd see the room's reflections through it */
+.stage.room:not(.dark) .ftile.hall {
+  opacity: 1;
 }
 /* lights out: the tiles are canvases with nothing to lay a shade over, so they dim instead */
 .ftile,
@@ -695,6 +700,9 @@ a {
 .stage.dark .glow {
   visibility: visible;
 }
+.stage.dark [data-off] .glow {
+  visibility: hidden;
+}
 .t-white .beam {
   display: none;
 }
@@ -895,7 +903,9 @@ a {
 .lblpos {
   flex: none;
   display: block;
-  width: calc(var(--S) * 0.095);
+  width: max-content;
+  min-width: calc(var(--S) * 0.095);
+  max-width: calc(var(--S) * 0.16);
   margin: calc(var(--S) * 0.18) 0 0 calc(var(--S) * 0.022);
 }
 
@@ -908,6 +918,9 @@ a {
 }
 .lbl-entry {
   display: block;
+}
+.label-ghost {
+  visibility: hidden;
 }
 .lbl-entry + .lbl-entry {
   margin-top: calc(var(--S) * 0.0035);
@@ -1073,8 +1086,10 @@ a {
 .stage.at-door:not(.tall) .hall {
   display: none;
 }
-/* likewise what can't be seen through the arch from the doorway (marked in Room.jsx) */
-.stage.at-door [data-unseen] {
+/* likewise what can't be seen through the arch from the doorway (marked in Room.jsx), and on a
+   phone, whatever is well outside the view */
+.stage.at-door [data-unseen],
+.room3d [data-off] {
   visibility: hidden;
 }
 /* a curtain over the page until it has loaded and had a moment to draw, and again as you walk
@@ -1093,7 +1108,7 @@ a {
 }
 .stage.ready.leaving .curtain {
   opacity: 1;
-  transition: opacity 0.8s ease 1.05s;
+  transition: opacity 0.6s ease;
 }
 /* (the map goes to black on the way anywhere, so every change of place passes through the
    dark) While a page loads: where you're going and a line that fills, at least a second, however
@@ -1156,8 +1171,51 @@ a {
 .glass:focus-visible {
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
 }
-/* an arrow floating either side of the view; in the doorway each gives a little nudge now
-   and then */
+/* the arrow on the hallway floor that takes you in (RoomBox EnterMark): light let into the
+   floor, breathing a little to catch the eye; gone once you're in */
+.enter-mark {
+  left: 0;
+  top: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  backface-visibility: hidden;
+  transition: opacity 0.6s ease;
+}
+.enter-mark svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: #f6f1e4;
+  animation: enter-glow 2.6s ease-in-out 1s infinite;
+}
+.enter-mark text {
+  font-family: inherit;
+  font-size: 24px;
+  font-weight: 700;
+}
+.stage.in .enter-mark {
+  opacity: 0;
+  pointer-events: none;
+}
+@keyframes enter-glow {
+  0%,
+  100% {
+    opacity: 0.78;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .enter-mark svg {
+    animation: none;
+  }
+}
+/* an arrow floating either side of the view, once you're in the room */
 .turn {
   position: absolute;
   inset: 0;
@@ -1192,47 +1250,6 @@ a {
 }
 .turn-r {
   right: max(20px, 4vw);
-}
-/* in the doorway they sit within the archway: the ways in */
-.stage.at-door .turn-l {
-  left: calc(50% - var(--S) * 0.38 - 27px);
-  animation: nudge-l 2.8s ease-in-out 1.2s infinite;
-}
-.stage.at-door .turn-r {
-  right: calc(50% - var(--S) * 0.38 - 27px);
-  animation: nudge-r 2.8s ease-in-out 1.2s infinite;
-}
-@keyframes nudge-l {
-  0%,
-  72%,
-  100% {
-    translate: 0 0;
-  }
-  82% {
-    translate: -8px 0;
-  }
-  92% {
-    translate: 2px 0;
-  }
-}
-@keyframes nudge-r {
-  0%,
-  72%,
-  100% {
-    translate: 0 0;
-  }
-  82% {
-    translate: 8px 0;
-  }
-  92% {
-    translate: -2px 0;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .turn-l,
-  .turn-r {
-    animation: none;
-  }
 }
 /* the folded brochure poking up from the bottom edge: its cover, with a second leaf of the fold
    showing behind it. It rises as you point at it. */
@@ -2023,9 +2040,54 @@ body:has(.stage:not(.ready)) .dock {
   .words {
     zoom: 0.8;
   }
-  /* no room for the signs beside the desk; the brochure at the bottom has the map */
+  /* no room for the signs beside the desk: they go on the wall under the lettering, in two
+     columns */
   .signage {
+    left: 24px;
+    right: 24px;
+    top: calc(var(--H) * 0.11 + 238px);
+    translate: none;
+  }
+  .signs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 18px;
+    width: auto;
+    zoom: 1;
+  }
+  .sign {
+    grid-template-columns: 18px 1fr 16px;
+    gap: 8px;
+    padding: 3px 0;
+    font-size: 15px;
+  }
+  .sign-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+  .sign-arrow svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+/* a short phone: smaller lettering without the counts, so the signs clear Charly */
+@media (max-width: 700px) and (max-height: 760px) {
+  .lettering {
+    top: calc(var(--H) * 0.08);
+  }
+  .words {
+    zoom: 0.64;
+  }
+  .words-rule,
+  .words-count {
     display: none;
+  }
+  .signage {
+    top: calc(var(--H) * 0.08 + 142px);
+  }
+  .sign {
+    padding: 1px 0;
+    font-size: 14px;
   }
 }
 

@@ -9,9 +9,10 @@
 //   2. Add an entry to `photos` below.
 //   3. `pair: true` hangs a photo right next to the one before it, sharing one wall label.
 //
-// Photos hang in order round the room, starting on your left as you come in. In a room of 17
-// or more, the first hangs on the entrance wall beside the door, on your left as you come in, and
-// the last beside it on your right; then along the left-hand wall, across the far wall and back along the right-hand wall.
+// Photos hang in order round the room, starting on your right as you come in (you go in to the
+// right): along the right-hand wall, across the far wall and back along the left-hand wall. In
+// a room of 17 or more, the first hangs on the entrance wall beside the door, on your right as
+// you come in, and the last beside the door on its other side.
 // The far wall takes 3 when the count is odd and 2 when it's even, so the long walls always
 // match; the room grows with them.
 //
@@ -163,8 +164,11 @@ export const roomList = rooms.map((r, i) => {
       const sz = sizes[p.file] || {};
       const width = p.width || sz.width || 1500;
       const height = p.height || sz.height || 1000;
-      // `wall` is the lighter copy hung on the wall; `file` is the full-size one shown up close
-      return { ...p, width, height, wall: sz.wall || p.file, id: `${r.slug}-${k + 1}`, index: k, portrait: height > width };
+      // `wall` is the lighter copy hung on the wall; `file` is the full-size one shown up close.
+      // Both carry a fingerprint of their contents (sz.v), so a browser that has cached a file
+      // under the same name before (photos get renumbered) fetches it afresh.
+      const v = sz.v ? `?v=${sz.v}` : '';
+      return { ...p, width, height, file: p.file + v, wall: (sz.wall || p.file) + v, id: `${r.slug}-${k + 1}`, index: k, portrait: height > width };
     });
   const groups = [];
   list.forEach((p) => {
