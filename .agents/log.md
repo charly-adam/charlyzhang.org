@@ -91,3 +91,6 @@ Pushed to charly; no PR yet. ENTER floor arrow: square caps and a mitred point l
 
 ## 2026-11-06 · charly · charly · done: enter arrow as one shape, dark on pale floors
 Pushed to charly; no PR yet. The floor arrow was three stroked lines that the non-uniform SVG stretch pulled apart (the stem's square cap poked out past the tip); it's now one filled outline, stem and head together. On pale floors (themes white and sky) the mark is dark (--mark #2e2c28); elsewhere it stays off-white.
+
+## 2026-11-06 · charly · charly · started: collage mode
+A second way to see a room: every photo on one flat wall, packed salon-style, with free pan and zoom; tap a photo to zoom in on it. A Gallery | Collage switch in each room (the choice is remembered from room to room), and an "All photos" wall (every photo on the site, one wall, scattered) from the map's middle box, where "Hall" was. New page src/pages/Collage.jsx and routes /room/:slug/collage, /collage; touches App.jsx, Room.jsx (the switch), GalleryMap.jsx and index.css.
