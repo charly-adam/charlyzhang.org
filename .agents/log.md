@@ -153,3 +153,6 @@ Pushed to charly (in PR #16). Charly wanted the lights back on phones. Pools are
 
 ## 2026-11-07 · charly · charly · done: real light cone on phones
 Pushed to charly; no PR yet. The CSS fan (`.fw::before`) from #18 is gone: Charly saw flat sideways light, not a cone. Phones draw the desktop's SVG beam again, still (no sway).
+
+## 2026-11-07 · charly · charly · done: light cone PR ready for Adam
+PR charly -> adam for the real light cone on phones (after #18's flat fan).
