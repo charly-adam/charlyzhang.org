@@ -3,7 +3,6 @@ import { Navigate, useNavigate, useParams } from 'react-router';
 import { getRoom, roomList } from '../data/gallery.js';
 import { Curtain } from '../components/Scene.jsx';
 import { metaLine, titleLine } from '../components/Frame.jsx';
-import { EdgeArrows } from '../components/RoomBox.jsx';
 import { usePreload } from '../hooks/usePreload.js';
 import { bezier } from '../hooks/useDolly.js';
 import { salonHang, seedOf, seeded, shuffled } from '../room/salon.js';
@@ -94,9 +93,6 @@ function Collage({ id, name, theme, photos, favored, base }) {
   const [ready, setReady] = useState(false);
   const [tiers, setTiers] = useState({}); // photo id → 1 (wall copy) or 2 (full size), once zoomed in enough
   const [hint, setHint] = useState(false);
-  // up close on a phone the arrows fade away to leave the photo; a touch brings them back a while
-  const [wake, setWake] = useState(false);
-  const wakeTimer = useRef(0);
   const { done: loaded, progress } = usePreload(`collage-${id}`, [...photos.map((p) => p.thumb), '/textures/wall-grain.png', theme === 'salon' && '/textures/damask.svg', theme === 'sky' && '/textures/birds.svg'], 350);
 
   // the hang: wide on a wide screen, tall on a tall one
@@ -235,7 +231,7 @@ function Collage({ id, name, theme, photos, favored, base }) {
     if (!f || !g) return null;
     const top = b.phone ? 40 : 28;
     const bottom = b.phone ? 170 : 128; // the caption and the map under it
-    const availW = b.vw - (b.phone ? 16 : 240); // the arrows either side
+    const availW = b.vw - (b.phone ? 16 : 96);
     const availH = b.vh - top - bottom;
     const z = Math.min((0.97 * availW) / f.w, (0.97 * availH) / f.h);
     return { z, tx: b.vw / 2 - (f.x + g.mx + f.w / 2) * z, ty: top + availH / 2 - (f.y + g.my + f.h / 2) * z };
@@ -439,7 +435,6 @@ function Collage({ id, name, theme, photos, favored, base }) {
   useEffect(() => () => {
     cancelAnimationFrame(anim.current);
     clearTimeout(settleTimer.current);
-    clearTimeout(wakeTimer.current);
   }, []);
 
   // a click on a photo zooms in on it; up close, a click anywhere else steps back
@@ -464,12 +459,7 @@ function Collage({ id, name, theme, photos, favored, base }) {
 
   const stageClass = `stage collage t-${theme}${near ? ' near' : ''}${ready ? ' ready' : ''}`;
   return (
-    <div ref={stageRef} className={stageClass} onClick={onStageClick} onDoubleClick={onDouble} onPointerDown={() => {
-        if (!near) return;
-        setWake(true);
-        clearTimeout(wakeTimer.current);
-        wakeTimer.current = setTimeout(() => setWake(false), 2500);
-      }} role="region" aria-label={`${name}: every photo on one wall. Drag to look round, pinch or scroll to zoom, click a photo to see it up close.`}>
+    <div ref={stageRef} className={stageClass} onClick={onStageClick} onDoubleClick={onDouble} role="region" aria-label={`${name}: every photo on one wall. Drag to look round, pinch or scroll to zoom, click a photo to see it up close.`}>
       {geom && (
         <div ref={wallRef} className="cwall" style={{ width: geom.Ww, height: geom.Wh }}>
           {hang.frames.map((f) => {
@@ -490,7 +480,6 @@ function Collage({ id, name, theme, photos, favored, base }) {
         {box?.phone ? 'Drag to look around · pinch to zoom' : 'Drag to look around · scroll to zoom'}
       </p>
       <Curtain key={id} kicker={id === 'all' ? `${photos.length} photographs` : 'Collage'} name={name} progress={progress} />
-      <EdgeArrows onLeft={() => step(-1)} onRight={() => step(1)} hidden={!near} wake={wake} leftLabel="The photo before" rightLabel="The photo after" />
     </div>
   );
 }

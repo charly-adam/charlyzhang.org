@@ -470,11 +470,15 @@ a {
   inset: 0;
   background: linear-gradient(90deg, rgba(0, 0, 0, 0.16), transparent calc(var(--S) * 0.19)), linear-gradient(270deg, rgba(0, 0, 0, 0.16), transparent calc(var(--S) * 0.19)), linear-gradient(rgba(0, 0, 0, 0.1), transparent calc(var(--S) * 0.08)), linear-gradient(to top, rgba(0, 0, 0, 0.13), transparent 9%);
 }
+/* The lobby's floor and ceiling reach out toward you only as far as the screen shows them
+   (with the perspective of 2 S, 1.2 S of floor and 0.9 S of ceiling fill a screen up to 1.45
+   times as tall as S). Deeper, their near edges came almost to the eye and had to be drawn at
+   ten times their size, and iPhone browsers dropped them. */
 .floor3d {
   left: 0;
   right: 0;
   top: calc(var(--S) * 0.78);
-  height: calc(var(--S) * 1.8);
+  height: calc(var(--S) * 1.2);
   transform-origin: 50% 0;
   transform: rotateX(90deg);
   opacity: var(--floorop);
@@ -484,8 +488,8 @@ a {
 .ceil3d {
   left: 0;
   right: 0;
-  top: calc(var(--S) * -1.73);
-  height: calc(var(--S) * 1.8);
+  top: calc(var(--S) * -0.83);
+  height: calc(var(--S) * 0.9);
   transform-origin: 50% 100%;
   transform: rotateX(-90deg);
   background: var(--ceilbg);
@@ -1345,6 +1349,27 @@ body:has(.stage:not(.ready)) .dock {
 @media (max-width: 700px) {
   .room .label {
     display: none;
+  }
+  /* A phone's GPU has far less memory for layers (a Pixel's ran out at the doorway: black
+     floor tiles, empty frames, no map). Each frame is one flat layer here: no edge faces, no
+     depth off the wall, and no beam or pool of light from the lamps (each was two big layers
+     a photo, and a running sway kept them apart); the glow, for the dark up close, keeps still.
+     See room-walkaround-rendering.md. */
+  .room .beam,
+  .room .pool {
+    display: none;
+  }
+  .room .glow {
+    animation: none;
+  }
+  .room .fw {
+    transform-style: flat;
+  }
+  .room .fw .side {
+    display: none;
+  }
+  .room .frame {
+    transform: none;
   }
   /* up close, the arrows fade away after a moment to leave the photo; a touch wakes them */
   .stage.near .turn:not(.wake) .turnbtn {
