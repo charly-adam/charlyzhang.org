@@ -102,3 +102,6 @@ Pushed to charly; no PR yet (Charly will ask). See .agents/knowledge/collage-mod
 - New: scripts/thumbs.js makes public/photos/*/NN-thumb.jpg (560 px) from the wall copies and records `thumb`/`tv` in photo-sizes.json; `npm run photos` runs it after compress-photos.
 - useDolly exports bezier; usePreload takes an optional minimum time.
 Adam: worth an iOS Safari look at pinch and at the wall's sharpness after a zoom (it drops will-change at rest to redraw). Checked in headless Chrome (1440x900, 390x844 @3, touch emulation), not on a real phone.
+
+## 2026-11-06 · charly · charly · done: All photos favours Favorites, Film, Travel
+Pushed to charly; no PR yet. On the All photos wall, photos from Favorites, Film and Travel (Charly's picks) hang bigger: salonHang takes `favored(photo)`; favoured photos get weight 3, the rest 1 or 2, so they come out about 1.4-1.5x as wide (median) without breaking the packing. A swap in the hill-climb now carries the photo's weight with it. Room collages are unchanged in kind (no favoured photos: weights 1, 2 or 4 as before).

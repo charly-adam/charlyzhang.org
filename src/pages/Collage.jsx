@@ -12,7 +12,10 @@ import { salonHang, seedOf, seeded, shuffled } from '../room/salon.js';
 // in the room's own paint and frames. Drag to look round, pinch or scroll to zoom; a photo
 // clicked is zoomed in on, the rest of the wall going dark, as in a room.
 
-// the All photos wall: plain gallery white, every photo once, scattered (the same each visit)
+// the All photos wall: plain gallery white, every photo once, scattered (the same each visit),
+// with those from Charly's best rooms hung bigger
+const ALL_FAVORED = new Set(['favorites', 'film', 'travel']);
+const favored = (p) => ALL_FAVORED.has(p.room);
 const ALL_THEME = 'white';
 const allPhotos = (() => {
   const seen = new Set();
@@ -39,7 +42,7 @@ export function RoomCollage() {
 }
 
 export function AllCollage() {
-  return <Collage key="all" id="all" name="All photos" theme={ALL_THEME} photos={allPhotos} base="/collage" />;
+  return <Collage key="all" id="all" name="All photos" theme={ALL_THEME} photos={allPhotos} favored={favored} base="/collage" />;
 }
 
 const IN = { ms: 850, ease: bezier(0.62, 0, 0.18, 1) };
@@ -82,7 +85,7 @@ const CFrame = memo(function CFrame({ f, ox, oy, want, lit, onOpen }) {
   );
 });
 
-function Collage({ id, name, theme, photos, base }) {
+function Collage({ id, name, theme, photos, favored, base }) {
   const { photoId } = useParams();
   const navigate = useNavigate();
   const stageRef = useRef(null);
@@ -98,7 +101,7 @@ function Collage({ id, name, theme, photos, base }) {
 
   // the hang: wide on a wide screen, tall on a tall one
   const aspect = box ? ((box.vw - 2 * box.side) / (box.vh - box.top - box.bottom) < 1 ? 0.62 : 1.55) : null;
-  const hang = useMemo(() => (aspect ? salonHang(photos, { aspect, theme, seed: seedOf(`${id}:${aspect}`) }) : null), [photos, aspect, theme, id]);
+  const hang = useMemo(() => (aspect ? salonHang(photos, { aspect, theme, favored, seed: seedOf(`${id}:${aspect}`) }) : null), [photos, aspect, theme, id, favored]);
 
   // The wall: the hang with a margin of bare wall round it, enough that at its smallest (the
   // whole hang in view) the wall still fills the screen.

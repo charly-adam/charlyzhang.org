@@ -125,7 +125,9 @@ function judge(root, aspect) {
   return { score: off / frames.length + 4 * Math.abs(Math.log(W / H / aspect)) + 12 * tiny, W, H, frames };
 }
 
-const WEIGHTS = [1, 2, 4];
+// the share of the wall a photo may get: a favoured one more (see salonHang's `favored`)
+const WEIGHTS = [1, 2];
+const FAVORED = [3];
 const nodesOf = (n, inner, leaves) => {
   if (n.photo) leaves.push(n);
   else {
@@ -138,11 +140,15 @@ const nodesOf = (n, inner, leaves) => {
 /**
  * Hangs `photos` as one block about `aspect` wide for its height. `theme` sets the frame
  * border. Gives { W, H, frames: [{ photo, x, y, w, h, S }] } in wall units, with S each frame's
- * scale (as --S) for the room's frame styles.
+ * scale (as --S) for the room's frame styles. `favored(photo)`, if given, picks photos to hang
+ * bigger: about twice the wall of the rest, so about half as wide again.
  * The best of many random hangs, then bettered a step at a time: a cut turned the other way,
  * two photos swapping places, or a photo given more or less of the wall, kept when it helps.
  */
-export function salonHang(photos, { aspect, theme, seed }) {
+export function salonHang(photos, { aspect, theme, seed, favored }) {
+  const fav = new Set(favored ? photos.filter(favored) : []);
+  // with none favoured, a few photos still hang big, so the wall isn't all one size
+  const choices = (ph) => (fav.has(ph) ? FAVORED : fav.size ? WEIGHTS : [1, 1, 1, 2, 2, 4]);
   if (!photos.length) return { W: 0, H: 0, frames: [] };
   const c = edgeOf(theme);
   const rnd = seeded(seed);
@@ -150,7 +156,8 @@ export function salonHang(photos, { aspect, theme, seed }) {
   for (let t = 0; t < 160; t++) {
     const items = photos.map((ph) => {
       const x = rnd();
-      return leaf(ph, c, x < 0.1 ? 4 : x < 0.38 ? 2 : 1);
+      const ws = choices(ph);
+      return leaf(ph, c, ws[Math.floor(x * ws.length)]);
     });
     const root = build(items, aspect, rnd);
     const j = judge(root, aspect);
@@ -171,13 +178,15 @@ export function salonHang(photos, { aspect, theme, seed }) {
       } else if (kind < 0.8) {
         const a = leaves[Math.floor(rnd() * leaves.length)];
         const b = leaves[Math.floor(rnd() * leaves.length)];
-        const swap = () => ([a.photo, a.p, b.photo, b.p] = [b.photo, b.p, a.photo, a.p]);
+        // (each takes its share of the wall with it)
+        const swap = () => ([a.photo, a.p, a.weight, b.photo, b.p, b.weight] = [b.photo, b.p, b.weight, a.photo, a.p, a.weight]);
         swap();
         undo = swap;
       } else {
         const a = leaves[Math.floor(rnd() * leaves.length)];
         const was = a.weight;
-        a.weight = WEIGHTS[Math.floor(rnd() * WEIGHTS.length)];
+        const ws = choices(a.photo);
+        a.weight = ws[Math.floor(rnd() * ws.length)];
         undo = () => (a.weight = was);
       }
       const j = judge(root, aspect);
