@@ -32,6 +32,8 @@ import sizes from './photo-sizes.json';
 export const site = {
   name: 'Charly Zhang',
   subtitle: 'Photography',
+  // the print hung on the wall behind the front desk (its file, as in `photos` below)
+  featured: '/photos/favorites/01.jpg',
 };
 
 export const rooms = [

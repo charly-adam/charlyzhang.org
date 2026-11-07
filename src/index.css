@@ -1563,8 +1563,8 @@ body:has(.stage:not(.ready)) .dock {
   --pivot: 63.09% 20.5%; /* (470, 205) */
   transform: rotate(calc(var(--px) * -1.5deg));
 }
-/* once the curtain lifts he waves once, then sways */
-.stage.ready .arm-r .idle {
+/* called up by the bell he waves once, then sways */
+.stage.ready .charly.up .arm-r .idle {
   animation: wave 1.7s 0.5s ease-in-out 1 both, sway-r 5.2s 2.4s ease-in-out infinite;
 }
 /* on the map stand he looks at it and lifts his right arm toward it */
@@ -1672,7 +1672,7 @@ body:has(.stage:not(.ready)) .dock {
   background: url(/lobby/charly-head.png) 0 0 / 100% 100%;
   clip-path: polygon(43.6% 12.7%, 52.6% 12.7%, 52.4% 14.8%, 50.6% 16.4%, 45.9% 16.4%, 44% 14.8%);
 }
-.stage.ready .jaw {
+.stage.ready .charly.up .jaw {
   animation: jabber 0.17s ease-in-out 0.85s 8 alternate both;
 }
 @keyframes jabber {
@@ -1730,7 +1730,7 @@ body:has(.stage:not(.ready)) .dock {
 .charly-face:focus-visible {
   outline: none;
 }
-.stage.ready .bubble {
+.stage.ready .charly.up .bubble {
   animation: bubble-in 0.35s cubic-bezier(0.3, 1.5, 0.5, 1) 0.7s both;
 }
 @keyframes bubble-in {
@@ -1740,10 +1740,10 @@ body:has(.stage:not(.ready)) .dock {
   }
 }
 /* clicked: he says it again at once */
-.stage.ready .bubble.again {
+.stage.ready .charly.up .bubble.again {
   animation-delay: 0s;
 }
-.stage.ready .jaw.again {
+.stage.ready .charly.up .jaw.again {
   animation-delay: 0.05s;
 }
 
@@ -1829,13 +1829,6 @@ body:has(.stage:not(.ready)) .dock {
   box-shadow: 0 4px 6px -2px rgba(0, 0, 0, 0.35);
 }
 
-/* the umbrella stand on the floor left of the desk */
-.desk-scene .dl-desk > .umbrellas {
-  left: 118px;
-  top: 486px;
-  width: 150px;
-  height: 300px;
-}
 
 /* the desk */
 .desk-scene .dl-desk > * {
@@ -2024,6 +2017,387 @@ body:has(.stage:not(.ready)) .dock {
 .stand:hover .stand-label {
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+/* Charly is down behind the desk (the .charly box clips at the desk top) until the bell calls
+   him up; then he pops up, waves and says welcome, and his name plate comes up after him */
+.charly .breathe {
+  translate: 0 340px;
+  transition: translate 0.42s cubic-bezier(0.5, 0, 0.8, 0.3);
+}
+.charly.up .breathe {
+  translate: 0 0;
+  transition: translate 0.6s cubic-bezier(0.25, 1.45, 0.5, 1);
+}
+.charly:not(.up) .charly-face {
+  display: none;
+}
+.desk-scene .dl-desk > .nameplate {
+  opacity: 0;
+  translate: 0 14px;
+  transition: opacity 0.25s ease, translate 0.25s ease;
+}
+.desk-scene .dl-desk > .nameplate.up {
+  opacity: 1;
+  translate: 0 0;
+  transition: opacity 0.4s ease 0.9s, translate 0.5s cubic-bezier(0.25, 1.4, 0.5, 1) 0.9s;
+}
+
+/* the wall behind the desk: its own layer, drifting with the wall (and the signs) */
+.dl-wall {
+  translate: calc(var(--px) * -6px) calc(var(--py) * -3px);
+}
+.desk-scene .dl > button,
+.desk-scene .dl-wall > * {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.desk-scene .dl > button:focus-visible,
+.feature-frame:focus-visible {
+  outline: 2px solid #141414;
+  outline-offset: 4px;
+}
+.desk-scene svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* the featured print: black frame, white mat, a brass picture light over it, a label beside it */
+.desk-scene .dl-wall > .feature {
+  left: 608px;
+  top: 270px;
+  width: 224px;
+  height: 260px;
+  cursor: default;
+  pointer-events: none;
+}
+.feature-frame {
+  position: absolute;
+  left: 0;
+  top: 36px;
+  width: 224px;
+  height: 224px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 16px;
+  background: #f8f8f6;
+  border: 5px solid #1b1a19;
+  box-shadow: 0 14px 22px -8px rgba(0, 0, 0, 0.35), 0 2px 3px rgba(0, 0, 0, 0.2), inset 0 3px 5px -3px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  pointer-events: auto;
+}
+.feature-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+.feature-lamp {
+  position: absolute;
+  left: 52px;
+  top: 0;
+  width: 120px;
+  height: 12px;
+  border-radius: 6px 6px 3px 3px;
+  background: linear-gradient(#f2d98f, #b8892f 60%, #7a5a22);
+  box-shadow: 0 3px 4px rgba(0, 0, 0, 0.25);
+}
+.feature-lamp::before {
+  content: "";
+  position: absolute;
+  left: 57px;
+  top: -16px;
+  width: 6px;
+  height: 18px;
+  background: linear-gradient(90deg, #7a5a22, #e8cb7d, #7a5a22);
+}
+/* the light it throws down the wall and the print */
+.feature-wash {
+  position: absolute;
+  left: -40px;
+  top: 8px;
+  width: 304px;
+  height: 250px;
+  background: radial-gradient(ellipse 50% 60% at 50% 0, rgba(255, 246, 220, 0.75), rgba(255, 246, 220, 0) 100%);
+  opacity: 0.55;
+  transition: opacity 0.35s ease;
+}
+.feature:has(.feature-frame:hover) .feature-wash {
+  opacity: 0.8;
+}
+.feature.lit .feature-wash {
+  opacity: 1;
+}
+.feature.lit .feature-frame {
+  filter: brightness(1.08);
+  transition: filter 0.35s ease;
+}
+.feature-label {
+  position: absolute;
+  left: 240px;
+  top: 196px;
+  width: 112px;
+  padding: 7px 9px 8px;
+  box-sizing: border-box;
+  background: #fbfaf6;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+.feature-label p {
+  margin: 0;
+}
+.fl-kicker {
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #7a756b;
+}
+.fl-title {
+  margin-top: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.fl-meta,
+.fl-room {
+  margin-top: 2px;
+  font-size: 8px;
+  line-height: 1.3;
+  color: #4a4741;
+}
+
+/* the clock, high above the signs */
+.desk-scene .dl-wall > .clock {
+  left: 1111px;
+  top: 64px;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.2));
+}
+.clock .hand {
+  transform-origin: 50px 50px;
+}
+.clock .sec {
+  transition: transform 0.18s cubic-bezier(0.4, 2.2, 0.6, 1);
+}
+.clock .sec.sweep {
+  transition: transform 1.2s cubic-bezier(0.5, 0, 0.3, 1);
+}
+
+/* the call bell, on the desk left of the maps */
+.desk-scene .dl-desk > .bell {
+  left: 868px;
+  top: 540px;
+  width: 52px;
+  height: 40px;
+}
+.bell-knob,
+.bell-dome {
+  transform-box: fill-box;
+}
+.bell-knob {
+  transform-origin: 50% 0;
+}
+.bell-dome {
+  transform-origin: 50% 100%;
+}
+.bell-svg.rung .bell-knob {
+  animation: bell-press 0.18s ease-out;
+}
+.bell-svg.rung .bell-dome {
+  animation: bell-shiver 0.5s ease-out;
+}
+@keyframes bell-press {
+  40% {
+    transform: translateY(4px);
+  }
+}
+@keyframes bell-shiver {
+  15% {
+    transform: scale(1.03, 0.97);
+  }
+  35% {
+    transform: rotate(1.5deg);
+  }
+  55% {
+    transform: rotate(-1.2deg);
+  }
+  75% {
+    transform: rotate(0.6deg);
+  }
+}
+
+/* the umbrellas: a shake, drops running down into the bucket, a ripple where each lands */
+.desk-scene .dl-desk > .umbrella-btn {
+  left: 118px;
+  top: 486px;
+  width: 150px;
+  height: 300px;
+}
+.desk-scene .umbrella-btn > .umbrellas {
+  position: static;
+}
+.umbrellas .ub {
+  transform-origin: 75px 200px;
+}
+.umbrellas.shook .ub {
+  animation: ub-shake 0.6s ease-out;
+}
+@keyframes ub-shake {
+  20% {
+    transform: rotate(-2deg);
+  }
+  45% {
+    transform: rotate(1.6deg);
+  }
+  70% {
+    transform: rotate(-0.8deg);
+  }
+}
+.drop {
+  fill: rgba(206, 228, 242, 0.95);
+  stroke: rgba(90, 120, 140, 0.5);
+  stroke-width: 0.6;
+  opacity: 0;
+  animation: drop-run 0.76s cubic-bezier(0.5, 0, 0.9, 0.6) both;
+}
+@keyframes drop-run {
+  0% {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.5);
+  }
+  25% {
+    opacity: 1;
+    transform: translateY(6px) scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(70px) scale(1, 1.3);
+  }
+}
+.ripple {
+  fill: none;
+  stroke: rgba(200, 222, 236, 0.85);
+  stroke-width: 0.9;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: ripple 0.7s ease-out both;
+}
+@keyframes ripple {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.4);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(3);
+  }
+}
+
+/* the velvet rope, and the plant in the corner */
+.desk-scene .dl-desk > .rope-btn {
+  left: 1150px;
+  top: 628px;
+  width: 170px;
+  height: 170px;
+}
+.rope {
+  transform-origin: 85px 42px;
+}
+.rope.swung {
+  animation: rope-swing 1.6s ease-out;
+}
+@keyframes rope-swing {
+  12% {
+    transform: scaleY(0.55) skewX(-4deg);
+  }
+  32% {
+    transform: scaleY(1.12) skewX(3deg);
+  }
+  52% {
+    transform: scaleY(0.8) skewX(-1.5deg);
+  }
+  72% {
+    transform: scaleY(1.05) skewX(0.6deg);
+  }
+  88% {
+    transform: scaleY(0.95);
+  }
+}
+.desk-scene .dl-desk > .plant-btn {
+  left: 1300px;
+  top: 420px;
+  width: 130px;
+  height: 380px;
+}
+.plant.rustled .blade {
+  animation: rustle 1.1s ease-out both;
+}
+.plant.rustled .blade:nth-child(odd) {
+  animation-name: rustle-b;
+}
+@keyframes rustle {
+  15% {
+    transform: rotate(4deg);
+  }
+  35% {
+    transform: rotate(-3deg);
+  }
+  55% {
+    transform: rotate(2deg);
+  }
+  75% {
+    transform: rotate(-0.8deg);
+  }
+}
+@keyframes rustle-b {
+  15% {
+    transform: rotate(-3.5deg);
+  }
+  35% {
+    transform: rotate(3deg);
+  }
+  55% {
+    transform: rotate(-1.6deg);
+  }
+  75% {
+    transform: rotate(0.8deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bell-svg.rung *,
+  .umbrellas.shook .ub,
+  .plant.rustled .blade,
+  .rope.swung {
+    animation: none;
+  }
+  .clock .sec.sweep {
+    transition-duration: 0.18s;
+  }
+}
+/* a phone shows the desk alone: the clock, rope and plant would be cut off at the edges */
+@media (max-width: 700px) {
+  /* and the print a little smaller, to clear the signs above it */
+  .desk-scene .dl-wall > .feature {
+    scale: 0.84;
+    transform-origin: 50% 100%;
+  }
+  .desk-scene .dl-wall > .clock,
+  .desk-scene .dl-desk > .rope-btn,
+  .desk-scene .dl-desk > .plant-btn {
+    display: none;
+  }
 }
 
 /* phones: no parallax; the desk fills the width, the lettering sits above it */

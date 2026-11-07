@@ -108,3 +108,11 @@ Pushed to charly; no PR yet. On the All photos wall, photos from Favorites, Film
 
 ## 2026-11-06 · charly · charly · started: front desk props and a hidden Charly
 Charly wants the lobby more serious: Charly and his name plate hidden by default, a call bell on the desk left of the maps (dings; three quick rings pop him up from behind the desk with the name plate, three more send him down). Clickable props, each with a small animation and a sound (Web Audio, no files): umbrellas drip into the bucket, a featured print on the wall behind the desk (picture light, goes to that photo), a wall clock above the signs (real time), a snake plant and a velvet rope on brass posts right of the desk. Touches Lobby.jsx, index.css (lobby section), gallery.js (site.featured), new src/sound.js.
+
+## 2026-11-06 · charly · charly · done: front desk props and a hidden Charly
+Pushed to charly; no PR yet. Lobby.jsx:
+- Charly and his name plate are hidden by default (.charly .breathe translated 340px down, clipped at the desk top). A call bell (Bell) sits on the desk left of the maps; three rings within 1.3 s pop him up (sound.pop, .charly.up), and he waves, says welcome and the name plate rises 0.9 s later. Three more send him down. His wave/jaw/bubble animations now key on .charly.up instead of .stage.ready.
+- New wall layer .dl-wall (drifts like the signs): a featured print (site.featured in gallery.js, now Favorites' Delicate Arch) under a brass picture light with a "Now showing" label; click: the light comes up, then it opens that photo in its room (in collage if that's the remembered mode). A wall clock above the signs showing local time; click: tick-tock and the second hand sweeps round once (its angle only ever increases, so no backwards spin).
+- Floor: umbrellas shake and four drops run down into the bucket with ripples; a velvet rope on brass posts swings; a snake plant rustles. Clock, rope and plant are hidden on phones (outside the desk's width there); the print is 0.84x there to clear the signs.
+- src/sound.js: every sound made with Web Audio on click (bell, drip, tick, rustle, clink, light click, pop); nothing loaded.
+Checked in headless Chrome (1440x900, 390x844), sounds not heard (headless).
