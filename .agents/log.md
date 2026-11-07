@@ -144,3 +144,6 @@ Pushed to charly; no PR yet (Charly will ask).
 
 ## 2026-11-07 · charly · charly · done: ready for Adam (PR charly -> adam)
 The 2026-11-07 fixes are in a PR for Adam. Please check the front desk floor and ceiling in the iOS simulator (the reason for the change), and a room doorway on an iPhone.
+
+## 2026-11-07 · charly · charly · done: lamp light back on phones
+Pushed to charly (in PR #16). Charly wanted the lights back on phones. Pools are back, still (no sway); the beam on a phone is a CSS soft fan of light down the wall (`.fw::before`, in the max-width: 700px block) instead of the 3D SVG cone, which stays a layer a photo however it's set. All rooms draw whole at a 64 MB GPU cap with the lights; Nature is borderline at 56 (it passed without the lights).
