@@ -131,3 +131,6 @@ Pushed to charly; no PR yet. On phones the room signs are one column at the top 
 
 ## 2026-11-06 · charly · charly · done: phone print centred
 Pushed to charly; no PR yet. On phones the featured print is centred on the screen and the desk now (--fx gone): fitPhoneWall takes the bigger of two fits, down to the welcome card but narrow enough to clear the map stand on both sides, or full width but ending above the stand and the first visit's note.
+
+## 2026-11-06 · charly · charly · done: ready for Adam (PR charly -> adam)
+Everything since #12 is in one PR for Adam: the doorway/room fixes (2026-11-05 and the first 2026-11-06 entries), collage mode and the All photos wall, and the front desk props with Charly hidden behind the bell. Worth a Mac look: iOS Safari pinch and sharpness on the collage walls, the clip-path arch at the door, Web Audio sounds on Safari (they start from a click), and the phone front desk layout (measured in Lobby.jsx fitPhoneWall).
