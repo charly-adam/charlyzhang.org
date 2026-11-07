@@ -1352,15 +1352,33 @@ body:has(.stage:not(.ready)) .dock {
   }
   /* A phone's GPU has far less memory for layers (a Pixel's ran out at the doorway: black
      floor tiles, empty frames, no map). Each frame is one flat layer here: no edge faces, no
-     depth off the wall, and no beam or pool of light from the lamps (each was two big layers
-     a photo, and a running sway kept them apart); the glow, for the dark up close, keeps still.
-     See room-walkaround-rendering.md. */
-  .room .beam,
-  .room .pool {
-    display: none;
-  }
+     depth off the wall, and the lamps' light keeps still (a running sway made every pool a
+     layer of its own). The beam isn't the 3D cone with its SVG blur (a layer a photo however
+     it's set) but a soft fan of light down the wall from the lamp, drawn into the frame's own
+     layer. See room-walkaround-rendering.md. */
+  .room .pool,
   .room .glow {
     animation: none;
+  }
+  .room .beam {
+    display: none;
+  }
+  .room .fw::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: calc(50% - var(--S) * 0.31);
+    width: 120%;
+    height: calc(var(--S) * 0.24);
+    margin-left: -60%;
+    background: radial-gradient(ellipse 50% 100% at 50% 0, rgba(255, 251, 241, 0.42), rgba(255, 251, 241, 0.16) 55%, rgba(255, 251, 241, 0) 100%);
+    pointer-events: none;
+    transition: opacity 0.3s ease calc(0.38s + var(--off, 0ms));
+  }
+  /* (a white room's lamps throw no beam, as on a desktop; nor does a dark room's but the one up close) */
+  .t-white .fw::before,
+  .stage.dark .fw:not(.lit)::before {
+    opacity: 0;
   }
   .room .fw {
     transform-style: flat;

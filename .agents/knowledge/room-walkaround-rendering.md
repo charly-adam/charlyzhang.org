@@ -15,11 +15,11 @@ Chrome rasterises each 3D plane at the magnification of its nearest corner and a
 
 - **Phones run out far sooner than desktops** (Nov 2026, Charly's Pixel 10 in Chrome: black floor tiles, frames showing only their edges, the map brochure and the Gallery switch missing, at the doorway of most rooms). Reproduce it on Windows/Mac headless Chrome with `--force-gpu-mem-available-mb=64` at 412×770 @2.625: it fails exactly like the phone. What fixed it (phone only, all in the `max-width: 700px` block and RoomBox):
   - each `.fw` is `transform-style: flat`, with no `.side` faces and no translateZ on `.frame`: one layer a photo instead of about nine;
-  - no lamp `.beam` or `.pool` (a full-wall-height box each, and their infinite `lamp-sway` animation kept every one a layer of its own); `.glow` doesn't sway;
+  - the lamps' light keeps still (an infinite `lamp-sway` animation kept every `.pool` a layer of its own), and the 3D SVG `.beam` (a layer a photo however it's styled, flat or not) is replaced by `.fw::before`, a soft radial fan of light down the wall drawn into the frame's layer. Charly wanted the lights kept on phones; without them every room passed at 56 MB, with them all pass at 64 and Nature is borderline at 56;
   - 16 arch facets instead of 48 (each facet is a layer);
   - textured floor canvases at most 288 px (`GEO.tilePxPhone`; canvases count against the same budget);
   - the hallway's tiles at 0.55 S (`GEO.tileNearPhone`): a tile is drawn as sharp as its nearest corner needs, and these are right by the camera.
-  Now every room's doorway draws whole at 56 MB, and only Nature shows a gap at 48. Any running CSS animation on an element inside the room makes it a layer: don't add one to a per-photo element.
+  Results right at the limit vary a little between runs; compare at a few caps (64, 56, 48). Any running CSS animation on an element inside the room makes it a layer: don't add one to a per-photo element.
 - the lobby's `.floor3d` and `.ceil3d` are only as deep as a screen shows (1.2 S and 0.9 S): at 1.8 S their near edges came within reach of the eye, drawn at ~10x, and iPhone browsers (WebKit) left them out.
 
 Measure with CDP `LayerTree.enable` + `DOM.describeNode` (sum layer area by class), and A/B by injecting CSS that hides one group. Result: 1728×1117 @2x renders every room solidly; 2560×1440 @2x (5K) Nature's doorway is still borderline.
