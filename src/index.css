@@ -2417,10 +2417,10 @@ body:has(.stage:not(.ready)) .dock {
 /* a phone shows the desk alone: the rope and plant would be cut off at the edges */
 @media (max-width: 700px) {
   /* and the print a little smaller, to clear the signs above it */
-  /* the print fills the wall under the lettering, beside the map stand (--fs, --fx, --fy: Lobby.jsx) */
+  /* the print, centred, as big as the wall under the lettering allows (--fs, --fy: Lobby.jsx) */
   .desk-scene .dl-wall > .feature {
     scale: var(--fs, 0.62);
-    translate: var(--fx, 0) var(--fy, 0);
+    translate: 0 var(--fy, 0);
     transform-origin: 50% 50%;
   }
   .desk-scene .dl-desk > .rope-btn,

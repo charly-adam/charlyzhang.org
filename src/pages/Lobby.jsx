@@ -132,13 +132,14 @@ function useDeskScale(ref) {
 }
 
 // On a phone the wall above the desk is laid out to fit: the signs in a column right of the
-// lettering, as tall as it (--lh), and the print as big as the wall under them allows: from
-// under the lettering down to the welcome card on the desk, and from the lettering's left edge
-// across to the map stand. --fs scales it about its middle, --fx and --fy move it, in the desk
-// scene's own units.
+// lettering, as tall as it (--lh), and the print, centred over the desk, as big as the wall
+// under them allows: either down to the welcome card and no wider than leaves the map stand
+// clear, or wider but ending above the stand (and the first visit's note over it), whichever
+// is bigger. --fs scales it about its middle, --fy moves it, in the desk scene's own units.
 const PRINT = { top: 172, size: 336, cx: 720 }; // the print in the desk scene (index.css .feature)
 const CARD_TOP = 518; // the welcome card's top, in the desk scene
 const STAND_LEFT = 936; // the map stand's left edge
+const STAND_TOP = 464; // and its red dot
 function fitPhoneWall(el, k) {
   const letters = el.querySelector('.lettering');
   const scene = el.querySelector('.desk-scene');
@@ -149,13 +150,20 @@ function fitPhoneWall(el, k) {
   const sceneTop = scene.getBoundingClientRect().top - stage.top;
   const W = window.innerWidth;
   const top = lr.bottom - stage.top + 28;
-  const bottom = sceneTop + CARD_TOP * k - 18;
-  const left = lr.left - stage.left;
-  const right = W / 2 + (STAND_LEFT - PRINT.cx) * k - 14;
-  const size = Math.max(80, Math.min(bottom - top, right - left));
+  const edge = lr.left - stage.left; // the lettering's margin, kept either side
+  // down to the card, between the stand and its mirror on the left
+  const low = { bottom: sceneTop + CARD_TOP * k - 18, width: 2 * ((STAND_LEFT - PRINT.cx) * k - 14) };
+  // or clear of the stand and the note above it, the screen's width
+  const high = { bottom: sceneTop + STAND_TOP * k - 66, width: W - 2 * edge };
+  const fit = (o) => ({ ...o, size: Math.min(o.bottom - top, o.width) });
+  const a = fit(low);
+  const b = fit(high);
+  const best = a.size >= b.size ? a : b;
+  const size = Math.max(80, best.size);
+  // centred across, and in the height it has
+  const centre = (top + best.bottom) / 2;
   el.style.setProperty('--fs', (size / (PRINT.size * k)).toFixed(4));
-  el.style.setProperty('--fx', `${(((left + right) / 2 - W / 2) / k).toFixed(1)}px`);
-  el.style.setProperty('--fy', `${(((top + bottom) / 2 - sceneTop) / k - (PRINT.top + PRINT.size / 2)).toFixed(1)}px`);
+  el.style.setProperty('--fy', `${((centre - sceneTop) / k - (PRINT.top + PRINT.size / 2)).toFixed(1)}px`);
 }
 
 // Where the pointer is over the lobby, -1..1 each way, as --px and --py on the stage. The

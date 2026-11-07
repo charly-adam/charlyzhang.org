@@ -128,3 +128,6 @@ Pushed to charly; no PR yet. The lobby's pointer parallax is one movement now: w
 
 ## 2026-11-06 · charly · charly · done: phone front desk layout
 Pushed to charly; no PR yet. On phones the room signs are one column at the top right, beside the lettering and as tall as it (--lh, measured), instead of two columns under it. The featured print fills the wall below: Lobby.jsx fitPhoneWall sizes and places it (--fs, --fx, --fy on the stage) from under the lettering down to the welcome card, and from the lettering's left edge across to the map stand, measured on load, font load and resize. Short phones keep the counts now (lettering zoom 0.7, a little higher). Desktop unchanged. Checked at 412x915, 390x844, 375x667.
+
+## 2026-11-06 · charly · charly · done: phone print centred
+Pushed to charly; no PR yet. On phones the featured print is centred on the screen and the desk now (--fx gone): fitPhoneWall takes the bigger of two fits, down to the welcome card but narrow enough to clear the map stand on both sides, or full width but ending above the stand and the first visit's note.
