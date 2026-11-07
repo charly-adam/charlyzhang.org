@@ -1,6 +1,6 @@
 // Small sounds for the front desk's props, made on the spot with Web Audio (no sound files):
-// struck metal is a few sine partials dying away, a drip a quick upward chirp, a tick a click of
-// filtered noise, leaves a hiss of it. Only ever played from a click, which is what lets a
+// struck metal is a few sine partials dying away, a drip a quick upward chirp, leaves a hiss of
+// filtered noise. Only ever played from a click, which is what lets a
 // browser start audio. Quiet: the whole lot goes through one gain.
 
 let ctx = null;
@@ -84,12 +84,6 @@ export const sound = {
     o.connect(g).connect(out);
     o.start(t);
     o.stop(t + 0.15);
-  },
-  // the clock: tick, tock
-  tick(delay = 0, low = false) {
-    const c = audio();
-    if (!c) return;
-    noise(c, at(c, delay), 0.035, { freq: low ? 1700 : 3200, q: 6, a: 0.5 });
   },
   // leaves brushing together
   rustle() {

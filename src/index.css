@@ -2070,7 +2070,7 @@ body:has(.stage:not(.ready)) .dock {
   overflow: visible;
 }
 
-/* the featured print: black frame, white mat, its label to the left (under the clock) */
+/* the featured print: black frame, white mat */
 .desk-scene .dl-wall > .feature {
   left: 572px;
   top: 214px;
@@ -2109,59 +2109,122 @@ body:has(.stage:not(.ready)) .dock {
   filter: brightness(1.12);
   transition: filter 0.35s ease;
 }
-.feature-label {
+/* "Start here", the first visit: an ink circle draws itself round the map stand and a note
+   comes up beside it, then it all fades (Lobby.jsx StartHere) */
+.desk-scene .dl-desk > .start-here {
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+.start-here.out {
+  opacity: 0;
+}
+.start-here svg {
   position: absolute;
-  left: -134px;
-  top: 214px;
-  width: 112px;
-  padding: 7px 9px 8px;
-  box-sizing: border-box;
-  background: #fbfaf6;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+  overflow: visible;
 }
-.feature-label p {
+.start-here path {
+  fill: none;
+  stroke: #c8402f;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+/* (.start-here's, over .desk-scene svg's 100% size) */
+.start-here .sh-ring {
+  left: 912px;
+  top: 446px;
+  width: 200px;
+  height: 160px;
+}
+.stage.ready .sh-ring path {
+  animation: ink 1.1s cubic-bezier(0.4, 0, 0.3, 1) 0.9s forwards;
+}
+.sh-note {
+  position: absolute;
+  left: 1112px;
+  top: 436px;
+  width: max-content;
   margin: 0;
-}
-.fl-kicker {
-  font-size: 7.5px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #7a756b;
-}
-.fl-title {
-  margin-top: 3px;
-  font-size: 10px;
+  font-size: 19px;
   font-weight: 600;
-  line-height: 1.25;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  color: #c8402f;
+  opacity: 0;
 }
-.fl-meta,
-.fl-room {
-  margin-top: 2px;
-  font-size: 8px;
-  line-height: 1.3;
-  color: #4a4741;
+.stage.ready .sh-note {
+  animation: note-in 0.5s ease 1.7s forwards;
 }
-
-/* the clock, on the wall between the lettering and the print, over the print's label */
-.desk-scene .dl-wall > .clock {
-  left: 460px;
-  top: 236px;
-  width: 68px;
-  height: 68px;
-  border-radius: 50%;
-  filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.2));
+.start-here .sh-arrow {
+  left: -34px;
+  top: 22px;
+  width: 52px;
+  height: 44px;
 }
-.clock .hand {
-  transform-origin: 50px 50px;
+.sh-arrow path {
+  stroke-width: 2.6;
 }
-.clock .sec {
-  transition: transform 0.18s cubic-bezier(0.4, 2.2, 0.6, 1);
+.stage.ready .sh-arrow path {
+  animation: ink 0.5s ease-out 1.9s forwards;
 }
-.clock .sec.sweep {
-  transition: transform 1.2s cubic-bezier(0.5, 0, 0.3, 1);
+@keyframes ink {
+  to {
+    stroke-dashoffset: 0;
+  }
 }
-
+@keyframes note-in {
+  from {
+    opacity: 0;
+    translate: 0 4px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+/* every visit: the top map lifts a little now and then, as if a draft caught it */
+.stage.ready .sheet-3 {
+  animation: map-flutter 8s ease-in-out 3s infinite;
+}
+@keyframes map-flutter {
+  0%,
+  9%,
+  100% {
+    transform: none;
+  }
+  2.5% {
+    transform: translateY(-6px) rotate(-1.8deg);
+  }
+  5% {
+    transform: translateY(-1px) rotate(0.8deg);
+  }
+  7% {
+    transform: translateY(-2px) rotate(-0.3deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stage.ready .sheet-3 {
+    animation: none;
+  }
+}
+@media (max-width: 700px) {
+  /* no wall beside the stand on a phone: the note goes above it, the arrow pointing down */
+  .sh-note {
+    left: 958px;
+    top: 392px;
+    font-size: 26px;
+  }
+  .start-here .sh-arrow {
+    left: 40px;
+    top: 30px;
+  }
+}
 /* the call bell, on the desk left of the maps */
 .desk-scene .dl-desk > .bell {
   left: 868px;
@@ -2350,18 +2413,14 @@ body:has(.stage:not(.ready)) .dock {
   .rope.swung {
     animation: none;
   }
-  .clock .sec.sweep {
-    transition-duration: 0.18s;
-  }
 }
-/* a phone shows the desk alone: the clock, rope and plant would be cut off at the edges */
+/* a phone shows the desk alone: the rope and plant would be cut off at the edges */
 @media (max-width: 700px) {
   /* and the print a little smaller, to clear the signs above it */
   .desk-scene .dl-wall > .feature {
     scale: 0.7;
     transform-origin: 50% 100%;
   }
-  .desk-scene .dl-wall > .clock,
   .desk-scene .dl-desk > .rope-btn,
   .desk-scene .dl-desk > .plant-btn {
     display: none;

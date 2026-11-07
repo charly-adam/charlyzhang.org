@@ -7,9 +7,27 @@ import { Curtain, Lens, Shell } from '../components/Scene.jsx';
 import { usePreload } from '../hooks/usePreload.js';
 import { sound } from '../sound.js';
 import { getViewMode } from '../viewMode.js';
-import { metaLine, titleLine } from '../components/Frame.jsx';
 
 const PHONE = '(max-width: 700px)';
+const SEEN_KEY = 'charlyzhang.seen-desk';
+const INTRO_MS = 6500; // the circle's up this long after the curtain lifts
+
+// "Start here": an ink circle drawn round the map stand, with a note and an arrow beside it.
+function StartHere({ on }) {
+  return (
+    <div className={on ? 'start-here' : 'start-here out'} aria-hidden="true">
+      <svg className="sh-ring" viewBox="0 0 200 160">
+        <path pathLength="1" d="M42 40 C70 14 160 12 184 58 C202 96 160 146 96 148 C40 150 8 118 14 82 C18 56 40 38 78 30" />
+      </svg>
+      <p className="sh-note">
+        Start here
+        <svg className="sh-arrow" viewBox="0 0 60 50">
+          <path pathLength="1" d="M52 6 C44 26 30 38 8 42 M8 42 L20 32 M8 42 L21 48" />
+        </svg>
+      </p>
+    </div>
+  );
+}
 
 export default function Lobby() {
   const openMap = useContext(MapContext);
@@ -34,6 +52,31 @@ export default function Lobby() {
     const id = setTimeout(() => setReady(true), 150);
     return () => clearTimeout(id);
   }, [done]);
+  // A first visit: an ink circle round the map stand and "Start here", till the first click or
+  // a few seconds have gone by. Remembered in the browser, so it's only the once.
+  const [intro, setIntro] = useState(() => {
+    try {
+      return !localStorage.getItem(SEEN_KEY);
+    } catch {
+      return false;
+    }
+  });
+  useEffect(() => {
+    if (!ready || !intro) return undefined;
+    try {
+      localStorage.setItem(SEEN_KEY, '1');
+    } catch {
+      // not remembered: it shows again next time
+    }
+    const end = () => setIntro(false);
+    const id = setTimeout(end, INTRO_MS);
+    window.addEventListener('pointerdown', end);
+    return () => {
+      clearTimeout(id);
+      window.removeEventListener('pointerdown', end);
+    };
+  }, [ready, intro]);
+  const [introShown] = useState(intro); // drawn at all this visit (it then fades, rather than vanishing)
   useDeskScale(stageRef);
   useLookAround(stageRef);
   useEffect(() => {
@@ -52,13 +95,13 @@ export default function Lobby() {
       <div className="desk-scene">
         <div className="dl dl-wall">
           <FeaturedPrint />
-          <WallClock />
         </div>
         <div className="dl dl-char">
           <Charly up={charly} />
         </div>
         <div className="dl dl-desk">
           <Desk onMap={(e) => openMap('stand', e.currentTarget)} charly={charly} onCall={onCall} />
+          {introShown && <StartHere on={intro} />}
         </div>
       </div>
       <Lens />
@@ -394,7 +437,7 @@ function Bell({ onCall }) {
   );
 }
 
-// The print hung on the wall behind the desk (site.featured), with a small label beside it.
+// The print hung on the wall behind the desk (site.featured).
 // Clicked, it brightens a moment and you go to it in its room.
 const featuredRoom = roomList.find((r) => r.photos.some((p) => p.file.split('?')[0] === site.featured));
 const featured = featuredRoom?.photos.find((p) => p.file.split('?')[0] === site.featured);
@@ -418,65 +461,7 @@ function FeaturedPrint() {
       <button type="button" className="feature-frame" onClick={go} aria-label={`Now showing: ${featured.title}. See it in ${featuredRoom.name}`}>
         <img src={featured.wall} alt="" width={featured.width} height={featured.height} draggable="false" />
       </button>
-      <div className="feature-label" aria-hidden="true">
-        <p className="fl-kicker">Now showing</p>
-        <p className="fl-title">{titleLine(featured)}</p>
-        <p className="fl-meta">{metaLine(featured)}</p>
-        <p className="fl-room">In {featuredRoom.name}</p>
-      </div>
     </div>
-  );
-}
-
-// A plain round clock high on the wall above the signs, keeping the visitor's own time. Clicked,
-// it gives a tick-tock and its second hand sweeps round once.
-function WallClock() {
-  const [now, setNow] = useState(() => Date.now());
-  const [sweeps, setSweeps] = useState(0);
-  const [sweeping, setSweeping] = useState(false);
-  const start = useRef(now);
-  useEffect(() => {
-    let id = 0;
-    const next = () => {
-      const t = Date.now();
-      setNow(t);
-      id = setTimeout(next, 1000 - (t % 1000) + 5);
-    };
-    id = setTimeout(next, 1000 - (Date.now() % 1000) + 5);
-    return () => clearTimeout(id);
-  }, []);
-  useEffect(() => {
-    if (!sweeping) return undefined;
-    const id = setTimeout(() => setSweeping(false), 1250);
-    return () => clearTimeout(id);
-  }, [sweeping, sweeps]);
-  const d = new Date(now);
-  const h = ((d.getHours() % 12) + d.getMinutes() / 60) * 30;
-  const m = (d.getMinutes() + d.getSeconds() / 60) * 6;
-  // the second hand only ever goes forward, so it never spins back past twelve
-  const secs = new Date(start.current).getSeconds() + Math.floor(now / 1000) - Math.floor(start.current / 1000);
-  const sa = secs * 6 + sweeps * 360;
-  const click = () => {
-    sound.tick(0);
-    sound.tick(0.5, true);
-    setSweeps((n) => n + 1);
-    setSweeping(true);
-  };
-  return (
-    <button type="button" className="clock" tabIndex={-1} onClick={click} aria-label={`A clock: ${d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`}>
-      <svg viewBox="0 0 100 100" aria-hidden="true">
-        <circle cx="50" cy="50" r="47" fill="#fbfaf7" stroke="#1b1a19" strokeWidth="4" />
-        {Array.from({ length: 60 }, (_, i) => (
-          <line key={i} x1="50" y1={i % 5 ? 8 : 7} x2="50" y2={i % 5 ? 11 : 17} stroke="#1b1a19" strokeWidth={i % 5 ? 0.9 : 3} transform={`rotate(${i * 6} 50 50)`} />
-        ))}
-        <line className="hand" x1="50" y1="56" x2="50" y2="27" stroke="#1b1a19" strokeWidth="4.6" style={{ transform: `rotate(${h}deg)` }} />
-        <line className="hand" x1="50" y1="58" x2="50" y2="13" stroke="#1b1a19" strokeWidth="3.4" style={{ transform: `rotate(${m}deg)` }} />
-        <g className={sweeping ? 'hand sec sweep' : 'hand sec'} style={{ transform: `rotate(${sa}deg)` }}>
-          <line x1="50" y1="64" x2="50" y2="11" stroke="#b8322a" strokeWidth="1.4" />
-        </g>
-        <circle cx="50" cy="50" r="2.6" fill="#b8322a" />
-      </svg>
-    </button>
   );
 }
 

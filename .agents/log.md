@@ -119,3 +119,6 @@ Checked in headless Chrome (1440x900, 390x844), sounds not heard (headless).
 
 ## 2026-11-06 · charly · charly · done: front desk layout tidy
 Pushed to charly; no PR yet. Featured print bigger (296 px) and higher (top 214), no picture light (lamp and wash gone; hover/click just brighten it); its label now sits to its left. The clock moved off the ceiling to the wall between the lettering and the print, over the label. The signs are 42 px higher (top 118 dk), clear of the map stand. The snake plant is drawn back to front like the umbrella stand (soil and back rim, leaves, then the planter's front with the near half of the rim), so the leaves go down inside the pot.
+
+## 2026-11-06 · charly · charly · done: clock and print label gone; "Start here" at the maps
+Pushed to charly; no PR yet. The wall clock (and sound.tick) and the print's "Now showing" label are removed. The map stand stands out more, as Charly chose: on a first visit (localStorage `charlyzhang.seen-desk`) a red ink circle draws itself round the stand with "Start here" and an arrow (Lobby.jsx StartHere), fading after 6.5 s or at the first pointerdown; on every visit the top map sheet lifts and settles every 8 s (map-flutter, off for reduced motion). Note: `.desk-scene svg` sizes every svg in the scene to 100%, so a positioned svg needs a more specific selector (see .start-here .sh-ring).
