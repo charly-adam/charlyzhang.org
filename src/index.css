@@ -1429,9 +1429,6 @@ body:has(.stage:not(.ready)) .dock {
   translate: calc(var(--px) * var(--dk) * -6px) calc(var(--py) * var(--dk) * -3px);
   transition: translate var(--ease);
 }
-.lobby .floor3d {
-  translate: calc(var(--px) * var(--dk) * -12px) calc(var(--py) * var(--dk) * -3px);
-}
 .lettering {
   position: absolute;
   left: calc(50% - 624px * var(--dk));
@@ -1497,11 +1494,10 @@ body:has(.stage:not(.ready)) .dock {
   inset: 0;
   transition: translate var(--ease);
 }
-.dl-char {
-  translate: calc(var(--px) * -15px) calc(var(--py) * -5px);
-}
-.dl-desk {
-  translate: calc(var(--px) * -28px) calc(var(--py) * -9px);
+/* the whole lobby drifts together with the pointer, a little, as one (the wall's 6 px): layers
+   drifting by different amounts looked like the desk sliding on the floor */
+.desk-scene > .dl {
+  translate: calc(var(--px) * -6px) calc(var(--py) * -3px);
 }
 .desk-scene p {
   margin: 0;
@@ -2043,10 +2039,7 @@ body:has(.stage:not(.ready)) .dock {
   transition: opacity 0.4s ease 0.9s, translate 0.5s cubic-bezier(0.25, 1.4, 0.5, 1) 0.9s;
 }
 
-/* the wall behind the desk: its own layer, drifting with the wall (and the signs) */
-.dl-wall {
-  translate: calc(var(--px) * -6px) calc(var(--py) * -3px);
-}
+/* the wall behind the desk: its own layer (behind Charly) */
 .desk-scene .dl > button,
 .desk-scene .dl-wall > * {
   position: absolute;
@@ -2072,10 +2065,10 @@ body:has(.stage:not(.ready)) .dock {
 
 /* the featured print: black frame, white mat */
 .desk-scene .dl-wall > .feature {
-  left: 572px;
-  top: 214px;
-  width: 296px;
-  height: 296px;
+  left: 552px;
+  top: 172px;
+  width: 336px;
+  height: 336px;
   cursor: default;
   pointer-events: none;
 }
@@ -2083,11 +2076,11 @@ body:has(.stage:not(.ready)) .dock {
   position: absolute;
   left: 0;
   top: 0;
-  width: 296px;
-  height: 296px;
+  width: 336px;
+  height: 336px;
   box-sizing: border-box;
   margin: 0;
-  padding: 22px;
+  padding: 25px;
   background: #f8f8f6;
   border: 6px solid #1b1a19;
   box-shadow: 0 14px 22px -8px rgba(0, 0, 0, 0.35), 0 2px 3px rgba(0, 0, 0, 0.2), inset 0 3px 5px -3px rgba(0, 0, 0, 0.3);
@@ -2122,6 +2115,13 @@ body:has(.stage:not(.ready)) .dock {
 .start-here.out {
   opacity: 0;
 }
+/* the ring takes the place of the stand's red dot while it's up */
+.stand-dot {
+  transition: opacity 0.4s ease;
+}
+.stage.ready .dl-desk:has(.start-here:not(.out)) .stand-dot {
+  opacity: 0;
+}
 .start-here svg {
   position: absolute;
   overflow: visible;
@@ -2147,8 +2147,8 @@ body:has(.stage:not(.ready)) .dock {
 }
 .sh-note {
   position: absolute;
-  left: 1112px;
-  top: 436px;
+  left: 1128px;
+  top: 414px;
   width: max-content;
   margin: 0;
   font-size: 19px;
@@ -2217,12 +2217,12 @@ body:has(.stage:not(.ready)) .dock {
   /* no wall beside the stand on a phone: the note goes above it, the arrow pointing down */
   .sh-note {
     left: 958px;
-    top: 392px;
+    top: 368px;
     font-size: 26px;
   }
   .start-here .sh-arrow {
     left: 40px;
-    top: 30px;
+    top: 34px;
   }
 }
 /* the call bell, on the desk left of the maps */
@@ -2418,7 +2418,7 @@ body:has(.stage:not(.ready)) .dock {
 @media (max-width: 700px) {
   /* and the print a little smaller, to clear the signs above it */
   .desk-scene .dl-wall > .feature {
-    scale: 0.7;
+    scale: 0.62;
     transform-origin: 50% 100%;
   }
   .desk-scene .dl-desk > .rope-btn,

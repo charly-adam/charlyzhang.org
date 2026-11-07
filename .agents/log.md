@@ -122,3 +122,6 @@ Pushed to charly; no PR yet. Featured print bigger (296 px) and higher (top 214)
 
 ## 2026-11-06 · charly · charly · done: clock and print label gone; "Start here" at the maps
 Pushed to charly; no PR yet. The wall clock (and sound.tick) and the print's "Now showing" label are removed. The map stand stands out more, as Charly chose: on a first visit (localStorage `charlyzhang.seen-desk`) a red ink circle draws itself round the stand with "Start here" and an arrow (Lobby.jsx StartHere), fading after 6.5 s or at the first pointerdown; on every visit the top map sheet lifts and settles every 8 s (map-flutter, off for reduced motion). Note: `.desk-scene svg` sizes every svg in the scene to 100%, so a positioned svg needs a more specific selector (see .start-here .sh-ring).
+
+## 2026-11-06 · charly · charly · done: one drift for the lobby, bigger print, Start here tidy
+Pushed to charly; no PR yet. The lobby's pointer parallax is one movement now: wall, floor, lettering, signs and every desk-scene layer all drift by the wall's 6 px x / 3 px y (the desk at 28 px and Charly at 15 px looked like they slid on the floor; the floor's own 12 px is gone too). Featured print 336 px, top 172 (0.62x on phones). Start here: the stand's red dot hides while the ring is up, and the note and arrow sit clear of the ring (on phones the note is higher).
