@@ -124,7 +124,9 @@ function DoorCol({ to, onLeave, S }) {
   const r = W / 2;
   const T = GEO.hall.t * S;
   const spring = GEO.arch.h * S - r;
-  const N = 48; // facets round the curve: enough that it reads as round
+  // facets round the curve: enough that it reads as round; fewer on a phone, where each is a
+  // layer of its own in a small GPU memory budget and the arch is small on screen
+  const N = phone.matches ? 16 : 48;
   const c = 2 * r * Math.tan(Math.PI / (2 * N)) + 1; // a facet, a hair over so they meet
   const facets = [];
   for (let i = 0; i < N; i++) {
@@ -192,8 +194,8 @@ export function Hallway({ S, D, theme, room, onToggle, onEnter, hallRef }) {
         <Panels len={D} S={S} />
       </div>
       <EnterMark S={S} D={D} onEnter={onEnter} />
-      <Slab kind="floor" S={S} L={depth - T} D={D} theme={theme} x0={-depth} cls="hall" edge={0.12} />
-      <Slab kind="ceiling" S={S} L={depth - T} D={D} theme={theme} x0={-depth} cls="hall" edge={0.12} />
+      <Slab kind="floor" S={S} L={depth - T} D={D} theme={theme} x0={-depth} cls="hall" edge={0.12} near />
+      <Slab kind="ceiling" S={S} L={depth - T} D={D} theme={theme} x0={-depth} cls="hall" edge={0.12} near />
     </>
   );
 }
@@ -237,7 +239,7 @@ function Tile({ w, h, S, look, ox, oy, dirs, dark, edge, solid, className, style
   // than a desktop's, and canvases are memory a phone hasn't got to spare (with them all at
   // full size the biggest room ran Safari out of it). A plain colour needs only a little
   // canvas: its edge shading scales up smoothly.
-  const px = look.img ? Math.min(GEO.tilePx, Math.ceil(w * 1.5)) : 64;
+  const px = look.img ? Math.min(phone.matches ? GEO.tilePxPhone : GEO.tilePx, Math.ceil(w * 1.5)) : 64;
   const py = Math.round((px * h) / w);
   // Safari keeps a canvas's memory until it's collected, long after the room has gone, and it
   // has a hard limit on canvas memory in all: past it a canvas stays blank (a dark patch in
@@ -314,13 +316,15 @@ function Tile({ w, h, S, look, ox, oy, dirs, dark, edge, solid, className, style
 
 // (memo: a floor's tiles are drawn once; walking up to a photo re-renders the room, and redrawing
 // every canvas then held up the move by a good part of a second)
-export const Slab = memo(function Slab({ kind, S, L, D, theme, x0 = 0, cls = '', edge = 0.3 }) {
+export const Slab = memo(function Slab({ kind, S, L, D, theme, x0 = 0, cls = '', edge = 0.3, near = false }) {
   if (!L) return null;
   const floor = kind === 'floor';
   const look = floor ? theme.floor : theme.ceil;
   // (a phone's room is drawn bigger than its screen is wide, so its tiles are bigger too: as
   // many as a room the screen's width would have, not two and a half times as many canvases)
-  const T = Math.max(GEO.tile * S, phone.matches ? GEO.tilePhone * S : GEO.tileMin);
+  // (`near`, the hallway's, right by the camera at the door: a tile is drawn as sharp as its
+  // nearest corner needs, so smaller ones there cost a phone's GPU memory far less)
+  const T = Math.max(GEO.tile * S, phone.matches ? (near ? GEO.tileNearPhone : GEO.tilePhone) * S : GEO.tileMin, GEO.tileMin);
   // columns along the room
   const cuts = [x0, x0 + L];
   const cols = [];
