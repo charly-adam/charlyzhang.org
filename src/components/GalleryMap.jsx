@@ -1,6 +1,7 @@
 import { createContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { roomList, site } from '../data/gallery.js';
 import { Pictogram } from './Icons.jsx';
+import { allPhotoCount } from '../pages/Collage.jsx';
 
 // openMap(from, opener): takes the map out, from the stand on the desk ('stand') or the
 // brochure at the bottom ('dock'); `opener` gets focus back when it's folded away. Provided by App.
@@ -37,6 +38,7 @@ export function planFor(list) {
 const plan = planFor(roomList);
 const gridStyle = { '--cols': plan.cols, '--rows': plan.rows };
 const DESK = 'desk';
+const ALL = 'all'; // the All photos wall, in the middle of the plan where the hall is
 
 // The little plan printed on the folded maps in the stand.
 export function MapThumb() {
@@ -136,10 +138,18 @@ export function GalleryMap({ here, onClose, onGo }) {
   if (room) {
     about = (
       <>
-        <p className="pick-room">Room {room.num}</p>
         <p className="pick-name">{room.name}</p>
         <p className="pick-blurb">{room.blurb}</p>
         {room.slug === here && <p className="pick-here">You are here.</p>}
+      </>
+    );
+  } else if (sel === ALL) {
+    about = (
+      <>
+        <p className="pick-room">Collage</p>
+        <p className="pick-name">All photos</p>
+        <p className="pick-blurb">Every photo in the gallery on one wall.</p>
+        {here === ALL && <p className="pick-here">You are here.</p>}
       </>
     );
   } else if (sel === DESK) {
@@ -183,19 +193,14 @@ export function GalleryMap({ here, onClose, onGo }) {
               <button
                 type="button"
                 className="plan-pick"
-                aria-label={r.slug === here ? `Room ${r.num}, ${r.name}, ${r.photos.length} photographs, you are here` : `Go to room ${r.num}, ${r.name}, ${r.photos.length} photographs`}
+                aria-label={r.slug === here ? `${r.name}, ${r.photos.length} photographs, you are here` : `Go to ${r.name}, ${r.photos.length} photographs`}
                 {...pick(r.slug, `/room/${r.slug}`, r.slug === here)}
               >
-                <span className="plan-ticks" aria-hidden="true">
-                  {r.photos.map((p) => (
-                    <span key={p.id} />
-                  ))}
-                </span>
                 <span className="plan-name" aria-hidden="true">
                   <Pictogram name={r.icon} size={17} className="plan-icon" />
                   <span className="plan-words">
                     <span className="plan-num">
-                      {r.num} · {r.name}
+                      {r.name}
                     </span>
                     <span className="plan-count">{r.photos.length} photos</span>
                   </span>
@@ -204,8 +209,23 @@ export function GalleryMap({ here, onClose, onGo }) {
               {r.slug === here && <Here />}
             </div>
           ))}
-          <div className="plan-hall" aria-hidden="true" style={{ gridColumn: plan.middle, gridRow: `2 / span ${plan.rows - 2}` }}>
-            Hall
+          <div className={sel === ALL ? 'plan-all picked' : 'plan-all'} style={{ gridColumn: plan.middle, gridRow: `2 / span ${plan.rows - 2}` }}>
+            <button type="button" className="plan-pick" aria-label={here === ALL ? `All photos, ${allPhotoCount} photographs, you are here` : `Go to all photos, ${allPhotoCount} photographs on one wall`} {...pick(ALL, '/collage', here === ALL)}>
+              <span className="plan-name" aria-hidden="true">
+                <span className="plan-all-mark">
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                </span>
+                <span className="plan-words">
+                  <span className="plan-num">All photos</span>
+                  <span className="plan-count">{allPhotoCount} photos</span>
+                </span>
+              </span>
+            </button>
+            {here === ALL && <Here />}
           </div>
           <div className={sel === DESK ? 'plan-desk picked' : 'plan-desk'} style={{ gridColumn: plan.middle, gridRow: plan.rows }}>
             <button type="button" className="plan-pick" aria-label={here ? 'Go to the front desk' : 'Front desk, you are here'} {...pick(DESK, '/', !here)}>
@@ -224,7 +244,6 @@ export function GalleryMap({ here, onClose, onGo }) {
           <div className="key-rows" role="group" aria-labelledby={copy ? undefined : 'map-key'}>
             {roomList.map((r) => (
               <button key={r.slug} type="button" className={sel === r.slug ? 'key-row picked' : 'key-row'} {...pick(r.slug, `/room/${r.slug}`, r.slug === here)}>
-                <span className="key-num">{r.num}</span>
                 <span className="key-name">
                   {r.name}
                   {r.slug === here && <KeyHere />}
@@ -232,10 +251,14 @@ export function GalleryMap({ here, onClose, onGo }) {
                 <span className="key-count">{r.photos.length}</span>
               </button>
             ))}
-            <button type="button" className={sel === DESK ? 'key-row picked' : 'key-row'} {...pick(DESK, '/', !here)}>
-              <span className="key-num" aria-hidden="true">
-                ·
+            <button type="button" className={sel === ALL ? 'key-row picked' : 'key-row'} {...pick(ALL, '/collage', here === ALL)}>
+              <span className="key-name">
+                All photos
+                {here === ALL && <KeyHere />}
               </span>
+              <span className="key-count">{allPhotoCount}</span>
+            </button>
+            <button type="button" className={sel === DESK ? 'key-row picked' : 'key-row'} {...pick(DESK, '/', !here)}>
               <span className="key-name">
                 Front desk
                 {!here && <KeyHere />}

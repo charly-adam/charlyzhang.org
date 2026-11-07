@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { poseFacing, rotY, turnTo } from '../room/geometry.js';
 
-const IN = { ms: 1700, ease: bezier(0.62, 0, 0.18, 1) };
-const OUT = { ms: 1300, ease: bezier(0.5, 0, 0.2, 1) };
+const IN = { ms: 850, ease: bezier(0.62, 0, 0.18, 1) };
+const OUT = { ms: 650, ease: bezier(0.5, 0, 0.2, 1) };
 const FILL = 0.8; // how much of the view the target fills when you're up close
 const FILL_PHONE = 0.95; // on a phone, where there's no wall label beside it, more
 const MAX_ZOOM = 2.8; // but never closer than this (small things like the room's title)
 
 // A CSS-style cubic-bezier timing function.
-function bezier(x1, y1, x2, y2) {
+export function bezier(x1, y1, x2, y2) {
   const at = (a, b, t) => 3 * a * t * (1 - t) ** 2 + 3 * b * t * t * (1 - t) + t ** 3;
   return (x) => {
     let lo = 0;

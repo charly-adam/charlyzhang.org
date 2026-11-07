@@ -9,9 +9,10 @@
 //   2. Add an entry to `photos` below.
 //   3. `pair: true` hangs a photo right next to the one before it, sharing one wall label.
 //
-// Photos hang in order round the room, starting on your left as you come in. In a room of 17
-// or more, the first hangs on the entrance wall beside the door, on your left as you come in, and
-// the last beside it on your right; then along the left-hand wall, across the far wall and back along the right-hand wall.
+// Photos hang in order round the room, starting on your right as you come in (you go in to the
+// right): along the right-hand wall, across the far wall and back along the left-hand wall. In
+// a room of 17 or more, the first hangs on the entrance wall beside the door, on your right as
+// you come in, and the last beside the door on its other side.
 // The far wall takes 3 when the count is odd and 2 when it's even, so the long walls always
 // match; the room grows with them.
 //
@@ -31,6 +32,8 @@ import sizes from './photo-sizes.json';
 export const site = {
   name: 'Charly Zhang',
   subtitle: 'Photography',
+  // the print hung on the wall behind the front desk (its file, as in `photos` below)
+  featured: '/photos/favorites/01.jpg',
 };
 
 export const rooms = [
@@ -112,11 +115,11 @@ export const photos = [
   { room: 'benches', file: '/photos/benches/08.jpg', title: 'Snowy Bench', year: '2024', place: 'Sand Harbor State Park, Lake Tahoe', camera: 'Nikon F100', lens: '', film: 'Fuji C200', note: '' },
   { room: 'benches', file: '/photos/benches/09.jpg', title: 'Bench in the woods', year: '2024', place: 'Bukhansan National Park', camera: 'Nikon F100', lens: '', film: 'Ilford HP5', note: '' },
   { room: 'benches', file: '/photos/benches/10.jpg', title: 'Bench in the wetland', year: '2024', place: 'Baylands Nature Preserve', camera: 'Nikon F100', lens: '', film: 'ColorPlus 200', note: '' },
-  { room: 'benches', file: '/photos/benches/11.jpg', title: 'Bench above the lake', year: '2024', place: 'Sand Harbor State Park, Lake Tahoe', camera: 'Pentax 67', lens: '', film: 'Fuji Pro 400H', note: '' },
+  { room: 'benches', file: '/photos/benches/11.jpg', title: 'Bench above the lake', year: '2024', place: 'Sand Harbor State Park, Lake Tahoe', camera: 'Pentax 6x7', lens: '', film: 'Fuji Pro 400H', note: '' },
 
   // Cars
   { room: 'cars', file: '/photos/cars/01.jpg', title: 'MotoGP', year: '2023', place: 'Laguna Seca Raceway', camera: 'Nikon D850', lens: '', film: '', note: '' },
-  { room: 'cars', file: '/photos/cars/02.jpg', title: 'Ferrari GT car', year: '2023', place: 'Sonoma Raceway', camera: 'Pentax 67', lens: '', film: 'Cinestill BWXX', note: '' },
+  { room: 'cars', file: '/photos/cars/02.jpg', title: 'Ferrari GT car', year: '2023', place: 'Sonoma Raceway', camera: 'Pentax 6x7', lens: '', film: 'Cinestill BWXX', note: '' },
   { room: 'cars', file: '/photos/cars/03.jpg', title: 'Mercedes GT car', year: '2023', place: 'Sonoma Raceway', camera: 'Nikon D850', lens: '', film: '', note: '' },
   { room: 'cars', file: '/photos/cars/04.jpg', title: 'IndyCar at speed', year: '2021', place: 'Laguna Seca Raceway', camera: 'Nikon D750', lens: '', film: '', note: '' },
   { room: 'cars', file: '/photos/cars/05.jpg', title: 'Laguna Seca Turn 6', year: '2021', place: 'Laguna Seca Raceway', camera: 'Nikon D750', lens: '', film: '', note: '' },
@@ -126,7 +129,7 @@ export const photos = [
   { room: 'cars', file: '/photos/cars/09.jpg', title: 'Two cars in the tunnel', year: '2021', place: 'Michigan Stadium, Ann Arbor', camera: 'Nikon D750', lens: '', film: '', note: '' },
 
   // Film
-  { room: 'film', file: '/photos/film/09.jpg', title: 'Lifeguard tower in snow', year: '2024', place: 'Sand Harbor State Park, Lake Tahoe', camera: 'Pentax 67', lens: '', film: 'Fuji Pro 400H', note: '' },
+  { room: 'film', file: '/photos/film/09.jpg', title: 'Lifeguard tower in snow', year: '2024', place: 'Sand Harbor State Park, Lake Tahoe', camera: 'Pentax 6x7', lens: '', film: 'Fuji Pro 400H', note: '' },
   { room: 'film', file: '/photos/film/01.jpg', title: 'Hot Tub at night', year: '2022', place: 'Mountain View', camera: 'Nikon F3HP', lens: 'Nikon 50mm F1.4 w/ 1/4 Promist', film: 'ColorPlus 200', note: '' },
   { room: 'film', file: '/photos/film/02.jpg', title: 'Empty booth', year: '2023', place: 'Mount Hamilton', camera: 'Nikon F3HP', lens: '', film: 'Gold 200', note: '' },
   { room: 'film', file: '/photos/film/03.jpg', title: 'Lick Observatory', year: '2023', place: 'Mount Hamilton', camera: 'Nikon F3HP', lens: '', film: 'Kodak Gold', note: '' },
@@ -138,7 +141,7 @@ export const photos = [
   { room: 'film', file: '/photos/film/10.jpg', title: 'Roses against the sky', year: '2022', place: 'San Jose Rose Garden', camera: 'Nikon F3HP', lens: '', film: 'Portra 160', note: '' },
   { room: 'film', file: '/photos/film/11.jpg', title: 'Gum Lung', year: '2023', place: 'Chinatown, San Francisco', camera: 'Nikon F3HP', lens: 'Zeiss Otus 55mm F1.4', film: 'Ilford HP5', note: '' },
   { room: 'film', file: '/photos/film/12.jpg', title: 'The Pole Field', year: '2023', place: 'Byxbee Park', camera: 'Nikon F3HP', lens: '', film: 'Portra 400', note: '' },
-  { room: 'film', file: '/photos/film/13.jpg', title: 'Skateboarder at San Jose City Hall', year: '2023', place: 'San Jose', camera: 'Nikon F3HP', lens: '', film: 'Portra 400', note: '' },
+  { room: 'film', file: '/photos/film/13.jpg', title: 'Skateboarder at City Hall', year: '2023', place: 'San Jose', camera: 'Nikon F3HP', lens: '', film: 'Portra 400', note: '' },
 ];
 
 // ── derived helpers (no need to edit below) ─────────────────────────────────
@@ -163,8 +166,12 @@ export const roomList = rooms.map((r, i) => {
       const sz = sizes[p.file] || {};
       const width = p.width || sz.width || 1500;
       const height = p.height || sz.height || 1000;
-      // `wall` is the lighter copy hung on the wall; `file` is the full-size one shown up close
-      return { ...p, width, height, wall: sz.wall || p.file, id: `${r.slug}-${k + 1}`, index: k, portrait: height > width };
+      // `wall` is the lighter copy hung on the wall; `file` is the full-size one shown up close;
+      // `thumb`, a small one, is what a collage starts with (scripts/thumbs.js).
+      // Both carry a fingerprint of their contents (sz.v), so a browser that has cached a file
+      // under the same name before (photos get renumbered) fetches it afresh.
+      const v = sz.v ? `?v=${sz.v}` : '';
+      return { ...p, width, height, file: p.file + v, wall: (sz.wall || p.file) + v, thumb: (sz.thumb || sz.wall || p.file) + v, id: `${r.slug}-${k + 1}`, index: k, portrait: height > width };
     });
   const groups = [];
   list.forEach((p) => {

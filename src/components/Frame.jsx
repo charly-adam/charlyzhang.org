@@ -72,19 +72,30 @@ export function FrameReflection({ photo }) {
 
 // "Title, year" and "place · camera · lens · film", skipping whatever hasn't been filled in.
 export const titleLine = (p) => [p.title, p.year].filter(Boolean).join(', ');
-export const metaLine = (p) => [p.place, p.camera, p.lens, p.film].filter(Boolean).join(' · ');
+export const metaParts = (p) => [p.place, p.camera, p.lens, p.film].filter(Boolean);
+export const metaLine = (p) => metaParts(p).join(' · ');
 
-// Small wall label printed beside a group of photos; clicking it walks up to the photo.
-export function WallLabel({ group, onZoom }) {
+// Small wall label printed beside a group of photos, a line for each detail; clicking it walks
+// up to the photo.
+// The label is as wide as its longest line (up to a limit), so it takes the same room in the
+// floor's reflection of the wall: there it's drawn as a `ghost`, an unseen copy, to keep the
+// reflected frames in line.
+export function WallLabel({ group, onZoom, ghost }) {
   const names = group.map((p) => p.title).join(' and ');
+  const Tag = ghost ? 'span' : 'button';
+  const props = ghost ? { className: 'lblpos label-ghost' } : { type: 'button', className: 'label ink lblpos', tabIndex: -1, onClick: onZoom, 'aria-label': `View ${names}` };
   return (
-    <button type="button" className="label ink lblpos" tabIndex={-1} onClick={onZoom} aria-label={`View ${names}`}>
+    <Tag {...props}>
       {group.map((p) => (
         <span key={p.id} className="lbl-entry">
           <span className="lt lbl-title">{titleLine(p)}</span>
-          <span className="ink2 lbl-meta">{metaLine(p)}</span>
+          {metaParts(p).map((m, i) => (
+            <span key={i} className="ink2 lbl-meta">
+              {m}
+            </span>
+          ))}
         </span>
       ))}
-    </button>
+    </Tag>
   );
 }

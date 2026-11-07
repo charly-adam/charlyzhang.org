@@ -6,8 +6,8 @@ const resting = (r) => r.stops.filter((st) => !st.pass);
 
 
 /**
- * The camera. It starts in the doorway ('door'), flies to a corner when you pick a side
- * ('fly'), then walks the loop round the room ('rail'): wheel / trackpad / drag / keys set a
+ * The camera. It starts in the doorway ('door'), flies to a corner when you go in ('fly'),
+ * then walks the loop round the room ('rail'): wheel / trackpad / drag / keys set a
  * target distance along the loop, the camera walks toward it as a slow eased pan, turning at
  * the corners, then settles on a stop. `dir` is the way round you chose: scrolling
  * on walks you that way, while the arrows, keys and a drag stay true to left and right. A
@@ -200,6 +200,8 @@ export function useRailCamera({ stageRef, camRef, paused, onChoose, onPose }) {
 
     const onWheel = (e) => {
       e.preventDefault();
+      // in the doorway, scrolling on takes you in
+      if (s.mode === 'door' && !pausedRef.current && e.deltaY > 4) chooseRef.current?.();
       if (pausedRef.current || s.mode !== 'rail') return;
       let dy = e.deltaY;
       let dx = e.deltaX;
@@ -245,14 +247,7 @@ export function useRailCamera({ stageRef, camRef, paused, onChoose, onPose }) {
       const d = s.drag;
       if (!d || e.pointerId !== d.id) return;
       s.drag = null;
-      if (!d.moved) return;
-      if (s.mode === 'door') {
-        // in the doorway, a swipe picks a side: the hand pulls the room past you
-        const dx = e.clientX - d.x0;
-        if (Math.abs(dx) > 40) chooseRef.current?.(dx < 0 ? 1 : -1);
-        return;
-      }
-      if (s.mode !== 'rail') return;
+      if (!d.moved || s.mode !== 'rail') return;
       s.tx -= d.v * 320; // fling
       s.heading = Math.sign(s.tx - d.tx0);
       run();
@@ -362,8 +357,8 @@ export function useRailCamera({ stageRef, camRef, paused, onChoose, onPose }) {
     run();
   }, [s, run]);
 
-  // Pick a side at the door: fly to that corner, then walk. If the corner is only walked
-  // through, fly on to the first stop that way.
+  // Go in at the door, to the left (dir < 0) or the right: fly to that corner, then walk. If
+  // the corner is only walked through, fly on to the first stop that way.
   const enter = useCallback((dir, via, ms, then) => {
     const r = s.rail;
     if (s.mode !== 'door' || !r) return false;
@@ -377,13 +372,6 @@ export function useRailCamera({ stageRef, camRef, paused, onChoose, onPose }) {
     }
     s.dir = -dir; // left sets off clockwise, which is the way the loop is measured
     flyTo(to.pose, to.t, via, ms, then);
-    return true;
-  }, [s, flyTo]);
-
-  // Walk out: from wherever you are, through the arch to `to`, facing out.
-  const leave = useCallback((to, via, ms, then) => {
-    if (s.mode === 'fly') return false;
-    flyTo(to, null, via, ms, then);
     return true;
   }, [s, flyTo]);
 
@@ -407,5 +395,5 @@ export function useRailCamera({ stageRef, camRef, paused, onChoose, onPose }) {
   const getDir = useCallback(() => s.dir, [s]);
   const nearestStop = useCallback(() => nearest(s.x), [nearest, s]);
 
-  return { setRail, setDoor, reset, enter, leave, jumpTo, getPose, getT, getMode, getDir, nearestStop, step };
+  return { setRail, setDoor, reset, enter, jumpTo, getPose, getT, getMode, getDir, nearestStop, step };
 }

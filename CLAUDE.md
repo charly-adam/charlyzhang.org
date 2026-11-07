@@ -67,6 +67,7 @@ Lasting project facts go here, one topic per file: things you learned the hard w
 - [headless-chrome-3d-screenshots.md](.agents/knowledge/headless-chrome-3d-screenshots.md): screenshotting and driving the rooms in headless Chrome; keep the GPU on
 - [ios-safari-testing.md](.agents/knowledge/ios-safari-testing.md): testing in the Xcode iPhone/iPad simulator, and what Safari gets wrong with 3D planes
 - [vercel-deploys.md](.agents/knowledge/vercel-deploys.md): only Adam's commits deploy (Hobby plan), so Charly's work gets previewed after Adam merges it into `adam`
+- [collage-mode.md](.agents/knowledge/collage-mode.md): collage mode and the All photos wall: routes, the remembered switch, the salon-hang layout, image sizes, and keeping it off the GPU
 
 Read the relevant file before changing room surfaces, rendering or anything you will test visually.
 
