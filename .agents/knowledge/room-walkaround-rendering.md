@@ -15,7 +15,7 @@ Chrome rasterises each 3D plane at the magnification of its nearest corner and a
 
 - **Phones run out far sooner than desktops** (Nov 2026, Charly's Pixel 10 in Chrome: black floor tiles, frames showing only their edges, the map brochure and the Gallery switch missing, at the doorway of most rooms). Reproduce it on Windows/Mac headless Chrome with `--force-gpu-mem-available-mb=64` at 412×770 @2.625: it fails exactly like the phone. What fixed it (phone only, all in the `max-width: 700px` block and RoomBox):
   - each `.fw` is `transform-style: flat`, with no `.side` faces and no translateZ on `.frame`: one layer a photo instead of about nine;
-  - the lamps' light keeps still (an infinite `lamp-sway` animation kept every `.pool` a layer of its own), and the 3D SVG `.beam` (a layer a photo however it's styled, flat or not) is replaced by `.fw::before`, a soft radial fan of light down the wall drawn into the frame's layer. Charly wanted the lights kept on phones; without them every room passed at 56 MB, with them all pass at 64 and Nature is borderline at 56;
+  - the lamps' light keeps still: an infinite `lamp-sway` animation kept every `.beam` and `.pool` a layer of its own. (A CSS fan in place of the SVG beam looked wrong, flat light sideways, so the real cone stays.) Without any lamp light every room passed at 56 MB; with it all pass at 64 and Nature is borderline at 56;
   - 16 arch facets instead of 48 (each facet is a layer);
   - textured floor canvases at most 288 px (`GEO.tilePxPhone`; canvases count against the same budget);
   - the hallway's tiles at 0.55 S (`GEO.tileNearPhone`): a tile is drawn as sharp as its nearest corner needs, and these are right by the camera.
