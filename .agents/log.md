@@ -141,3 +141,6 @@ Pushed to charly; no PR yet (Charly will ask).
 - Collage close-up: the left/right arrow buttons are gone (swipe and arrow keys still step); the photo gets the width they took on desktop.
 - Lobby floor/ceiling planes cut to the depth a screen shows (1.2 S / 0.9 S, were 1.8 S): Adam's brother's iPhone (Chrome = WebKit) drew no floor or ceiling at the front desk. Looks identical in Chrome. Adam: please confirm in the iOS simulator; I can't run WebKit 3D here.
 - Every photo has a stop of its own now, including the first and last on each wall, which were only ever seen from the corner views; the corners stay as views on the way between walls (as in Favorites).
+
+## 2026-11-07 · charly · charly · done: ready for Adam (PR charly -> adam)
+The 2026-11-07 fixes are in a PR for Adam. Please check the front desk floor and ceiling in the iOS simulator (the reason for the change), and a room doorway on an iPhone.
