@@ -105,3 +105,6 @@ Adam: worth an iOS Safari look at pinch and at the wall's sharpness after a zoom
 
 ## 2026-11-06 · charly · charly · done: All photos favours Favorites, Film, Travel
 Pushed to charly; no PR yet. On the All photos wall, photos from Favorites, Film and Travel (Charly's picks) hang bigger: salonHang takes `favored(photo)`; favoured photos get weight 3, the rest 1 or 2, so they come out about 1.4-1.5x as wide (median) without breaking the packing. A swap in the hill-climb now carries the photo's weight with it. Room collages are unchanged in kind (no favoured photos: weights 1, 2 or 4 as before).
+
+## 2026-11-06 · charly · charly · started: front desk props and a hidden Charly
+Charly wants the lobby more serious: Charly and his name plate hidden by default, a call bell on the desk left of the maps (dings; three quick rings pop him up from behind the desk with the name plate, three more send him down). Clickable props, each with a small animation and a sound (Web Audio, no files): umbrellas drip into the bucket, a featured print on the wall behind the desk (picture light, goes to that photo), a wall clock above the signs (real time), a snake plant and a velvet rope on brass posts right of the desk. Touches Lobby.jsx, index.css (lobby section), gallery.js (site.featured), new src/sound.js.
