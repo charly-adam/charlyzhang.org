@@ -125,3 +125,6 @@ Pushed to charly; no PR yet. The wall clock (and sound.tick) and the print's "No
 
 ## 2026-11-06 · charly · charly · done: one drift for the lobby, bigger print, Start here tidy
 Pushed to charly; no PR yet. The lobby's pointer parallax is one movement now: wall, floor, lettering, signs and every desk-scene layer all drift by the wall's 6 px x / 3 px y (the desk at 28 px and Charly at 15 px looked like they slid on the floor; the floor's own 12 px is gone too). Featured print 336 px, top 172 (0.62x on phones). Start here: the stand's red dot hides while the ring is up, and the note and arrow sit clear of the ring (on phones the note is higher).
+
+## 2026-11-06 · charly · charly · done: phone front desk layout
+Pushed to charly; no PR yet. On phones the room signs are one column at the top right, beside the lettering and as tall as it (--lh, measured), instead of two columns under it. The featured print fills the wall below: Lobby.jsx fitPhoneWall sizes and places it (--fs, --fx, --fy on the stage) from under the lettering down to the welcome card, and from the lettering's left edge across to the map stand, measured on load, font load and resize. Short phones keep the counts now (lettering zoom 0.7, a little higher). Desktop unchanged. Checked at 412x915, 390x844, 375x667.

@@ -115,14 +115,47 @@ export default function Lobby() {
 function useDeskScale(ref) {
   useLayoutEffect(() => {
     const set = () => {
+      const el = ref.current;
+      if (!el) return;
       const W = window.innerWidth;
-      const k = window.matchMedia(PHONE).matches ? W / 840 : Math.min(window.innerHeight, W / 1.6) / 900;
-      ref.current.style.setProperty('--dk', k.toFixed(4));
+      const phone = window.matchMedia(PHONE).matches;
+      const k = phone ? W / 840 : Math.min(window.innerHeight, W / 1.6) / 900;
+      el.style.setProperty('--dk', k.toFixed(4));
+      if (phone) fitPhoneWall(el, k);
     };
     set();
+    // the lettering's height changes once its font has loaded
+    document.fonts?.ready.then(set);
     window.addEventListener('resize', set);
     return () => window.removeEventListener('resize', set);
   }, [ref]);
+}
+
+// On a phone the wall above the desk is laid out to fit: the signs in a column right of the
+// lettering, as tall as it (--lh), and the print as big as the wall under them allows: from
+// under the lettering down to the welcome card on the desk, and from the lettering's left edge
+// across to the map stand. --fs scales it about its middle, --fx and --fy move it, in the desk
+// scene's own units.
+const PRINT = { top: 172, size: 336, cx: 720 }; // the print in the desk scene (index.css .feature)
+const CARD_TOP = 518; // the welcome card's top, in the desk scene
+const STAND_LEFT = 936; // the map stand's left edge
+function fitPhoneWall(el, k) {
+  const letters = el.querySelector('.lettering');
+  const scene = el.querySelector('.desk-scene');
+  if (!letters || !scene) return;
+  const stage = el.getBoundingClientRect();
+  const lr = letters.getBoundingClientRect();
+  el.style.setProperty('--lh', `${lr.height.toFixed(1)}px`);
+  const sceneTop = scene.getBoundingClientRect().top - stage.top;
+  const W = window.innerWidth;
+  const top = lr.bottom - stage.top + 28;
+  const bottom = sceneTop + CARD_TOP * k - 18;
+  const left = lr.left - stage.left;
+  const right = W / 2 + (STAND_LEFT - PRINT.cx) * k - 14;
+  const size = Math.max(80, Math.min(bottom - top, right - left));
+  el.style.setProperty('--fs', (size / (PRINT.size * k)).toFixed(4));
+  el.style.setProperty('--fx', `${(((left + right) / 2 - W / 2) / k).toFixed(1)}px`);
+  el.style.setProperty('--fy', `${(((top + bottom) / 2 - sceneTop) / k - (PRINT.top + PRINT.size / 2)).toFixed(1)}px`);
 }
 
 // Where the pointer is over the lobby, -1..1 each way, as --px and --py on the stage. The
