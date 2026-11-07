@@ -9,6 +9,7 @@
 
 import sharp from 'sharp';
 import { readdir, mkdir, readFile, writeFile, stat } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 
@@ -55,7 +56,11 @@ async function main() {
       const after = await write(src, full, wide || FULL);
       await write(src, path.join(OUT, room, `${name}-wall.jpg`), wide ? Math.round(wide / 2) : WALL);
       const { width, height } = await sharp(full).metadata();
-      sizes[`/photos/${room}/${name}.jpg`] = { width, height, wall: `/photos/${room}/${name}-wall.jpg` };
+      // v: a fingerprint of both copies, added to their URLs (gallery.js) so no browser shows
+      // an old cached photo under a reused name
+      const wallOut = path.join(OUT, room, `${name}-wall.jpg`);
+      const v = createHash('sha1').update(await readFile(full)).update(await readFile(wallOut)).digest('hex').slice(0, 8);
+      sizes[`/photos/${room}/${name}.jpg`] = { width, height, wall: `/photos/${room}/${name}-wall.jpg`, v };
       console.log(`  ${f}  ${mb(before)} → ${mb(after)}  (${width}×${height})`);
     }
   }

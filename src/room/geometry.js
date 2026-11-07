@@ -33,6 +33,9 @@ export const GEO = {
   doorCam: -1.1, // where you stand in the hallway, looking in through the arch, far enough back to
   // read the room's sign beside it (the .room CSS vars --archw and --archh repeat the arch's size)
   sign: { w: 0.3, gap: 0.06 }, // the room's sign on the hallway wall: its width; how far left of the arch
+  enter: { x0: -0.4, x1: -0.2, w: 0.15 }, // the arrow on the hallway floor that takes you in: from
+  // and to (x; the hallway wall's outer face is at -hall.t), and its width. A desktop view sees
+  // the floor from about -0.52 on, so it's all in view.
   turn: 0.6, // scroll distance per radian of turning at a corner
   cornerPad: 0.05, // spare wall past the photos a corner view takes in
   cornerFar: 1.4, // a corner view may stand at most this far off the walls (and stays in the room)
@@ -43,6 +46,7 @@ export const GEO = {
   tile: 0.5, // floor and ceiling tiles, and at least tileMin px across (in a phone's small
   tileMin: 360, // room: Safari falls over with too many surfaces in one 3D scene)
   tilePx: 512, // at most this many pixels across a textured tile's canvas
+  tilePhone: 0.9, // on a phone, tiles this big (S there is 1.6 times the screen's width)
   panel: 0.75, // wall panels
   panelNear: 0.3, // on the entrance wall, which you pass close by going in
   panelMin: 300, // but at least this many px (a phone's small room needs few, and Safari
@@ -56,11 +60,11 @@ export const GEO = {
 // The far wall takes 3 slots when the count is odd and 2 when it's even; once the long walls
 // have seven each, the entrance wall gets one either side of the door; the rest split evenly
 // (a small room is filled along its long walls, so their photos reach the corners).
-// Walking left from the door you meet the walls in order: N wall, far wall, S wall, then the
-// entrance wall (below the door first, then above it).
-// Numbering starts on your left as you come in: with photos on the entrance wall, the first
-// hangs there beside the door (the slot on the corner with the N wall, which the walk reaches
-// last), then the N wall carries on from 2.
+// Numbering starts on your right as you come in (you go in to the right) and runs round the
+// room that way: the S wall, right to left as you face it, then the far wall, then the N wall,
+// then the entrance wall. With photos on the entrance wall, the first hangs there beside the
+// door (the slot on the corner with the S wall, which the walk reaches last but you see as you
+// come in), then the S wall carries on from 2. (Each wall's slots are listed left to right.)
 export function distribute(groups) {
   const n = groups.length;
   const far = Math.min(n, n % 2 ? 3 : 2);
@@ -70,8 +74,11 @@ export function distribute(groups) {
   const side = rest / 2;
   const hang = ent ? [...groups.slice(1), groups[0]] : groups;
   let i = 0;
-  const take = (k) => hang.slice(i, (i += k));
-  return { N: take(side), E: take(far), S: take(side), W: take(ent) };
+  const take = (k) => hang.slice(i, (i += k)).reverse();
+  const S = take(side);
+  const E = take(far);
+  const N = take(side);
+  return { N, E, S, W: take(ent) };
 }
 
 // Each wall's place in the room (px): where its left end is, which way its length runs,

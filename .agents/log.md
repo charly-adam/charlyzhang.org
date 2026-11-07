@@ -65,3 +65,72 @@ Ready for Adam (PR charly -> adam). Charly chose to drop the pillar:
 - With no pillar to walk round, rooms are as small as their photos need (GEO.minD 1.7, minL 1.8 instead of D 2.52 / minL 2.4); corner views just stay inside the room. Benches is now 2.36 x 1.70 S, photos about 0.1 S from every corner. Spare wall is shared equally at both ends (spareW gone).
 - Phones: roomScale is min(h, 1.6 w) (CSS --S min(--H, 160vw)), so photos are bigger in the walk; up close the photo fills 95% (FILL_PHONE) and the arrows fade out after a moment, a touch wakes them (.turn.wake). The map now opens and folds like a book on phones too; the flaps copy the paper's scroll when folding.
 Checked in desktop Chrome and Chrome's 375x812 phone emulation, not on a real phone or Safari.
+
+## 2026-11-05 · charly · charly · done: enter arrow, order from the right, phone stability, phone directory
+Pushed to charly; no PR yet (Charly will ask for one when he's previewed it).
+- Doorway: no side arrows or swipe. An ENTER arrow lies on the hallway floor (RoomBox EnterMark, GEO.enter); clicking it, Enter/Space/Up or a scroll down goes in, always to the right (cam.enter(1)). Inside, the arrows walk left/right as before.
+- Hanging order starts on the right: distribute() fills S (right to left as you face it), then E, then N; with entrance photos (Nature) photo 1 is beside the door on the S side. Up close, the left arrow is photo n+1, the right n-1 (physical sides).
+- Exit fades the room to black and goes to '/'; cam.leave is gone.
+- Plaques: a line per detail (metaParts); labels are as wide as their longest line (max 0.16 S), with an invisible copy in the reflection row so reflections stay aligned.
+- Benches "1st and 9th swapped": the same images were renumbered on Nov 1 and photos/ is cached for a week, so browsers showed old 03-wall.jpg (now 09). Photo URLs now carry ?v=<hash> (photo-sizes.json `v`; compress-photos.js writes it).
+- Phone stability: tiles 0.9 S on phones, canvases freed on unmount, per-frame view culling on phones (see room-walkaround-rendering.md). Hallway floor is solid (desktop now draws it at the door, since doorCam -1.1 makes landscape count as `tall`, and room reflections showed through it). Adam: worth a Retina look at the door now that the hall floor shows on desktop.
+- Phone lobby: the room signs are back, two columns under the lettering (smaller lettering, no counts, on short phones).
+Checked in headless Chrome (390x844 @3, 375x667, 1440x900), not on a real phone or Safari.
+
+## 2026-11-06 · charly · charly · done: quieter enter mark, seamless arch, map without numbers, faster zoom, doc fixes
+Pushed to charly; no PR yet (Charly will ask).
+- ENTER floor mark is a small thin-stroke arrow over spaced capitals (GEO.enter 0.15 S wide, 0.2 S deep), no pulse.
+- Arch: ArchPanel is now an ordinary full-height .panel (same paint/grain/pattern, background lined up) with the opening cut by clip-path: path(); it overlaps each neighbour by 1px, so no seam or see-through gap. The reveal has 48 facets (was 14), shaded from the left jamb's tone through the crown to the right jamb's (--m per facet). The SVG arch and its .arch .s0/.s1 CSS are gone. Adam: clip-path on a 3D plane is new here; worth a Retina/Safari look at the door.
+- Room numbers gone everywhere they showed: map plan (and its photo-count ticks; icon and name now centred in each box), map key and pick panel, the hallway sign, and the loading curtain (kicker is site.name). room.num still exists in data.
+- Zoom twice as fast: dolly IN 850 / OUT 650 ms, lead-in 210 ms, lamp ripple 35 ms, lights back on sooner. Slab is memo'd and Tile's deps use dirs.join(): before, every route change redrew all floor/ceiling canvases and froze the start of each move ~0.4 s.
+- Data from Charly's doc: Lifeguard tower camera Pentax 6x7, "Skateboarder at City Hall"; also fixed "Pentax 67" -> "Pentax 6x7" for Bench above the lake and Ferrari GT car (in the doc too).
+Checked in headless Chrome (1440x900 @1/@2, 390x844 @3). A faint hairline is left where the arch springs.
+
+## 2026-11-06 · charly · charly · done: enter arrow style, whole archway goes in
+Pushed to charly; no PR yet. ENTER floor arrow: square caps and a mitred point like the lobby signs' Arrow, and its gentle pulse is back. The whole archway is a click target from the hallway (button.enter-door on the hall-wall, the arch's size; hidden once in). At the door the room's frames, labels and exit sign take no clicks (.stage.at-door), so a click on a photo seen through the arch goes in instead of zooming. Checked in headless Chrome (1440x900, 390x844).
+
+## 2026-11-06 · charly · charly · done: enter arrow as one shape, dark on pale floors
+Pushed to charly; no PR yet. The floor arrow was three stroked lines that the non-uniform SVG stretch pulled apart (the stem's square cap poked out past the tip); it's now one filled outline, stem and head together. On pale floors (themes white and sky) the mark is dark (--mark #2e2c28); elsewhere it stays off-white.
+
+## 2026-11-06 · charly · charly · started: collage mode
+A second way to see a room: every photo on one flat wall, packed salon-style, with free pan and zoom; tap a photo to zoom in on it. A Gallery | Collage switch in each room (the choice is remembered from room to room), and an "All photos" wall (every photo on the site, one wall, scattered) from the map's middle box, where "Hall" was. New page src/pages/Collage.jsx and routes /room/:slug/collage, /collage; touches App.jsx, Room.jsx (the switch), GalleryMap.jsx and index.css.
+
+## 2026-11-06 · charly · charly · done: collage mode
+Pushed to charly; no PR yet (Charly will ask). See .agents/knowledge/collage-mode.md.
+- Gallery | Collage switch at the top of every room (App renders ModeSwitch); the choice is remembered (localStorage) and rooms open in it. Collage: the room's photos salon-hung on one flat wall in the room's paint and frames; drag, pinch, scroll/ctrl-scroll or +/-/0 keys; a click zooms in on a photo (850 ms, wall goes dark, caption under it, arrows/swipe/arrow keys step, Esc or a click off it goes back).
+- The map's middle box (was "Hall") is now All photos -> /collage: every photo once, scattered, white wall. Also a row in the map key.
+- New: scripts/thumbs.js makes public/photos/*/NN-thumb.jpg (560 px) from the wall copies and records `thumb`/`tv` in photo-sizes.json; `npm run photos` runs it after compress-photos.
+- useDolly exports bezier; usePreload takes an optional minimum time.
+Adam: worth an iOS Safari look at pinch and at the wall's sharpness after a zoom (it drops will-change at rest to redraw). Checked in headless Chrome (1440x900, 390x844 @3, touch emulation), not on a real phone.
+
+## 2026-11-06 · charly · charly · done: All photos favours Favorites, Film, Travel
+Pushed to charly; no PR yet. On the All photos wall, photos from Favorites, Film and Travel (Charly's picks) hang bigger: salonHang takes `favored(photo)`; favoured photos get weight 3, the rest 1 or 2, so they come out about 1.4-1.5x as wide (median) without breaking the packing. A swap in the hill-climb now carries the photo's weight with it. Room collages are unchanged in kind (no favoured photos: weights 1, 2 or 4 as before).
+
+## 2026-11-06 · charly · charly · started: front desk props and a hidden Charly
+Charly wants the lobby more serious: Charly and his name plate hidden by default, a call bell on the desk left of the maps (dings; three quick rings pop him up from behind the desk with the name plate, three more send him down). Clickable props, each with a small animation and a sound (Web Audio, no files): umbrellas drip into the bucket, a featured print on the wall behind the desk (picture light, goes to that photo), a wall clock above the signs (real time), a snake plant and a velvet rope on brass posts right of the desk. Touches Lobby.jsx, index.css (lobby section), gallery.js (site.featured), new src/sound.js.
+
+## 2026-11-06 · charly · charly · done: front desk props and a hidden Charly
+Pushed to charly; no PR yet. Lobby.jsx:
+- Charly and his name plate are hidden by default (.charly .breathe translated 340px down, clipped at the desk top). A call bell (Bell) sits on the desk left of the maps; three rings within 1.3 s pop him up (sound.pop, .charly.up), and he waves, says welcome and the name plate rises 0.9 s later. Three more send him down. His wave/jaw/bubble animations now key on .charly.up instead of .stage.ready.
+- New wall layer .dl-wall (drifts like the signs): a featured print (site.featured in gallery.js, now Favorites' Delicate Arch) under a brass picture light with a "Now showing" label; click: the light comes up, then it opens that photo in its room (in collage if that's the remembered mode). A wall clock above the signs showing local time; click: tick-tock and the second hand sweeps round once (its angle only ever increases, so no backwards spin).
+- Floor: umbrellas shake and four drops run down into the bucket with ripples; a velvet rope on brass posts swings; a snake plant rustles. Clock, rope and plant are hidden on phones (outside the desk's width there); the print is 0.84x there to clear the signs.
+- src/sound.js: every sound made with Web Audio on click (bell, drip, tick, rustle, clink, light click, pop); nothing loaded.
+Checked in headless Chrome (1440x900, 390x844), sounds not heard (headless).
+
+## 2026-11-06 · charly · charly · done: front desk layout tidy
+Pushed to charly; no PR yet. Featured print bigger (296 px) and higher (top 214), no picture light (lamp and wash gone; hover/click just brighten it); its label now sits to its left. The clock moved off the ceiling to the wall between the lettering and the print, over the label. The signs are 42 px higher (top 118 dk), clear of the map stand. The snake plant is drawn back to front like the umbrella stand (soil and back rim, leaves, then the planter's front with the near half of the rim), so the leaves go down inside the pot.
+
+## 2026-11-06 · charly · charly · done: clock and print label gone; "Start here" at the maps
+Pushed to charly; no PR yet. The wall clock (and sound.tick) and the print's "Now showing" label are removed. The map stand stands out more, as Charly chose: on a first visit (localStorage `charlyzhang.seen-desk`) a red ink circle draws itself round the stand with "Start here" and an arrow (Lobby.jsx StartHere), fading after 6.5 s or at the first pointerdown; on every visit the top map sheet lifts and settles every 8 s (map-flutter, off for reduced motion). Note: `.desk-scene svg` sizes every svg in the scene to 100%, so a positioned svg needs a more specific selector (see .start-here .sh-ring).
+
+## 2026-11-06 · charly · charly · done: one drift for the lobby, bigger print, Start here tidy
+Pushed to charly; no PR yet. The lobby's pointer parallax is one movement now: wall, floor, lettering, signs and every desk-scene layer all drift by the wall's 6 px x / 3 px y (the desk at 28 px and Charly at 15 px looked like they slid on the floor; the floor's own 12 px is gone too). Featured print 336 px, top 172 (0.62x on phones). Start here: the stand's red dot hides while the ring is up, and the note and arrow sit clear of the ring (on phones the note is higher).
+
+## 2026-11-06 · charly · charly · done: phone front desk layout
+Pushed to charly; no PR yet. On phones the room signs are one column at the top right, beside the lettering and as tall as it (--lh, measured), instead of two columns under it. The featured print fills the wall below: Lobby.jsx fitPhoneWall sizes and places it (--fs, --fx, --fy on the stage) from under the lettering down to the welcome card, and from the lettering's left edge across to the map stand, measured on load, font load and resize. Short phones keep the counts now (lettering zoom 0.7, a little higher). Desktop unchanged. Checked at 412x915, 390x844, 375x667.
+
+## 2026-11-06 · charly · charly · done: phone print centred
+Pushed to charly; no PR yet. On phones the featured print is centred on the screen and the desk now (--fx gone): fitPhoneWall takes the bigger of two fits, down to the welcome card but narrow enough to clear the map stand on both sides, or full width but ending above the stand and the first visit's note.
+
+## 2026-11-06 · charly · charly · done: ready for Adam (PR charly -> adam)
+Everything since #12 is in one PR for Adam: the doorway/room fixes (2026-11-05 and the first 2026-11-06 entries), collage mode and the All photos wall, and the front desk props with Charly hidden behind the bell. Worth a Mac look: iOS Safari pinch and sharpness on the collage walls, the clip-path arch at the door, Web Audio sounds on Safari (they start from a click), and the phone front desk layout (measured in Lobby.jsx fitPhoneWall).

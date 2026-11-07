@@ -313,8 +313,30 @@ a {
 .frame,
 .label,
 .intro-inner,
-.doorbtn {
+.doorbtn,
+.room3d .enter-mark,
+.room3d .enter-door {
   pointer-events: auto;
+}
+/* the archway, seen from the hallway: a click anywhere in it goes in (RoomBox Hallway) */
+.enter-door {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transform: translateZ(1px);
+  backface-visibility: hidden;
+}
+.stage.in .enter-door {
+  display: none;
+}
+/* from the doorway the room's photos, labels and exit aren't for clicking: you go in first */
+.stage.at-door .room3d .frame,
+.stage.at-door .room3d .label,
+.stage.at-door .room3d .doorbtn {
+  pointer-events: none;
 }
 .frame,
 .label,
@@ -337,10 +359,14 @@ a {
 .ftile {
   opacity: var(--floorop);
 }
+/* the hallway's floor is solid (RoomBox.jsx): you'd see the room's reflections through it */
+.stage.room:not(.dark) .ftile.hall {
+  opacity: 1;
+}
 /* lights out: the tiles are canvases with nothing to lay a shade over, so they dim instead */
 .ftile,
 .ctile {
-  transition: opacity 0.9s ease 0.7s;
+  transition: opacity 0.5s ease 0.35s;
 }
 .stage.dark .ftile,
 .stage.dark .ctile {
@@ -365,20 +391,6 @@ a {
   backface-visibility: hidden;
   background: url(/textures/wall-grain.png), var(--wall);
 }
-.panel.arch {
-  background: none;
-}
-.panel.arch svg {
-  position: absolute;
-  left: 0;
-  top: 0;
-}
-.arch .s0 {
-  stop-color: var(--wall0);
-}
-.arch .s1 {
-  stop-color: var(--wall1);
-}
 .panel::before {
   content: "";
   position: absolute;
@@ -388,9 +400,6 @@ a {
   height: var(--plh);
   background: var(--plc);
   box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.18), 0 -8px 12px -6px rgba(0, 0, 0, 0.18);
-}
-.panel.arch::before {
-  display: none;
 }
 .panel::after {
   content: "";
@@ -410,9 +419,6 @@ a {
 }
 .panel.first.last::after {
   background: var(--pl), var(--pr), var(--ptop), var(--pbot);
-}
-.panel.arch::after {
-  background: var(--ptop);
 }
 .world {
   position: absolute;
@@ -695,6 +701,9 @@ a {
 .stage.dark .glow {
   visibility: visible;
 }
+.stage.dark [data-off] .glow {
+  visibility: hidden;
+}
 .t-white .beam {
   display: none;
 }
@@ -895,7 +904,9 @@ a {
 .lblpos {
   flex: none;
   display: block;
-  width: calc(var(--S) * 0.095);
+  width: max-content;
+  min-width: calc(var(--S) * 0.095);
+  max-width: calc(var(--S) * 0.16);
   margin: calc(var(--S) * 0.18) 0 0 calc(var(--S) * 0.022);
 }
 
@@ -908,6 +919,9 @@ a {
 }
 .lbl-entry {
   display: block;
+}
+.label-ghost {
+  visibility: hidden;
 }
 .lbl-entry + .lbl-entry {
   margin-top: calc(var(--S) * 0.0035);
@@ -1063,7 +1077,7 @@ a {
   left: 0;
   top: 0;
   transform-origin: 0 0;
-  background: color-mix(in srgb, var(--wall1) 58%, black);
+  background: color-mix(in srgb, var(--wall1) var(--m, 58%), black);
 }
 /* the hallway: the outside of the entrance wall, the wall across from it, floor and ceiling,
    finished like the room. While you stand in it the far wall is behind you, and on a desktop
@@ -1073,8 +1087,10 @@ a {
 .stage.at-door:not(.tall) .hall {
   display: none;
 }
-/* likewise what can't be seen through the arch from the doorway (marked in Room.jsx) */
-.stage.at-door [data-unseen] {
+/* likewise what can't be seen through the arch from the doorway (marked in Room.jsx), and on a
+   phone, whatever is well outside the view */
+.stage.at-door [data-unseen],
+.room3d [data-off] {
   visibility: hidden;
 }
 /* a curtain over the page until it has loaded and had a moment to draw, and again as you walk
@@ -1093,7 +1109,7 @@ a {
 }
 .stage.ready.leaving .curtain {
   opacity: 1;
-  transition: opacity 0.8s ease 1.05s;
+  transition: opacity 0.6s ease;
 }
 /* (the map goes to black on the way anywhere, so every change of place passes through the
    dark) While a page loads: where you're going and a line that fills, at least a second, however
@@ -1156,8 +1172,58 @@ a {
 .glass:focus-visible {
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
 }
-/* an arrow floating either side of the view; in the doorway each gives a little nudge now
-   and then */
+/* the arrow on the hallway floor that takes you in (RoomBox EnterMark): a quiet vinyl floor
+   marking, a square-cut arrow like the lobby's signs over spaced-out capitals, breathing a
+   little to catch the eye; gone once you're in */
+.enter-mark {
+  left: 0;
+  top: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  backface-visibility: hidden;
+  transition: opacity 0.6s ease;
+}
+.enter-mark svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: var(--mark, #f3efe6);
+  opacity: 0.62;
+  animation: enter-glow 2.6s ease-in-out 1s infinite;
+}
+@keyframes enter-glow {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .enter-mark svg {
+    animation: none;
+  }
+}
+/* on a pale floor, dark vinyl instead */
+.t-white .enter-mark,
+.t-sky .enter-mark {
+  --mark: #2e2c28;
+}
+.enter-mark text {
+  font-family: inherit;
+  font-size: 19px;
+  font-weight: 600;
+}
+.stage.in .enter-mark {
+  opacity: 0;
+  pointer-events: none;
+}
+/* an arrow floating either side of the view, once you're in the room */
 .turn {
   position: absolute;
   inset: 0;
@@ -1192,47 +1258,6 @@ a {
 }
 .turn-r {
   right: max(20px, 4vw);
-}
-/* in the doorway they sit within the archway: the ways in */
-.stage.at-door .turn-l {
-  left: calc(50% - var(--S) * 0.38 - 27px);
-  animation: nudge-l 2.8s ease-in-out 1.2s infinite;
-}
-.stage.at-door .turn-r {
-  right: calc(50% - var(--S) * 0.38 - 27px);
-  animation: nudge-r 2.8s ease-in-out 1.2s infinite;
-}
-@keyframes nudge-l {
-  0%,
-  72%,
-  100% {
-    translate: 0 0;
-  }
-  82% {
-    translate: -8px 0;
-  }
-  92% {
-    translate: 2px 0;
-  }
-}
-@keyframes nudge-r {
-  0%,
-  72%,
-  100% {
-    translate: 0 0;
-  }
-  82% {
-    translate: 8px 0;
-  }
-  92% {
-    translate: -2px 0;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .turn-l,
-  .turn-r {
-    animation: none;
-  }
 }
 /* the folded brochure poking up from the bottom edge: its cover, with a second leaf of the fold
    showing behind it. It rises as you point at it. */
@@ -1364,7 +1389,7 @@ body:has(.stage:not(.ready)) .dock {
     color: #f3f2ee;
     text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
     pointer-events: none;
-    animation: caption-in 0.6s ease 1.5s both;
+    animation: caption-in 0.4s ease 0.75s both;
   }
   .caption-title {
     font-size: 16px;
@@ -1403,9 +1428,6 @@ body:has(.stage:not(.ready)) .dock {
   right: -60px;
   translate: calc(var(--px) * var(--dk) * -6px) calc(var(--py) * var(--dk) * -3px);
   transition: translate var(--ease);
-}
-.lobby .floor3d {
-  translate: calc(var(--px) * var(--dk) * -12px) calc(var(--py) * var(--dk) * -3px);
 }
 .lettering {
   position: absolute;
@@ -1472,11 +1494,10 @@ body:has(.stage:not(.ready)) .dock {
   inset: 0;
   transition: translate var(--ease);
 }
-.dl-char {
-  translate: calc(var(--px) * -15px) calc(var(--py) * -5px);
-}
-.dl-desk {
-  translate: calc(var(--px) * -28px) calc(var(--py) * -9px);
+/* the whole lobby drifts together with the pointer, a little, as one (the wall's 6 px): layers
+   drifting by different amounts looked like the desk sliding on the floor */
+.desk-scene > .dl {
+  translate: calc(var(--px) * -6px) calc(var(--py) * -3px);
 }
 .desk-scene p {
   margin: 0;
@@ -1538,8 +1559,8 @@ body:has(.stage:not(.ready)) .dock {
   --pivot: 63.09% 20.5%; /* (470, 205) */
   transform: rotate(calc(var(--px) * -1.5deg));
 }
-/* once the curtain lifts he waves once, then sways */
-.stage.ready .arm-r .idle {
+/* called up by the bell he waves once, then sways */
+.stage.ready .charly.up .arm-r .idle {
   animation: wave 1.7s 0.5s ease-in-out 1 both, sway-r 5.2s 2.4s ease-in-out infinite;
 }
 /* on the map stand he looks at it and lifts his right arm toward it */
@@ -1647,7 +1668,7 @@ body:has(.stage:not(.ready)) .dock {
   background: url(/lobby/charly-head.png) 0 0 / 100% 100%;
   clip-path: polygon(43.6% 12.7%, 52.6% 12.7%, 52.4% 14.8%, 50.6% 16.4%, 45.9% 16.4%, 44% 14.8%);
 }
-.stage.ready .jaw {
+.stage.ready .charly.up .jaw {
   animation: jabber 0.17s ease-in-out 0.85s 8 alternate both;
 }
 @keyframes jabber {
@@ -1705,7 +1726,7 @@ body:has(.stage:not(.ready)) .dock {
 .charly-face:focus-visible {
   outline: none;
 }
-.stage.ready .bubble {
+.stage.ready .charly.up .bubble {
   animation: bubble-in 0.35s cubic-bezier(0.3, 1.5, 0.5, 1) 0.7s both;
 }
 @keyframes bubble-in {
@@ -1715,10 +1736,10 @@ body:has(.stage:not(.ready)) .dock {
   }
 }
 /* clicked: he says it again at once */
-.stage.ready .bubble.again {
+.stage.ready .charly.up .bubble.again {
   animation-delay: 0s;
 }
-.stage.ready .jaw.again {
+.stage.ready .charly.up .jaw.again {
   animation-delay: 0.05s;
 }
 
@@ -1726,7 +1747,7 @@ body:has(.stage:not(.ready)) .dock {
 .signage {
   position: absolute;
   left: calc(50% + 300px * var(--dk));
-  top: calc(var(--top) + 160px * var(--dk));
+  top: calc(var(--top) + 118px * var(--dk));
   translate: calc(var(--px) * var(--dk) * -6px) calc(var(--py) * var(--dk) * -3px);
   transition: translate var(--ease);
 }
@@ -1804,13 +1825,6 @@ body:has(.stage:not(.ready)) .dock {
   box-shadow: 0 4px 6px -2px rgba(0, 0, 0, 0.35);
 }
 
-/* the umbrella stand on the floor left of the desk */
-.desk-scene .dl-desk > .umbrellas {
-  left: 118px;
-  top: 486px;
-  width: 150px;
-  height: 300px;
-}
 
 /* the desk */
 .desk-scene .dl-desk > * {
@@ -2001,6 +2015,420 @@ body:has(.stage:not(.ready)) .dock {
   text-underline-offset: 3px;
 }
 
+/* Charly is down behind the desk (the .charly box clips at the desk top) until the bell calls
+   him up; then he pops up, waves and says welcome, and his name plate comes up after him */
+.charly .breathe {
+  translate: 0 340px;
+  transition: translate 0.42s cubic-bezier(0.5, 0, 0.8, 0.3);
+}
+.charly.up .breathe {
+  translate: 0 0;
+  transition: translate 0.6s cubic-bezier(0.25, 1.45, 0.5, 1);
+}
+.charly:not(.up) .charly-face {
+  display: none;
+}
+.desk-scene .dl-desk > .nameplate {
+  opacity: 0;
+  translate: 0 14px;
+  transition: opacity 0.25s ease, translate 0.25s ease;
+}
+.desk-scene .dl-desk > .nameplate.up {
+  opacity: 1;
+  translate: 0 0;
+  transition: opacity 0.4s ease 0.9s, translate 0.5s cubic-bezier(0.25, 1.4, 0.5, 1) 0.9s;
+}
+
+/* the wall behind the desk: its own layer (behind Charly) */
+.desk-scene .dl > button,
+.desk-scene .dl-wall > * {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.desk-scene .dl > button:focus-visible,
+.feature-frame:focus-visible {
+  outline: 2px solid #141414;
+  outline-offset: 4px;
+}
+.desk-scene svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* the featured print: black frame, white mat */
+.desk-scene .dl-wall > .feature {
+  left: 552px;
+  top: 172px;
+  width: 336px;
+  height: 336px;
+  cursor: default;
+  pointer-events: none;
+}
+.feature-frame {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 336px;
+  height: 336px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 25px;
+  background: #f8f8f6;
+  border: 6px solid #1b1a19;
+  box-shadow: 0 14px 22px -8px rgba(0, 0, 0, 0.35), 0 2px 3px rgba(0, 0, 0, 0.2), inset 0 3px 5px -3px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  pointer-events: auto;
+}
+.feature-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+.feature-frame:hover {
+  filter: brightness(1.04);
+}
+/* clicked: it brightens for a moment as you set off to it */
+.feature.lit .feature-frame {
+  filter: brightness(1.12);
+  transition: filter 0.35s ease;
+}
+/* "Start here", the first visit: an ink circle draws itself round the map stand and a note
+   comes up beside it, then it all fades (Lobby.jsx StartHere) */
+.desk-scene .dl-desk > .start-here {
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+.start-here.out {
+  opacity: 0;
+}
+/* the ring takes the place of the stand's red dot while it's up */
+.stand-dot {
+  transition: opacity 0.4s ease;
+}
+.stage.ready .dl-desk:has(.start-here:not(.out)) .stand-dot {
+  opacity: 0;
+}
+.start-here svg {
+  position: absolute;
+  overflow: visible;
+}
+.start-here path {
+  fill: none;
+  stroke: #c8402f;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+/* (.start-here's, over .desk-scene svg's 100% size) */
+.start-here .sh-ring {
+  left: 912px;
+  top: 446px;
+  width: 200px;
+  height: 160px;
+}
+.stage.ready .sh-ring path {
+  animation: ink 1.1s cubic-bezier(0.4, 0, 0.3, 1) 0.9s forwards;
+}
+.sh-note {
+  position: absolute;
+  left: 1128px;
+  top: 414px;
+  width: max-content;
+  margin: 0;
+  font-size: 19px;
+  font-weight: 600;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  color: #c8402f;
+  opacity: 0;
+}
+.stage.ready .sh-note {
+  animation: note-in 0.5s ease 1.7s forwards;
+}
+.start-here .sh-arrow {
+  left: -34px;
+  top: 22px;
+  width: 52px;
+  height: 44px;
+}
+.sh-arrow path {
+  stroke-width: 2.6;
+}
+.stage.ready .sh-arrow path {
+  animation: ink 0.5s ease-out 1.9s forwards;
+}
+@keyframes ink {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes note-in {
+  from {
+    opacity: 0;
+    translate: 0 4px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+/* every visit: the top map lifts a little now and then, as if a draft caught it */
+.stage.ready .sheet-3 {
+  animation: map-flutter 8s ease-in-out 3s infinite;
+}
+@keyframes map-flutter {
+  0%,
+  9%,
+  100% {
+    transform: none;
+  }
+  2.5% {
+    transform: translateY(-6px) rotate(-1.8deg);
+  }
+  5% {
+    transform: translateY(-1px) rotate(0.8deg);
+  }
+  7% {
+    transform: translateY(-2px) rotate(-0.3deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stage.ready .sheet-3 {
+    animation: none;
+  }
+}
+@media (max-width: 700px) {
+  /* no wall beside the stand on a phone: the note goes above it, the arrow pointing down */
+  .sh-note {
+    left: 958px;
+    top: 368px;
+    font-size: 26px;
+  }
+  .start-here .sh-arrow {
+    left: 40px;
+    top: 34px;
+  }
+}
+/* the call bell, on the desk left of the maps */
+.desk-scene .dl-desk > .bell {
+  left: 868px;
+  top: 540px;
+  width: 52px;
+  height: 40px;
+}
+.bell-knob,
+.bell-dome {
+  transform-box: fill-box;
+}
+.bell-knob {
+  transform-origin: 50% 0;
+}
+.bell-dome {
+  transform-origin: 50% 100%;
+}
+.bell-svg.rung .bell-knob {
+  animation: bell-press 0.18s ease-out;
+}
+.bell-svg.rung .bell-dome {
+  animation: bell-shiver 0.5s ease-out;
+}
+@keyframes bell-press {
+  40% {
+    transform: translateY(4px);
+  }
+}
+@keyframes bell-shiver {
+  15% {
+    transform: scale(1.03, 0.97);
+  }
+  35% {
+    transform: rotate(1.5deg);
+  }
+  55% {
+    transform: rotate(-1.2deg);
+  }
+  75% {
+    transform: rotate(0.6deg);
+  }
+}
+
+/* the umbrellas: a shake, drops running down into the bucket, a ripple where each lands */
+.desk-scene .dl-desk > .umbrella-btn {
+  left: 118px;
+  top: 486px;
+  width: 150px;
+  height: 300px;
+}
+.desk-scene .umbrella-btn > .umbrellas {
+  position: static;
+}
+.umbrellas .ub {
+  transform-origin: 75px 200px;
+}
+.umbrellas.shook .ub {
+  animation: ub-shake 0.6s ease-out;
+}
+@keyframes ub-shake {
+  20% {
+    transform: rotate(-2deg);
+  }
+  45% {
+    transform: rotate(1.6deg);
+  }
+  70% {
+    transform: rotate(-0.8deg);
+  }
+}
+.drop {
+  fill: rgba(206, 228, 242, 0.95);
+  stroke: rgba(90, 120, 140, 0.5);
+  stroke-width: 0.6;
+  opacity: 0;
+  animation: drop-run 0.76s cubic-bezier(0.5, 0, 0.9, 0.6) both;
+}
+@keyframes drop-run {
+  0% {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.5);
+  }
+  25% {
+    opacity: 1;
+    transform: translateY(6px) scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(70px) scale(1, 1.3);
+  }
+}
+.ripple {
+  fill: none;
+  stroke: rgba(200, 222, 236, 0.85);
+  stroke-width: 0.9;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: ripple 0.7s ease-out both;
+}
+@keyframes ripple {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.4);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(3);
+  }
+}
+
+/* the velvet rope, and the plant in the corner */
+.desk-scene .dl-desk > .rope-btn {
+  left: 1150px;
+  top: 628px;
+  width: 170px;
+  height: 170px;
+}
+.rope {
+  transform-origin: 85px 42px;
+}
+.rope.swung {
+  animation: rope-swing 1.6s ease-out;
+}
+@keyframes rope-swing {
+  12% {
+    transform: scaleY(0.55) skewX(-4deg);
+  }
+  32% {
+    transform: scaleY(1.12) skewX(3deg);
+  }
+  52% {
+    transform: scaleY(0.8) skewX(-1.5deg);
+  }
+  72% {
+    transform: scaleY(1.05) skewX(0.6deg);
+  }
+  88% {
+    transform: scaleY(0.95);
+  }
+}
+.desk-scene .dl-desk > .plant-btn {
+  left: 1300px;
+  top: 420px;
+  width: 130px;
+  height: 380px;
+}
+.plant.rustled .blade {
+  animation: rustle 1.1s ease-out both;
+}
+.plant.rustled .blade:nth-child(odd) {
+  animation-name: rustle-b;
+}
+@keyframes rustle {
+  15% {
+    transform: rotate(4deg);
+  }
+  35% {
+    transform: rotate(-3deg);
+  }
+  55% {
+    transform: rotate(2deg);
+  }
+  75% {
+    transform: rotate(-0.8deg);
+  }
+}
+@keyframes rustle-b {
+  15% {
+    transform: rotate(-3.5deg);
+  }
+  35% {
+    transform: rotate(3deg);
+  }
+  55% {
+    transform: rotate(-1.6deg);
+  }
+  75% {
+    transform: rotate(0.8deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bell-svg.rung *,
+  .umbrellas.shook .ub,
+  .plant.rustled .blade,
+  .rope.swung {
+    animation: none;
+  }
+}
+/* a phone shows the desk alone: the rope and plant would be cut off at the edges */
+@media (max-width: 700px) {
+  /* and the print a little smaller, to clear the signs above it */
+  /* the print, centred, as big as the wall under the lettering allows (--fs, --fy: Lobby.jsx) */
+  .desk-scene .dl-wall > .feature {
+    scale: var(--fs, 0.62);
+    translate: 0 var(--fy, 0);
+    transform-origin: 50% 50%;
+  }
+  .desk-scene .dl-desk > .rope-btn,
+  .desk-scene .dl-desk > .plant-btn {
+    display: none;
+  }
+}
+
 /* phones: no parallax; the desk fills the width, the lettering sits above it */
 @media (max-width: 700px) {
   .stage.lobby {
@@ -2023,9 +2451,49 @@ body:has(.stage:not(.ready)) .dock {
   .words {
     zoom: 0.8;
   }
-  /* no room for the signs beside the desk; the brochure at the bottom has the map */
+  /* no room for the signs beside the desk: they go up on the wall right of the lettering, in
+     one column as tall as it (--lh, measured in Lobby.jsx) */
   .signage {
-    display: none;
+    left: auto;
+    right: 16px;
+    top: calc(var(--H) * 0.11);
+    height: var(--lh, auto);
+    translate: none;
+  }
+  .signs {
+    height: 100%;
+    justify-content: space-between;
+    gap: 2px;
+    width: min(166px, 40vw);
+    zoom: 1;
+  }
+  .sign {
+    grid-template-columns: 18px 1fr 16px;
+    gap: 8px;
+    padding: 0;
+    font-size: 15px;
+  }
+  .sign-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+  .sign-arrow svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+/* a short phone: the lettering (and the signs beside it) a little smaller and higher, to leave
+   the print some wall */
+@media (max-width: 700px) and (max-height: 760px) {
+  .lettering,
+  .signage {
+    top: calc(var(--H) * 0.07);
+  }
+  .words {
+    zoom: 0.7;
+  }
+  .sign {
+    font-size: 14px;
   }
 }
 
@@ -2301,8 +2769,10 @@ dialog.map::backdrop {
   padding: 10px 11px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
+  align-items: center;
   gap: 6px;
+  text-align: center;
 }
 .plan-room:hover,
 .plan-desk:hover {
@@ -2315,24 +2785,17 @@ dialog.map::backdrop {
   border-style: solid;
 }
 .plan-room.picked,
+.plan-all.picked,
 .plan-desk.picked {
   border-color: #c8402f;
   box-shadow: inset 0 0 0 1px #c8402f, 0 0 0 1px #c8402f;
 }
-.plan-ticks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-.plan-ticks > span {
-  width: 7px;
-  height: 3px;
-  background: #1d1b17;
-}
+/* the room's pictogram over its name and count, in the middle of its box */
 .plan-name {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
 }
 .plan-icon {
   flex: none;
@@ -2357,15 +2820,35 @@ dialog.map::backdrop {
   font-size: 11px;
   color: #4a4436;
 }
-.plan-hall {
+/* the middle of the plan, where the hall is: the All photos wall (pages/Collage.jsx), marked
+   with a little salon hang */
+.plan-all {
+  position: relative;
+  min-height: 44px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  border: 2px solid #1d1b17;
+  background: repeating-linear-gradient(45deg, transparent 0 9px, rgba(0, 0, 0, 0.05) 9px 10px), #f6f1e3;
+}
+.plan-all:hover {
+  filter: brightness(0.96);
+}
+.plan-all > .plan-here {
+  align-self: center;
+  margin-bottom: 12px;
+}
+.plan-all-mark {
   display: grid;
-  place-items: center;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #6b6352;
-  background: repeating-linear-gradient(45deg, transparent 0 9px, rgba(0, 0, 0, 0.05) 9px 10px);
+  grid-template-columns: 11px 7px 9px;
+  grid-template-rows: 7px 6px;
+  gap: 2px;
+}
+.plan-all-mark span {
+  background: #1d1b17;
+}
+.plan-all-mark span:first-child {
+  grid-row: span 2;
 }
 .plan-desk {
   border: 2px dashed #8a8170;
@@ -2455,14 +2938,11 @@ dialog.map::backdrop {
   min-height: 36px;
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: 22px minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
   padding: 7px 0;
   border-bottom: 1px solid rgba(29, 27, 23, 0.25);
-}
-.key-num {
-  font-size: 13px;
 }
 .key-name {
   font-size: 15px;
@@ -2473,9 +2953,6 @@ dialog.map::backdrop {
 }
 .key-row.picked {
   font-weight: 600;
-}
-.key-row.picked .key-num {
-  color: #a33222;
 }
 .key-pick {
   grid-area: pick;
@@ -2543,8 +3020,6 @@ dialog.map::backdrop {
     padding: 7px 6px;
   }
   .plan-name {
-    flex-direction: column;
-    align-items: flex-start;
     gap: 5px;
   }
   .plan-icon {
@@ -2605,10 +3080,10 @@ dialog.map::backdrop {
 .can-glow,
 .label,
 .frame::before {
-  transition: opacity 0.5s ease calc(0.75s + var(--off, 0ms));
+  transition: opacity 0.3s ease calc(0.38s + var(--off, 0ms));
 }
 .glow {
-  transition: opacity 0.5s ease calc(0.75s + var(--off, 0ms)), visibility 0s linear calc(1.25s + var(--off, 0ms));
+  transition: opacity 0.3s ease calc(0.38s + var(--off, 0ms)), visibility 0s linear calc(0.68s + var(--off, 0ms));
 }
 .shade,
 .refl .fw,
@@ -2620,7 +3095,7 @@ dialog.map::backdrop {
 .dof-b,
 .grain,
 .vignette::after {
-  transition: opacity 0.9s ease 0.7s;
+  transition: opacity 0.5s ease 0.35s;
 }
 /* lights off: a quick click per lamp, then the room */
 .stage.dark .beam,
@@ -2716,3 +3191,217 @@ dialog.map::backdrop {
   will-change: auto;
 }
 
+
+/* ---------- collage mode (pages/Collage.jsx) ----------
+   A room's photos on one flat wall, in its own paint and frames: .cwall is the wall, moved and
+   scaled as one (Collage.jsx sets its transform); each frame (.cfw) gets its own --S, so the
+   room's mat, border and shadow (fractions of S) come out the right size for it. */
+.stage.collage {
+  background: var(--wall1);
+  perspective: none;
+  cursor: grab;
+  transition: background-color 0.45s ease;
+}
+.stage.collage.near {
+  background: #070707;
+  cursor: default;
+}
+.cwall {
+  --S: 1000px;
+  --cwlight: radial-gradient(ellipse 70% 60% at 50% 45%, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.14));
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  background: url(/textures/wall-grain.png), var(--cwlight), var(--wall1);
+}
+.t-salon .cwall {
+  background: url(/textures/wall-grain.png), url(/textures/damask.svg) 0 0 / calc(var(--S) * 0.2) auto, var(--cwlight), var(--wall1);
+}
+.t-sky .cwall {
+  background: url(/textures/wall-grain.png), url(/textures/birds.svg) 0 0 / calc(var(--S) * 0.42) auto, var(--cwlight), var(--wall1);
+}
+/* while it moves the wall is one picture slid and scaled; at rest it's redrawn sharp */
+.stage.collage.moving .cwall {
+  will-change: transform;
+}
+/* the frame border, as a fraction of S, as each room's --fb */
+.collage {
+  --fbk: 0.0035;
+}
+.collage.t-spot {
+  --fbk: 0.0094;
+}
+.collage.t-teal {
+  --fbk: 0.0165;
+}
+.collage.t-violet {
+  --fbk: 0.012;
+}
+.collage.t-sky {
+  --fbk: 0.008;
+}
+.collage.t-salon {
+  --fbk: 0.009;
+}
+.cfw {
+  position: absolute;
+  --fshadow: 0 calc(var(--S) * 0.014) calc(var(--S) * 0.028) rgba(0, 0, 0, 0.32), 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+.t-teal .cfw,
+.t-violet .cfw,
+.t-spot .cfw,
+.t-salon .cfw {
+  --fshadow: 0 calc(var(--S) * 0.016) calc(var(--S) * 0.03) rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+.collage .frame {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  transform: none;
+  backface-visibility: visible; /* (hidden would make every frame a layer of its own) */
+  border-width: calc(var(--S) * var(--fbk));
+}
+.collage .frame img {
+  width: 100%;
+  height: 100%;
+}
+/* up close: the rest of the wall goes dark, the photo stays lit */
+.cdim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: #050505;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.45s ease;
+}
+.collage.near .cdim {
+  opacity: 0.9;
+}
+.cfw.lit {
+  z-index: 2;
+}
+.cfw.lit .frame {
+  cursor: zoom-out;
+}
+/* the photo's title and details, under it up close */
+.ccap {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: calc(80px + env(safe-area-inset-bottom));
+  z-index: 20;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  text-align: center;
+  color: #f3f2ee;
+  pointer-events: none;
+  animation: caption-in 0.4s ease 0.7s both;
+}
+.ccap .caption-title {
+  font-size: 18px;
+  font-weight: 600;
+  font-style: italic;
+}
+.ccap .caption-meta {
+  font-size: 13.5px;
+  color: #c9c7c0;
+}
+@media (max-width: 700px) {
+  .ccap {
+    bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+  .ccap .caption-title {
+    font-size: 16px;
+  }
+  .ccap .caption-meta {
+    font-size: 13px;
+  }
+}
+/* how to get about, for a moment when the wall comes up */
+.chint {
+  position: absolute;
+  left: 50%;
+  bottom: calc(112px + env(safe-area-inset-bottom));
+  z-index: 20;
+  margin: 0;
+  padding: 7px 14px;
+  border-radius: 999px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  color: #f3f2ee;
+  background: rgba(16, 16, 16, 0.62);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.chint.on {
+  opacity: 1;
+  transition-delay: 0.6s;
+}
+
+/* Gallery | Collage, at the top of a room (components/ModeSwitch.jsx) */
+.modeswitch {
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top));
+  left: 50%;
+  z-index: 35;
+  display: flex;
+  padding: 3px;
+  border-radius: 999px;
+  transform: translateX(-50%);
+  background: rgba(18, 18, 18, 0.55);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  transition: opacity 0.6s ease 0.3s;
+}
+body:has(.stage:not(.ready)) .modeswitch {
+  opacity: 0;
+  pointer-events: none;
+}
+.mode-btn {
+  min-height: 32px;
+  padding: 6px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(243, 242, 238, 0.82);
+  cursor: pointer;
+}
+.mode-btn:hover {
+  color: #fff;
+}
+.mode-btn[aria-pressed="true"] {
+  background: #f3f2ee;
+  color: #161616;
+  cursor: default;
+}
+.mode-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+.mode-title {
+  margin: 0;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+  color: #f3f2ee;
+}
+.mode-count {
+  margin-left: 4px;
+  font-weight: 500;
+  opacity: 0.6;
+}
