@@ -46,7 +46,9 @@ export const GEO = {
   tile: 0.5, // floor and ceiling tiles, and at least tileMin px across (in a phone's small
   tileMin: 360, // room: Safari falls over with too many surfaces in one 3D scene)
   tilePx: 512, // at most this many pixels across a textured tile's canvas
+  tilePxPhone: 288, // and on a phone, where canvases share a small GPU memory budget with everything else
   tilePhone: 0.9, // on a phone, tiles this big (S there is 1.6 times the screen's width)
+  tileNearPhone: 0.55, // and the hallway's, by the camera at the door (still at least tileMin)
   panel: 0.75, // wall panels
   panelNear: 0.3, // on the entrance wall, which you pass close by going in
   panelMin: 300, // but at least this many px (a phone's small room needs few, and Safari

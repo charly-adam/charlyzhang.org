@@ -137,8 +137,8 @@ function Room({ room }) {
     return () => window.removeEventListener('resize', on);
   }, []);
 
-  // ── the loop: a corner view between walls showing the last photo of one and the first of the
-  // next, a stop at each photo between, and a stop at the door ──
+  // ── the loop: a stop at each photo, a corner view between walls showing the last photo of
+  // one and the first of the next, and a stop at the door ──
   useLayoutEffect(() => {
     if (!geo) return;
     const { S, L, D } = geo;
@@ -165,16 +165,12 @@ function Room({ room }) {
       const cols = [...el.querySelectorAll('[data-stop]')].sort(byLeft);
       const photoCols = cols.filter((c) => c.dataset.stop === 'photo');
       const doorCol = cols.find((c) => c.dataset.stop === 'door');
-      const prevSide = WALL_ORDER[(wi + 3) % 4];
       const nextSide = WALL_ORDER[(wi + 1) % 4];
-      // the first photo is seen from the corner before, the last from the corner after (unless
-      // they're walked through); each of the rest is a stop, square on to it with its neighbours
-      // in view either side. In a solo room every photo has a stop of its own, and the corners
-      // show two at once as well.
-      const from = passes(prevSide, side) ? 0 : 1;
-      const to = passes(side, nextSide) ? photoCols.length : photoCols.length - 1;
-      const between = room.solo ? photoCols : photoCols.slice(from, Math.max(from, to));
-      const here = between.map((col) => {
+      // every photo is a stop, square on to it with its neighbours in view either side; the
+      // corners between walls show the last photo of one and the first of the next at once too,
+      // on the way from one to the other (photos by a corner used to be seen only from there,
+      // never straight on)
+      const here = photoCols.map((col) => {
         const f = col.querySelector('.frame') || col;
         const b = localBox(f, el);
         const lx = b.x + b.w / 2;

@@ -134,3 +134,13 @@ Pushed to charly; no PR yet. On phones the featured print is centred on the scre
 
 ## 2026-11-06 · charly · charly · done: ready for Adam (PR charly -> adam)
 Everything since #12 is in one PR for Adam: the doorway/room fixes (2026-11-05 and the first 2026-11-06 entries), collage mode and the All photos wall, and the front desk props with Charly hidden behind the bell. Worth a Mac look: iOS Safari pinch and sharpness on the collage walls, the clip-path arch at the door, Web Audio sounds on Safari (they start from a click), and the phone front desk layout (measured in Lobby.jsx fitPhoneWall).
+
+## 2026-11-07 · charly · charly · done: phone rendering, collage close-up, lobby on iPhone, a stop for every photo
+Pushed to charly; no PR yet (Charly will ask).
+- Phone rooms dropped layers (Charly's Pixel 10: black floor patches, empty frames, map brochure gone). Reproduced with headless Chrome `--force-gpu-mem-available-mb=64` at 412x770; fixed for phones only: flat frames (no edge faces), no lamp beams/pools, 16 arch facets, 288 px floor canvases, 0.55 S hallway tiles. All rooms draw whole at 56 MB now. Details and the test in room-walkaround-rendering.md. Visible change on phones: no light cones/pools on the walls (the lamps stay), frames flat to the wall.
+- Collage close-up: the left/right arrow buttons are gone (swipe and arrow keys still step); the photo gets the width they took on desktop.
+- Lobby floor/ceiling planes cut to the depth a screen shows (1.2 S / 0.9 S, were 1.8 S): Adam's brother's iPhone (Chrome = WebKit) drew no floor or ceiling at the front desk. Looks identical in Chrome. Adam: please confirm in the iOS simulator; I can't run WebKit 3D here.
+- Every photo has a stop of its own now, including the first and last on each wall, which were only ever seen from the corner views; the corners stay as views on the way between walls (as in Favorites).
+
+## 2026-11-07 · charly · charly · done: ready for Adam (PR charly -> adam)
+The 2026-11-07 fixes are in a PR for Adam. Please check the front desk floor and ceiling in the iOS simulator (the reason for the change), and a room doorway on an iPhone.
