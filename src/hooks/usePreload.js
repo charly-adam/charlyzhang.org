@@ -6,8 +6,8 @@ const WAIT_MS = 12000; // past this, show the page anyway
 
 // Loads and decodes a page's images before it's shown, so it doesn't come up with pictures
 // missing and the browser drawing them in one by one. `key` names the set (a new key starts
-// over). Gives how far along it is, 0..1, and whether it's done (never sooner than MIN_MS).
-export function usePreload(key, srcs) {
+// over; `minMs` overrides how long it stays up at least). Gives how far along it is, 0..1, and whether it's done (never sooner than minMs).
+export function usePreload(key, srcs, minMs = MIN_MS) {
   const [state, setState] = useState({ key: null, loaded: 0, total: 0, waited: false });
   useEffect(() => {
     const todo = [...new Set(srcs.filter(Boolean))].filter((src) => !decoded.has(src));

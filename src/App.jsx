@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router';
 import Dock from './components/Dock.jsx';
+import ModeSwitch from './components/ModeSwitch.jsx';
 import { GalleryMap, MapContext } from './components/GalleryMap.jsx';
 import Lobby from './pages/Lobby.jsx';
 import Room from './pages/Room.jsx';
+import { AllCollage, RoomCollage } from './pages/Collage.jsx';
 
 // A gallery, not a document: no context menu, nothing to drag out.
 function useNoBrowserMenus() {
@@ -22,7 +24,9 @@ export default function App() {
   useNoBrowserMenus();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const here = pathname.startsWith('/room/') ? pathname.split('/')[2] : null;
+  // where you are, for the map: a room's slug (in either mode), 'all' on the All photos wall, or
+  // null at the front desk
+  const here = pathname.startsWith('/room/') ? pathname.split('/')[2] : pathname.startsWith('/collage') ? 'all' : null;
   const [map, setMap] = useState(null); // { from, opener } while the map is out
   const openMap = useCallback((from, opener) => setMap({ from, opener }), []);
   const closeMap = () => {
@@ -39,7 +43,8 @@ export default function App() {
     navigate(to);
   };
   useEffect(() => {
-    if (going.current && going.current === pathname) {
+    // (a room may open in collage mode, a step further along: /room/x/collage)
+    if (going.current && (going.current === pathname || pathname.startsWith(`${going.current}/`))) {
       going.current = null;
       setMap(null);
     }
@@ -51,10 +56,15 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Lobby />} />
             <Route path="/room/:slug" element={<Room />} />
+            <Route path="/room/:slug/collage" element={<RoomCollage />} />
+            <Route path="/room/:slug/collage/:photoId" element={<RoomCollage />} />
             <Route path="/room/:slug/:photoId" element={<Room />} />
+            <Route path="/collage" element={<AllCollage />} />
+            <Route path="/collage/:photoId" element={<AllCollage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
+        <ModeSwitch />
         <Dock />
         {map && <GalleryMap here={here} onClose={closeMap} onGo={go} />}
       </div>

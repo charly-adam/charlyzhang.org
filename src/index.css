@@ -2387,6 +2387,7 @@ dialog.map::backdrop {
   border-style: solid;
 }
 .plan-room.picked,
+.plan-all.picked,
 .plan-desk.picked {
   border-color: #c8402f;
   box-shadow: inset 0 0 0 1px #c8402f, 0 0 0 1px #c8402f;
@@ -2421,15 +2422,35 @@ dialog.map::backdrop {
   font-size: 11px;
   color: #4a4436;
 }
-.plan-hall {
+/* the middle of the plan, where the hall is: the All photos wall (pages/Collage.jsx), marked
+   with a little salon hang */
+.plan-all {
+  position: relative;
+  min-height: 44px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  border: 2px solid #1d1b17;
+  background: repeating-linear-gradient(45deg, transparent 0 9px, rgba(0, 0, 0, 0.05) 9px 10px), #f6f1e3;
+}
+.plan-all:hover {
+  filter: brightness(0.96);
+}
+.plan-all > .plan-here {
+  align-self: center;
+  margin-bottom: 12px;
+}
+.plan-all-mark {
   display: grid;
-  place-items: center;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #6b6352;
-  background: repeating-linear-gradient(45deg, transparent 0 9px, rgba(0, 0, 0, 0.05) 9px 10px);
+  grid-template-columns: 11px 7px 9px;
+  grid-template-rows: 7px 6px;
+  gap: 2px;
+}
+.plan-all-mark span {
+  background: #1d1b17;
+}
+.plan-all-mark span:first-child {
+  grid-row: span 2;
 }
 .plan-desk {
   border: 2px dashed #8a8170;
@@ -2772,3 +2793,217 @@ dialog.map::backdrop {
   will-change: auto;
 }
 
+
+/* ---------- collage mode (pages/Collage.jsx) ----------
+   A room's photos on one flat wall, in its own paint and frames: .cwall is the wall, moved and
+   scaled as one (Collage.jsx sets its transform); each frame (.cfw) gets its own --S, so the
+   room's mat, border and shadow (fractions of S) come out the right size for it. */
+.stage.collage {
+  background: var(--wall1);
+  perspective: none;
+  cursor: grab;
+  transition: background-color 0.45s ease;
+}
+.stage.collage.near {
+  background: #070707;
+  cursor: default;
+}
+.cwall {
+  --S: 1000px;
+  --cwlight: radial-gradient(ellipse 70% 60% at 50% 45%, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.14));
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  background: url(/textures/wall-grain.png), var(--cwlight), var(--wall1);
+}
+.t-salon .cwall {
+  background: url(/textures/wall-grain.png), url(/textures/damask.svg) 0 0 / calc(var(--S) * 0.2) auto, var(--cwlight), var(--wall1);
+}
+.t-sky .cwall {
+  background: url(/textures/wall-grain.png), url(/textures/birds.svg) 0 0 / calc(var(--S) * 0.42) auto, var(--cwlight), var(--wall1);
+}
+/* while it moves the wall is one picture slid and scaled; at rest it's redrawn sharp */
+.stage.collage.moving .cwall {
+  will-change: transform;
+}
+/* the frame border, as a fraction of S, as each room's --fb */
+.collage {
+  --fbk: 0.0035;
+}
+.collage.t-spot {
+  --fbk: 0.0094;
+}
+.collage.t-teal {
+  --fbk: 0.0165;
+}
+.collage.t-violet {
+  --fbk: 0.012;
+}
+.collage.t-sky {
+  --fbk: 0.008;
+}
+.collage.t-salon {
+  --fbk: 0.009;
+}
+.cfw {
+  position: absolute;
+  --fshadow: 0 calc(var(--S) * 0.014) calc(var(--S) * 0.028) rgba(0, 0, 0, 0.32), 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+.t-teal .cfw,
+.t-violet .cfw,
+.t-spot .cfw,
+.t-salon .cfw {
+  --fshadow: 0 calc(var(--S) * 0.016) calc(var(--S) * 0.03) rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+.collage .frame {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  transform: none;
+  backface-visibility: visible; /* (hidden would make every frame a layer of its own) */
+  border-width: calc(var(--S) * var(--fbk));
+}
+.collage .frame img {
+  width: 100%;
+  height: 100%;
+}
+/* up close: the rest of the wall goes dark, the photo stays lit */
+.cdim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: #050505;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.45s ease;
+}
+.collage.near .cdim {
+  opacity: 0.9;
+}
+.cfw.lit {
+  z-index: 2;
+}
+.cfw.lit .frame {
+  cursor: zoom-out;
+}
+/* the photo's title and details, under it up close */
+.ccap {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: calc(80px + env(safe-area-inset-bottom));
+  z-index: 20;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  text-align: center;
+  color: #f3f2ee;
+  pointer-events: none;
+  animation: caption-in 0.4s ease 0.7s both;
+}
+.ccap .caption-title {
+  font-size: 18px;
+  font-weight: 600;
+  font-style: italic;
+}
+.ccap .caption-meta {
+  font-size: 13.5px;
+  color: #c9c7c0;
+}
+@media (max-width: 700px) {
+  .ccap {
+    bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+  .ccap .caption-title {
+    font-size: 16px;
+  }
+  .ccap .caption-meta {
+    font-size: 13px;
+  }
+}
+/* how to get about, for a moment when the wall comes up */
+.chint {
+  position: absolute;
+  left: 50%;
+  bottom: calc(112px + env(safe-area-inset-bottom));
+  z-index: 20;
+  margin: 0;
+  padding: 7px 14px;
+  border-radius: 999px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  color: #f3f2ee;
+  background: rgba(16, 16, 16, 0.62);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.chint.on {
+  opacity: 1;
+  transition-delay: 0.6s;
+}
+
+/* Gallery | Collage, at the top of a room (components/ModeSwitch.jsx) */
+.modeswitch {
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top));
+  left: 50%;
+  z-index: 35;
+  display: flex;
+  padding: 3px;
+  border-radius: 999px;
+  transform: translateX(-50%);
+  background: rgba(18, 18, 18, 0.55);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  transition: opacity 0.6s ease 0.3s;
+}
+body:has(.stage:not(.ready)) .modeswitch {
+  opacity: 0;
+  pointer-events: none;
+}
+.mode-btn {
+  min-height: 32px;
+  padding: 6px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(243, 242, 238, 0.82);
+  cursor: pointer;
+}
+.mode-btn:hover {
+  color: #fff;
+}
+.mode-btn[aria-pressed="true"] {
+  background: #f3f2ee;
+  color: #161616;
+  cursor: default;
+}
+.mode-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+.mode-title {
+  margin: 0;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+  color: #f3f2ee;
+}
+.mode-count {
+  margin-left: 4px;
+  font-weight: 500;
+  opacity: 0.6;
+}

@@ -94,3 +94,11 @@ Pushed to charly; no PR yet. The floor arrow was three stroked lines that the no
 
 ## 2026-11-06 · charly · charly · started: collage mode
 A second way to see a room: every photo on one flat wall, packed salon-style, with free pan and zoom; tap a photo to zoom in on it. A Gallery | Collage switch in each room (the choice is remembered from room to room), and an "All photos" wall (every photo on the site, one wall, scattered) from the map's middle box, where "Hall" was. New page src/pages/Collage.jsx and routes /room/:slug/collage, /collage; touches App.jsx, Room.jsx (the switch), GalleryMap.jsx and index.css.
+
+## 2026-11-06 · charly · charly · done: collage mode
+Pushed to charly; no PR yet (Charly will ask). See .agents/knowledge/collage-mode.md.
+- Gallery | Collage switch at the top of every room (App renders ModeSwitch); the choice is remembered (localStorage) and rooms open in it. Collage: the room's photos salon-hung on one flat wall in the room's paint and frames; drag, pinch, scroll/ctrl-scroll or +/-/0 keys; a click zooms in on a photo (850 ms, wall goes dark, caption under it, arrows/swipe/arrow keys step, Esc or a click off it goes back).
+- The map's middle box (was "Hall") is now All photos -> /collage: every photo once, scattered, white wall. Also a row in the map key.
+- New: scripts/thumbs.js makes public/photos/*/NN-thumb.jpg (560 px) from the wall copies and records `thumb`/`tv` in photo-sizes.json; `npm run photos` runs it after compress-photos.
+- useDolly exports bezier; usePreload takes an optional minimum time.
+Adam: worth an iOS Safari look at pinch and at the wall's sharpness after a zoom (it drops will-change at rest to redraw). Checked in headless Chrome (1440x900, 390x844 @3, touch emulation), not on a real phone.

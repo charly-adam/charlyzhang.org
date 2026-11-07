@@ -164,11 +164,12 @@ export const roomList = rooms.map((r, i) => {
       const sz = sizes[p.file] || {};
       const width = p.width || sz.width || 1500;
       const height = p.height || sz.height || 1000;
-      // `wall` is the lighter copy hung on the wall; `file` is the full-size one shown up close.
+      // `wall` is the lighter copy hung on the wall; `file` is the full-size one shown up close;
+      // `thumb`, a small one, is what a collage starts with (scripts/thumbs.js).
       // Both carry a fingerprint of their contents (sz.v), so a browser that has cached a file
       // under the same name before (photos get renumbered) fetches it afresh.
       const v = sz.v ? `?v=${sz.v}` : '';
-      return { ...p, width, height, file: p.file + v, wall: (sz.wall || p.file) + v, id: `${r.slug}-${k + 1}`, index: k, portrait: height > width };
+      return { ...p, width, height, file: p.file + v, wall: (sz.wall || p.file) + v, thumb: (sz.thumb || sz.wall || p.file) + v, id: `${r.slug}-${k + 1}`, index: k, portrait: height > width };
     });
   const groups = [];
   list.forEach((p) => {

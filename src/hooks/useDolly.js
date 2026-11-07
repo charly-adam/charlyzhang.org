@@ -8,7 +8,7 @@ const FILL_PHONE = 0.95; // on a phone, where there's no wall label beside it, m
 const MAX_ZOOM = 2.8; // but never closer than this (small things like the room's title)
 
 // A CSS-style cubic-bezier timing function.
-function bezier(x1, y1, x2, y2) {
+export function bezier(x1, y1, x2, y2) {
   const at = (a, b, t) => 3 * a * t * (1 - t) ** 2 + 3 * b * t * t * (1 - t) + t ** 3;
   return (x) => {
     let lo = 0;

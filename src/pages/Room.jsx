@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router';
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router';
+import { getViewMode } from '../viewMode.js';
 import { getRoom, site, themes } from '../data/gallery.js';
 import { Curtain, Lens } from '../components/Scene.jsx';
 import { metaLine, titleLine } from '../components/Frame.jsx';
@@ -10,9 +11,13 @@ import { usePreload } from '../hooks/usePreload.js';
 import { GEO, WALL_ORDER, depthOf, distribute, hallFaceFor, localBox, placeFace, roomScale, standAt, turnTo, wallsFor } from '../room/geometry.js';
 
 export default function RoomRoute() {
-  const { slug } = useParams();
+  const { slug, photoId } = useParams();
+  const { state } = useLocation();
   const room = getRoom(slug);
   if (!room) return <Navigate to="/" replace />;
+  // someone who'd rather see rooms as collages gets one, coming in; not stepping back from a
+  // photo they were sent a link to (state.gallery: stepping back within the gallery)
+  if (!photoId && !state?.gallery && getViewMode() === 'collage') return <Navigate to={`/room/${slug}/collage`} replace />;
   return <Room room={room} />;
 }
 
@@ -446,12 +451,12 @@ function Room({ room }) {
   }, [leaving, navigate]);
   const stepBack = useCallback(() => {
     setAtIntro(false);
-    if (photoId) navigate(`/room/${room.slug}`);
+    if (photoId) navigate(`/room/${room.slug}`, { state: { gallery: true } });
   }, [navigate, room.slug, photoId]);
   const toggleIntro = () => {
     if (atIntro) return stepBack();
     if (cam.getMode() !== 'door') return;
-    if (photoId) navigate(`/room/${room.slug}`);
+    if (photoId) navigate(`/room/${room.slug}`, { state: { gallery: true } });
     setAtIntro(true);
   };
   // in the doorway: go in, turning to the right, where the first photo hangs
