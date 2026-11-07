@@ -116,3 +116,6 @@ Pushed to charly; no PR yet. Lobby.jsx:
 - Floor: umbrellas shake and four drops run down into the bucket with ripples; a velvet rope on brass posts swings; a snake plant rustles. Clock, rope and plant are hidden on phones (outside the desk's width there); the print is 0.84x there to clear the signs.
 - src/sound.js: every sound made with Web Audio on click (bell, drip, tick, rustle, clink, light click, pop); nothing loaded.
 Checked in headless Chrome (1440x900, 390x844), sounds not heard (headless).
+
+## 2026-11-06 · charly · charly · done: front desk layout tidy
+Pushed to charly; no PR yet. Featured print bigger (296 px) and higher (top 214), no picture light (lamp and wash gone; hover/click just brighten it); its label now sits to its left. The clock moved off the ceiling to the wall between the lettering and the print, over the label. The signs are 42 px higher (top 118 dk), clear of the map stand. The snake plant is drawn back to front like the umbrella stand (soil and back rim, leaves, then the planter's front with the near half of the rim), so the leaves go down inside the pot.

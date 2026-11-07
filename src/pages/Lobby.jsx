@@ -394,8 +394,8 @@ function Bell({ onCall }) {
   );
 }
 
-// The print hung on the wall behind the desk (site.featured), under a brass picture light, with
-// a small label. Clicked, its light comes up and you go to it in its room.
+// The print hung on the wall behind the desk (site.featured), with a small label beside it.
+// Clicked, it brightens a moment and you go to it in its room.
 const featuredRoom = roomList.find((r) => r.photos.some((p) => p.file.split('?')[0] === site.featured));
 const featured = featuredRoom?.photos.find((p) => p.file.split('?')[0] === site.featured);
 function FeaturedPrint() {
@@ -415,8 +415,6 @@ function FeaturedPrint() {
   };
   return (
     <div className={lit ? 'feature lit' : 'feature'}>
-      <span className="feature-wash" aria-hidden="true" />
-      <span className="feature-lamp" aria-hidden="true" />
       <button type="button" className="feature-frame" onClick={go} aria-label={`Now showing: ${featured.title}. See it in ${featuredRoom.name}`}>
         <img src={featured.wall} alt="" width={featured.width} height={featured.height} draggable="false" />
       </button>
@@ -550,14 +548,18 @@ function Plant() {
           </linearGradient>
         </defs>
         <ellipse cx="65" cy="374" rx="50" ry="5" fill="rgba(0,0,0,0.22)" />
+        {/* back to front, as the umbrella stand: the soil and the back of the rim, the leaves
+            standing in it, then the planter's front, whose top edge is the near half of the rim */}
+        <ellipse cx="65" cy="232" rx="41" ry="5" fill="#2b2622" />
+        <path d="M24 232 A41 5 0 0 1 106 232" stroke="#55524e" strokeWidth="1.5" fill="none" />
         {BLADES.map((b, i) => (
           <g key={i} className="blade" style={{ transformOrigin: `${b.x}px 236px`, animationDelay: `${i * 0.05}s` }}>
-            <path d={`M${b.x - b.w} 236 C${b.x - b.w * 1.3} 170 ${b.tx - b.w * 0.6} ${b.ty + 70} ${b.tx} ${b.ty} C${b.tx + b.w * 0.6} ${b.ty + 70} ${b.x + b.w * 1.3} 170 ${b.x + b.w} 236 Z`} fill="#355f38" stroke="#c4bd66" strokeWidth="1.6" />
+            <path d={`M${b.x - b.w} 242 C${b.x - b.w * 1.3} 170 ${b.tx - b.w * 0.6} ${b.ty + 70} ${b.tx} ${b.ty} C${b.tx + b.w * 0.6} ${b.ty + 70} ${b.x + b.w * 1.3} 170 ${b.x + b.w} 242 Z`} fill="#355f38" stroke="#c4bd66" strokeWidth="1.6" />
             <path d={`M${b.x} 232 Q${(b.x + b.tx) / 2} ${(236 + b.ty) / 2 + 10} ${b.tx} ${b.ty + 10}`} stroke="rgba(170,205,140,0.35)" strokeWidth="2.5" fill="none" />
           </g>
         ))}
-        <path d="M24 232 H106 L100 370 Q65 376 30 370 Z" fill="url(#planter)" />
-        <ellipse cx="65" cy="232" rx="41" ry="5" fill="#2b2a28" />
+        <path d="M24 232 A41 5 0 0 0 106 232 L100 370 Q65 376 30 370 Z" fill="url(#planter)" />
+        <path d="M24 232 A41 5 0 0 0 106 232" stroke="#6a6762" strokeWidth="1.8" fill="none" />
       </svg>
     </button>
   );
