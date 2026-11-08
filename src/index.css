@@ -1374,6 +1374,12 @@ body:has(.stage:not(.ready)) .dock {
   .room.stage.dark .fw.lit .beam {
     opacity: 0;
   }
+  /* Flat to the wall, the frame lies in the same plane as its glow, and Safari picks either to
+     draw on top: up close it drew the glow, a grey haze over the photo. The one photo you're
+     on stands 1 px proud of it, which costs one layer, not one per frame. */
+  .room.stage.dark .fw.lit .frame {
+    transform: translateZ(1px);
+  }
   /* up close, the arrows fade away after a moment to leave the photo; a touch wakes them */
   .stage.near .turn:not(.wake) .turnbtn {
     opacity: 0;

@@ -176,3 +176,6 @@ Pushed to charly; no PR yet. From Charly's iPhone Safari screenshots:
 
 ## 2026-11-07 · charly · charly · done: iPhone lobby and floors PR ready for Adam
 PR charly -> adam with the flat phone lobby floor and ceiling, the higher ceiling line, and smoothly shrunk floor textures. Please check in the iOS simulator: the front desk, the Favorites doorway (blocky floor, and photos missing in Charly's screenshot).
+
+## 2026-11-07 · charly · charly · done: no glow haze over the photo on iPhone
+Pushed to charly; no PR yet. With the beam hidden (#22), Charly's iPhone still showed a grey haze over an opened photo. My #22 note blamed it all on the beam, but it was mostly the lit frame's `.glow`. On phones the frames are flat to the wall (`.room .frame { transform: none }`), so the frame and its glow lie in one plane, and WebKit draws either on top. The lit frame now gets `translateZ(1px)` on phones while the room is dark (`.room.stage.dark .fw.lit .frame`). That's one extra layer, for the photo you're on only. Chrome looks the same. Adam: please check a close-up in the iOS simulator.
