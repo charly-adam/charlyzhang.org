@@ -185,3 +185,15 @@ Pushed to charly; no PR yet. Charly wants the cone above the photo you're on. Th
 
 ## 2026-11-07 · charly · charly · done: glow haze and light cone PR ready for Adam
 PR charly -> adam: on phones the photo you're on stands in front of its glow, and the light cone stays above it up close. Please check a close-up in the iOS simulator.
+
+## 2026-11-07 · charly · charly · handoff: grey haze over the photo up close on iPhone (for Adam)
+Not fixed, and Charly asked to hand it to Adam: it needs the iOS simulator, and I can't run WebKit on Windows.
+- **What happens:** Charly's iPhone, gallery mode, Favorites, Delicate Arch Under the Milky Way (also Delicate Arch, and Snowy Bench in Benches). Up close, a grey-white haze covers the photo and its mat, brightest in the middle. Chrome on the Pixel and desktop are fine. His screenshot was taken at 1:05, a minute after #26 reached main, so first check that production really has #26.
+- **Tried, didn't fix it:**
+  1. #22 hid the lit frame's beam up close on phones. The haze stayed, so #26 put the beam back.
+  2. #26 gives the lit frame `translateZ(1px)` on phones in dark mode (`.room.stage.dark .fw.lit .frame`). The haze looks like `.glow` (a grey radial gradient, opacity 1 on the lit frame in dark mode), drawn over the frame.
+- **Where to look:** the phone block in index.css (max-width: 700px) makes `.fw` `transform-style: flat` and the frame `transform: none`, to save layer memory. `.glow` and `.pool` come before `.frame` in Frame.jsx, so they should paint under it. Things to try in the simulator:
+  - hide `.glow`, then `.pool`, to confirm which one it is;
+  - check whether the `.glow` opacity/visibility transition is what lifts it above the frame;
+  - check whether the lens overlays (`.dof-t`, `.dof-b` with backdrop-filter, `.vignette`) are involved.
+  Please keep the light cone above the photo: Charly wants it.
