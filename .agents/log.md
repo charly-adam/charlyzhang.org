@@ -182,3 +182,6 @@ Pushed to charly; no PR yet. With the beam hidden (#22), Charly's iPhone still s
 
 ## 2026-11-07 · charly · charly · done: light cone back up close on phones
 Pushed to charly; no PR yet. Charly wants the cone above the photo you're on. The `.room.stage.dark .fw.lit .beam { opacity: 0 }` phone rule from #22 is gone: the iPhone haze was the glow (fixed by the lit frame's `translateZ(1px)`), not the beam. Adam: in the iOS simulator, check that a close-up shows the cone above the photo and no haze over it.
+
+## 2026-11-07 · charly · charly · done: glow haze and light cone PR ready for Adam
+PR charly -> adam: on phones the photo you're on stands in front of its glow, and the light cone stays above it up close. Please check a close-up in the iOS simulator.
