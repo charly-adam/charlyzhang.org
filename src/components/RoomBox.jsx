@@ -218,6 +218,40 @@ function loadImage(src) {
   return images.get(src);
 }
 
+// The texture shrunk to about `size` px across, halving at a time. A tile's pattern repeats
+// every few hundred canvas px, and Safari shrinks a pattern's 1024 px image that far without
+// smoothing it: it picks scattered pixels, and the floor came out in blocks. Shrunk here first,
+// in steps no bigger than half, every browser averages it properly.
+const shrunk = new Map();
+// (sizes are rounded up to a multiple of 64, so a room's tiles share a few copies: Safari has a
+// hard limit on canvas memory, and the in-between canvases give theirs back at once)
+function shrinkImage(im, want) {
+  const size = Math.ceil(want / 64) * 64;
+  const key = `${im.src}@${size}`;
+  if (shrunk.has(key)) return shrunk.get(key);
+  let src = im;
+  let w = im.width;
+  let h = im.height;
+  while (w > size) {
+    const nw = Math.max(size, Math.ceil(w / 2));
+    const nh = Math.max(1, Math.round((h * nw) / w));
+    const c = document.createElement('canvas');
+    c.width = nw;
+    c.height = nh;
+    const ctx = c.getContext('2d');
+    if (!ctx) break;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(src, 0, 0, nw, nh);
+    if (src !== im) src.width = src.height = 0;
+    src = c;
+    w = nw;
+    h = nh;
+  }
+  shrunk.set(key, src);
+  return src;
+}
+
 // a repeating pattern of an image, or null if the browser won't make one yet (the tile is then
 // left its plain colour, still shaded)
 function makePattern(ctx, im) {
@@ -263,11 +297,12 @@ function Tile({ w, h, S, look, ox, oy, dirs, dark, edge, solid, className, style
       const k = c.width / w; // canvas px per css px
       ctx.fillStyle = look.color;
       ctx.fillRect(0, 0, c.width, c.height);
-      const pat = im && makePattern(ctx, im);
+      const period = look.size * S; // the texture repeats every `period` css px, from the room's corner
+      const tex = im && shrinkImage(im, period * k);
+      const pat = tex && makePattern(ctx, tex);
       if (pat) {
-        const period = look.size * S; // the texture repeats every `period` css px, from the room's corner
         const ph = (v) => (((v % period) + period) % period) * k;
-        pat.setTransform(new DOMMatrix().translate(-ph(ox), -ph(oy)).scale((period * k) / im.width));
+        pat.setTransform(new DOMMatrix().translate(-ph(ox), -ph(oy)).scale((period * k) / tex.width));
         ctx.fillStyle = pat;
         ctx.fillRect(0, 0, c.width, c.height);
       }

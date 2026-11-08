@@ -167,3 +167,12 @@ Pushed to charly; no PR yet.
 
 ## 2026-11-07 · charly · charly · done: collage default, swipe by direction and beam haze PR ready for Adam
 PR charly -> adam with the iPhone beam haze fix, collage by default on phones, and swiping to the photo in that direction. Please check a gallery close-up in the iOS simulator; the haze only shows in WebKit.
+
+## 2026-11-07 · charly · charly · done: iPhone lobby floor/ceiling, smooth room floors
+Pushed to charly; no PR yet. From Charly's iPhone Safari screenshots:
+- The front desk still had no floor or ceiling on iPhone after the shorter planes in #20. A phone's lobby doesn't move, so it no longer uses a 3D scene there. `.stage.lobby` has `perspective: none`, `.cam` and `.world` are flat, and `.floor3d` and `.ceil3d` each carry the stage's perspective in their own transform (`translateY(-d) perspective(2S) translateY(d) rotateX(...)`, with the eye 0.34 S above the floor line and 0.4 S below the ceiling line). In Chrome it looks the same as before. The ceiling line is raised to 0.04 S on phones (was 0.07 S) to give the lettering room under it.
+- The Favorites floor came out in blocks on iPhone. Safari doesn't smooth a canvas pattern it shrinks by about 7x (a 1024 px texture into a repeat of about 140 canvas px). `Tile` in RoomBox.jsx now shrinks each texture in halving steps first (`shrinkImage`, sizes rounded up to 64 px and cached), and every room's floor and ceiling textures go through it.
+- Charly's screenshot also showed the Favorites walls without photos at the doorway, which they have in Chrome. I couldn't find why without WebKit; Adam, please look in the iOS simulator.
+
+## 2026-11-07 · charly · charly · done: iPhone lobby and floors PR ready for Adam
+PR charly -> adam with the flat phone lobby floor and ceiling, the higher ceiling line, and smoothly shrunk floor textures. Please check in the iOS simulator: the front desk, the Favorites doorway (blocky floor, and photos missing in Charly's screenshot).
