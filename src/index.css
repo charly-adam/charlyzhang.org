@@ -2472,6 +2472,30 @@ body:has(.stage:not(.ready)) .dock {
   .desk-scene > .dl {
     translate: none;
   }
+  /* A phone's lobby keeps still, so it needs no 3D scene. iPhone browsers dropped its floor and
+     ceiling from one, so each is drawn flat here instead, with the same perspective worked into
+     its own transform: the eye is where the stage's perspective puts it (44% down, 2 S away),
+     0.34 S above the floor line and 0.4 S below the ceiling line. The ceiling sits higher than
+     on a desktop (0.04 S, was 0.07 S) to leave the lettering room under it. */
+  .stage.lobby {
+    perspective: none;
+  }
+  .lobby .cam,
+  .lobby .world {
+    transform-style: flat;
+    will-change: auto;
+  }
+  .lobby .backwall {
+    top: calc(var(--S) * 0.04);
+    height: calc(var(--S) * 0.74);
+  }
+  .lobby .floor3d {
+    transform: translateY(calc(var(--S) * -0.34)) perspective(calc(var(--S) * 2)) translateY(calc(var(--S) * 0.34)) rotateX(90deg);
+  }
+  .lobby .ceil3d {
+    top: calc(var(--S) * -0.86);
+    transform: translateY(calc(var(--S) * 0.4)) perspective(calc(var(--S) * 2)) translateY(calc(var(--S) * -0.4)) rotateX(-90deg);
+  }
   .lettering {
     left: 24px;
     top: calc(var(--H) * 0.11);

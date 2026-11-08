@@ -10,3 +10,7 @@ What Safari got wrong (fixed Nov 2026, see [room-walkaround-rendering.md](room-w
 **Why:** Adam saw the site broken on his iPhone (Chrome on iOS is WebKit too) while desktop Chrome looked fine.
 
 **How to apply:** after any change to the room's surfaces, run the simulator sweep on every room doorway, especially Nature (biggest) and Benches/Cars (bright floor sheen shows sort errors).
+
+## Two more things Safari gets wrong (2026-11-07)
+- **A shrunk canvas pattern isn't smoothed.** Shrinking a 1024 px texture by about 7x in `createPattern` + `setTransform` made the room floors blocky on iPhone; Chrome smooths it. Shrink the image in halving steps first (`shrinkImage` in RoomBox.jsx).
+- **The phone lobby's floor and ceiling vanished from its 3D scene,** even after the planes were shortened. On phones the lobby has no 3D scene now: each plane carries the perspective in its own transform (see the phone block for `.lobby .floor3d` in index.css). When something on a phone doesn't move, prefer a flat element with a `perspective()` in its transform to a plane in a preserve-3d scene.
