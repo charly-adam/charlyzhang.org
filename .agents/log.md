@@ -164,3 +164,6 @@ Pushed to charly; no PR yet. On an iPhone (Safari, and Chrome since it's WebKit 
 Pushed to charly; no PR yet.
 - `getViewMode()` (src/viewMode.js) now falls back to collage on phones (max-width: 700px) when nothing is stored, and to gallery elsewhere. Once someone picks with the switch, their choice is remembered as before.
 - Up close in a collage, a swipe or arrow key (all four directions now) goes to the nearest photo on the wall that lies in that direction, favouring ones straight across. It used to go to the next photo in hang order, which jumped round the wall. At the wall's edge it stays put. The `order` list in Collage.jsx is gone.
+
+## 2026-11-07 · charly · charly · done: collage default, swipe by direction and beam haze PR ready for Adam
+PR charly -> adam with the iPhone beam haze fix, collage by default on phones, and swiping to the photo in that direction. Please check a gallery close-up in the iOS simulator; the haze only shows in WebKit.
