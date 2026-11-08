@@ -185,3 +185,6 @@ Pushed to charly; no PR yet. Charly wants the cone above the photo you're on. Th
 
 ## 2026-11-07 · charly · charly · done: glow haze and light cone PR ready for Adam
 PR charly -> adam: on phones the photo you're on stands in front of its glow, and the light cone stays above it up close. Please check a close-up in the iOS simulator.
+
+## 2026-11-08 · adam · adam · started: iPhone close-up glow haze
+Picking up Charly's handoff. Touches the phone block in index.css (the lit frame's glow).
