@@ -837,8 +837,10 @@ a {
 .solo .imgP {
   height: calc(var(--S) * 0.4);
 }
+/* a hair in front of the bay's face, not in its plane: level with it, Safari (iPhone and iPad)
+   drew the bay over its photo, so from the doorway the bays stood empty */
 .solo .frames {
-  transform: translateZ(var(--bay));
+  transform: translateZ(calc(var(--bay) + var(--S) * 0.004));
 }
 .solo .label {
   transform: translateZ(calc(var(--bay) + 1px));
