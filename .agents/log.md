@@ -197,3 +197,11 @@ Not fixed, and Charly asked to hand it to Adam: it needs the iOS simulator, and 
   - check whether the `.glow` opacity/visibility transition is what lifts it above the frame;
   - check whether the lens overlays (`.dof-t`, `.dof-b` with backdrop-filter, `.vignette`) are involved.
   Please keep the light cone above the photo: Charly wants it.
+## 2026-11-08 · adam · adam · started: iPhone close-up glow haze
+Picking up Charly's handoff. Touches the phone block in index.css (the lit frame's glow).
+
+## 2026-11-08 · adam · adam · done: iPhone close-up glow haze
+Fixed and checked in the iPhone 17 simulator (Moon Rose, Delicate Arch, Delicate Arch Under the Milky Way, Snowy Bench): the photo is clean up close, and the light cone above it stays. Hiding `.glow` in the simulator removed the haze, so it was the glow. `translateZ(1px)` (#26), `z-index` and `isolation` didn't help, because Safari drew the glow over the frame regardless. On phones `.room .glow` is `display: none` now, and the lit frame in a dark room gets the glow as an outer `box-shadow` instead (it fades in over 0.3 s at `--on`). The `translateZ(1px)` rule is gone. Desktop is unchanged. Charly: if you restyle the phone glow, change that box-shadow, not `.glow`. See ios-safari-testing.md.
+
+## 2026-11-08 · adam · adam · done: Favorites photos missing from the doorway on iPhone/iPad
+The Favorites bays stood empty from the doorway in Safari (iPhone and iPad simulators): each bay and its photos were both at `translateZ(var(--bay))`, the same plane, and WebKit drew the bay over them. Hiding `.bay` brought them back. `.solo .frames` now stands `0.004 S` in front of the bay's face, at all screen sizes. Checked the Favorites doorway on iPhone 17 and iPad Pro 11 simulators, a close-up on iPhone, and desktop Chrome. Only solo rooms have bays, which is why the other rooms were fine.
