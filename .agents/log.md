@@ -179,3 +179,6 @@ PR charly -> adam with the flat phone lobby floor and ceiling, the higher ceilin
 
 ## 2026-11-07 · charly · charly · done: no glow haze over the photo on iPhone
 Pushed to charly; no PR yet. With the beam hidden (#22), Charly's iPhone still showed a grey haze over an opened photo. My #22 note blamed it all on the beam, but it was mostly the lit frame's `.glow`. On phones the frames are flat to the wall (`.room .frame { transform: none }`), so the frame and its glow lie in one plane, and WebKit draws either on top. The lit frame now gets `translateZ(1px)` on phones while the room is dark (`.room.stage.dark .fw.lit .frame`). That's one extra layer, for the photo you're on only. Chrome looks the same. Adam: please check a close-up in the iOS simulator.
+
+## 2026-11-07 · charly · charly · done: light cone back up close on phones
+Pushed to charly; no PR yet. Charly wants the cone above the photo you're on. The `.room.stage.dark .fw.lit .beam { opacity: 0 }` phone rule from #22 is gone: the iPhone haze was the glow (fixed by the lit frame's `translateZ(1px)`), not the beam. Adam: in the iOS simulator, check that a close-up shows the cone above the photo and no haze over it.

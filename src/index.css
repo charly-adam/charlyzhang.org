@@ -1368,12 +1368,6 @@ body:has(.stage:not(.ready)) .dock {
   .room .frame {
     transform: none;
   }
-  /* Up close on a phone the camera comes nearer the wall than the lamp, so the lit frame's
-     beam is behind it: Chrome clips it away, but Safari (all iPhone browsers) draws it
-     magnified across the photo as a white haze. Nothing of it is in view there, so it's off. */
-  .room.stage.dark .fw.lit .beam {
-    opacity: 0;
-  }
   /* Flat to the wall, the frame lies in the same plane as its glow, and Safari picks either to
      draw on top: up close it drew the glow, a grey haze over the photo. The one photo you're
      on stands 1 px proud of it, which costs one layer, not one per frame. */
