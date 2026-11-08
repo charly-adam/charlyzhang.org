@@ -1368,11 +1368,19 @@ body:has(.stage:not(.ready)) .dock {
   .room .frame {
     transform: none;
   }
-  /* Flat to the wall, the frame lies in the same plane as its glow, and Safari picks either to
-     draw on top: up close it drew the glow, a grey haze over the photo. The one photo you're
-     on stands 1 px proud of it, which costs one layer, not one per frame. */
+  /* With the room dark, iPhone Safari drew the lit frame's .glow over the frame: a grey haze
+     on the photo, brightest in the middle. Stacking fixes didn't help (z-index, isolation, the
+     frame 1 px proud of the wall), so on phones the glow is the frame's own outer shadow. An
+     outer shadow is only ever drawn outside the frame, so it can't cover the photo, and it
+     costs no extra layer. */
+  .room .glow {
+    display: none;
+  }
+  .room .frame {
+    transition: box-shadow 0.3s ease var(--on, 0s);
+  }
   .room.stage.dark .fw.lit .frame {
-    transform: translateZ(1px);
+    box-shadow: var(--fshadow), 0 0 calc(var(--S) * 0.16) calc(var(--S) * 0.05) rgba(165, 165, 161, 0.75), inset 0 5px 7px -4px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(0, 0, 0, 0.07);
   }
   /* up close, the arrows fade away after a moment to leave the photo; a touch wakes them */
   .stage.near .turn:not(.wake) .turnbtn {

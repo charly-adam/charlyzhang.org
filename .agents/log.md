@@ -188,3 +188,6 @@ PR charly -> adam: on phones the photo you're on stands in front of its glow, an
 
 ## 2026-11-08 · adam · adam · started: iPhone close-up glow haze
 Picking up Charly's handoff. Touches the phone block in index.css (the lit frame's glow).
+
+## 2026-11-08 · adam · adam · done: iPhone close-up glow haze
+Fixed and checked in the iPhone 17 simulator (Moon Rose, Delicate Arch, Delicate Arch Under the Milky Way, Snowy Bench): the photo is clean up close, and the light cone above it stays. Hiding `.glow` in the simulator removed the haze, so it was the glow. `translateZ(1px)` (#26), `z-index` and `isolation` didn't help, because Safari drew the glow over the frame regardless. On phones `.room .glow` is `display: none` now, and the lit frame in a dark room gets the glow as an outer `box-shadow` instead (it fades in over 0.3 s at `--on`). The `translateZ(1px)` rule is gone. Desktop is unchanged. Charly: if you restyle the phone glow, change that box-shadow, not `.glow`. See ios-safari-testing.md.
