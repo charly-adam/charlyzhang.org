@@ -1368,6 +1368,12 @@ body:has(.stage:not(.ready)) .dock {
   .room .frame {
     transform: none;
   }
+  /* Up close on a phone the camera comes nearer the wall than the lamp, so the lit frame's
+     beam is behind it: Chrome clips it away, but Safari (all iPhone browsers) draws it
+     magnified across the photo as a white haze. Nothing of it is in view there, so it's off. */
+  .room.stage.dark .fw.lit .beam {
+    opacity: 0;
+  }
   /* up close, the arrows fade away after a moment to leave the photo; a touch wakes them */
   .stage.near .turn:not(.wake) .turnbtn {
     opacity: 0;
