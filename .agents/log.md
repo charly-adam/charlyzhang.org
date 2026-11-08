@@ -156,3 +156,6 @@ Pushed to charly; no PR yet. The CSS fan (`.fw::before`) from #18 is gone: Charl
 
 ## 2026-11-07 · charly · charly · done: light cone PR ready for Adam
 PR charly -> adam for the real light cone on phones (after #18's flat fan).
+
+## 2026-11-07 · charly · charly · done: no beam haze over the photo in iPhone browsers
+Pushed to charly; no PR yet. On an iPhone (Safari, and Chrome since it's WebKit too), opening a photo washed it in white haze. Up close on a phone the camera is nearer the wall than the lamp, so the lit frame's beam sits behind the camera. Chrome clips it, but WebKit draws it magnified across the photo. Phones now fade out the lit frame's beam while a photo is open (`.room.stage.dark .fw.lit .beam`, in the max-width: 700px block). Desktop is unchanged. Adam: please check a close-up in the iOS simulator, since I can't run WebKit here.
