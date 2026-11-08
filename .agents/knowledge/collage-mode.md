@@ -9,7 +9,10 @@ title + year, shuffled from a fixed seed, plain white theme).
   mode, never up close on a photo. The choice is kept in localStorage (`charlyzhang.view`,
   src/viewMode.js). With "collage" kept, RoomRoute redirects `/room/x` to `/room/x/collage`,
   except when the gallery itself navigates back to `/room/x` (it passes `state: { gallery: true }`).
-  Switching uses `replace`, so Back isn't trapped between the two.
+  Switching uses `replace`, so Back isn't trapped between the two. With nothing kept, it's collage
+  on phones (max-width: 700px) and gallery elsewhere.
+- **Up close**, a swipe or arrow key goes to the nearest photo whose middle lies that way on the
+  wall (within about 60 degrees, favouring straight across); at the wall's edge it stays put.
 - **Layout**: a binary cut tree whose pieces keep their photos' exact proportions (h = p·w + q
   per piece). Best of 160 random trees, then hill-climbing (flip a cut, swap two photos, change
   a weight). About 30 ms for 80 photos. Same seed, same wall; wide and tall screens get
