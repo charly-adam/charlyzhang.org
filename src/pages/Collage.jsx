@@ -222,7 +222,6 @@ function Collage({ id, name, theme, photos, favored, base }) {
   const near = photos.find((p) => p.id === photoId) || null;
   const nearRef = useRef(near);
   nearRef.current = near;
-  const order = useMemo(() => (hang ? hang.frames.map((f) => f.photo) : photos), [hang, photos]);
   const frameOf = useCallback((p) => hang?.frames.find((f) => f.photo === p), [hang]);
   const closeView = useCallback((p) => {
     const f = frameOf(p);
@@ -241,11 +240,33 @@ function Collage({ id, name, theme, photos, favored, base }) {
 
   const open = useCallback((p) => navigate(`${base}/${p.id}`), [navigate, base]);
   const stepBack = useCallback(() => navigate(base), [navigate, base]);
-  const step = useCallback((way) => {
-    const n = order.length;
-    const i = order.indexOf(nearRef.current);
-    if (i >= 0) open(order[(i + way + n) % n]);
-  }, [order, open]);
+  // up close, a swipe or an arrow key goes to the photo next to this one on the wall in that
+  // direction (dx, dy: -1, 0 or 1): the nearest whose middle lies that way, favouring ones
+  // straight across over ones off to the side. At the wall's edge there's none, and it stays.
+  const step = useCallback((dx, dy) => {
+    const here = frameOf(nearRef.current);
+    if (!here) return;
+    const cx = here.x + here.w / 2;
+    const cy = here.y + here.h / 2;
+    const half = dx ? here.w / 2 : here.h / 2;
+    let best = null;
+    let bestCost = Infinity;
+    for (const f of hang.frames) {
+      if (f === here) continue;
+      const vx = f.x + f.w / 2 - cx;
+      const vy = f.y + f.h / 2 - cy;
+      const along = vx * dx + vy * dy;
+      const side = Math.abs(vx * dy - vy * dx);
+      // past this photo's middle by a fair way, and within about 60 degrees of the swipe
+      if (along < half * 0.5 || side > along * 1.8) continue;
+      const cost = along + 2 * side;
+      if (cost < bestCost) {
+        bestCost = cost;
+        best = f;
+      }
+    }
+    if (best) open(best.photo);
+  }, [hang, frameOf, open]);
 
   // measure the screen, now and on every resize
   useLayoutEffect(() => {
@@ -372,7 +393,9 @@ function Collage({ id, name, theme, photos, favored, base }) {
       if (nearRef.current) {
         const dx = end.x - g.start.x;
         const dy = end.y - g.start.y;
-        if (Math.abs(dx) > 50 && Math.abs(dx) > 1.5 * Math.abs(dy)) step(dx < 0 ? 1 : -1);
+        // the finger drags the wall, so a swipe left brings in the photo on the right
+        if (Math.abs(dx) > 50 && Math.abs(dx) > 1.5 * Math.abs(dy)) step(dx < 0 ? 1 : -1, 0);
+        else if (Math.abs(dy) > 50 && Math.abs(dy) > 1.5 * Math.abs(dx)) step(0, dy < 0 ? 1 : -1);
         return;
       }
       if (pinching || view.z < geomRef.current.fitZ) setView({ ...view }); // settles back inside the limits
@@ -411,8 +434,10 @@ function Collage({ id, name, theme, photos, favored, base }) {
       const b = boxRef.current;
       if (nearRef.current) {
         if (e.key === 'Escape') stepBack();
-        else if (e.key === 'ArrowLeft') step(-1);
-        else if (e.key === 'ArrowRight') step(1);
+        else if (e.key === 'ArrowLeft') step(-1, 0);
+        else if (e.key === 'ArrowRight') step(1, 0);
+        else if (e.key === 'ArrowUp') step(0, -1);
+        else if (e.key === 'ArrowDown') step(0, 1);
         else return;
       } else {
         const pan = { ArrowLeft: [1, 0], ArrowRight: [-1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] }[e.key];
