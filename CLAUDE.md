@@ -6,43 +6,49 @@ Charly Zhang's photography site: a walk-through 3D gallery (React 19, Vite, Tail
 
 Adam and his brother each run Claude Code on their own clone. You never talk to the other agent directly: **git is the only channel**. The other agent knows only what has been pushed, and you know only what you have pulled. So pull before you work, push as you go, and write down what the other agent needs to know.
 
-### The pipeline: `charly` → `adam` → `main`
+### Branches: `adam`, `charly`, `main`
 
-Each person has one long-lived branch, and work moves up a step at a time:
+Repo: https://github.com/charlyzhang-org/charlyzhang.org (private, owned by the `charlyzhang-org` organisation).
 
-- **`charly`**: Charly's agent works here. Charly tests locally (`npm run dev`, `npm run build`, `npm run preview`). When a piece of work is ready, his agent opens a PR **`charly` → `adam`**.
-- **`adam`**: Adam's agent works here, and it is where Charly's work gets checked. Adam merges Charly's PRs into `adam` with a merge commit. Because that commit is Adam's, Vercel builds a **preview** of `adam`, which is the only preview of Charly's work. Adam's side also runs the Mac-only checks (iOS Safari simulator, headless Chrome).
-- **`main`**: production. Only a PR **`adam` → `main`**, merged by Adam with a merge commit, updates it, and that deploys the site.
+Each person has one long-lived branch, and **each ships their own work to `main`**:
 
-Work also flows back down: whatever lands on `adam` gets merged into `charly`, and whatever lands on `main` gets merged into `adam`. The SessionStart hook does this for you.
+- **`charly`** and **`adam`**: each agent works on its own. Every push deploys a **preview** to a link that stays the same, **https://charlyzhang-charly.vercel.app** or **https://charlyzhang-adam.vercel.app**, about a minute later.
+- **`main`**: production, **https://charlyzhang.org**. A PR from your branch to `main`, merged with a merge commit, deploys it. Either person can merge their own PR when they say it's ready.
+
+Deploys run in GitHub Actions ([.github/workflows/deploy.yml](.github/workflows/deploy.yml)), not through Vercel's Git integration. See [vercel-deploys.md](.agents/knowledge/vercel-deploys.md).
+
+Whatever lands on `main` gets merged back into both branches. The SessionStart hook does this for you.
 
 ### Every session
 
 A SessionStart hook ([.claude/hooks/sync.sh](.claude/hooks/sync.sh)) fetches, then on your branch:
 - fast-forwards to what's been pushed to it from elsewhere,
-- merges in its upstream (`adam` for `charly`, `main` for `adam`) when the tree is clean, and stops without merging if that would conflict.
+- merges in `main` when the tree is clean, and stops without merging if that would conflict.
 
-Then it prints what's **waiting at each step** of the pipeline (commits, files and log entries), any other open branches, and the end of the shared log.
+Then it prints what each branch has that **isn't on `main` yet** (commits, files and log entries), any open PRs and other branches, and the end of the shared log.
 
-Read that output before you do anything. If it pulled or merged, push (`git push`). If it reports a conflict or a diverged branch, sort that out first, or tell your human.
+Read that output before you do anything. If it pulled or merged, push (`git push`). If it reports a conflict, a diverged branch or a wrong `origin`, sort that out first, or tell your human.
 
 ### Doing a piece of work
 
 1. **Be on your own branch**: `charly` or `adam`, whichever matches your human (the first word of `git config user.name`, lowercase). If it doesn't exist locally yet, run `git switch <name>`. Never work on `main` or on the other person's branch.
-2. **Check for overlap.** If work waiting in the pipeline touches the same files, keep your change away from those lines if you can. If you can't, say so in your log entry and tell your human before you go on.
+2. **Check for overlap.** If the other branch has work not yet on `main` that touches the same files, keep your change away from those lines if you can. If you can't, say so in your log entry and tell your human before you go on.
 3. **Claim the work.** Your first commit adds a `started` entry to [.agents/log.md](.agents/log.md). Push it right away so the other agent sees it.
-4. **Commit and push at each working step.** Unpushed work is invisible to the other agent. Keep each commit to one thing and keep it building, because Adam may take your branch at any point.
-5. **When it's ready**, check that `npm run build` passes and add a `done` entry to the log. Then:
-   - **Charly's agent**: open (or update) a PR `charly` → `adam`, and say in the log entry that it's ready for Adam. Don't merge it yourself. Ignore the failing `Vercel` check on it (see [vercel-deploys.md](.agents/knowledge/vercel-deploys.md)).
-   - **Adam's agent**: when Adam says so, open a PR `adam` → `main` and merge it with a merge commit (`gh pr merge --merge`), then check the production deploy.
-6. **Reviewing Charly's PR** (Adam's agent): when Adam asks, read the diff, merge it into `adam` with `gh pr merge --merge`, run `npm run build`, and check the Vercel preview of `adam`. Run the Mac checks from [.agents/knowledge/](.agents/knowledge/) on whatever Charly changed. Fix problems on `adam`, log what you changed, and tell Adam.
+4. **Commit and push at each working step.** Unpushed work is invisible to the other agent. Keep each commit to one thing and keep it building. Each push updates your preview link, so your human can try it on a phone.
+5. **Check the deploy after a push**: `gh run list --branch <name> -L 1`, then `gh run watch <id>`. If it failed, `gh run view <id> --log-failed` shows why.
+6. **Ship when your human says so:**
+   1. `git fetch && git merge origin/main`, then resolve any conflicts. Ship only on top of the latest `main`.
+   2. `npm run build` must pass. Add a `done` entry to the log, then commit and push.
+   3. `gh pr create --base main --head <name> --fill` (or update the open one), then `gh pr merge --merge`. Never use `--squash` or `--rebase`.
+   4. Watch the production deploy (`gh run list --branch main -L 1`, then `gh run watch <id>`), and check https://charlyzhang.org.
+7. **Mac-only checks.** The iOS Safari simulator and headless Chrome checks in [.agents/knowledge/](.agents/knowledge/) need Adam's Mac. Charly can ship without them. If a change touches 3D rendering, room surfaces or phone CSS, say so in the `done` entry (e.g. "Adam: please check the Favorites close-up in the iOS simulator"). Adam's agent picks these notes up from the log, runs the checks, and fixes problems on `adam`.
 
 Rules:
-- **Merge, never rebase or squash.** Commits from `charly` live on in `adam` and `main`, so rewriting them duplicates them and causes conflicts. Bring in upstream changes with `git merge origin/<upstream>`.
-- Never force-push `adam`, `charly` or `main`, and never commit straight to `main`.
+- **Merge, never rebase or squash.** Commits from each branch live on in `main` and in the other branch, so rewriting them duplicates them and causes conflicts. Bring in `main` with `git merge origin/main`.
+- Never force-push `adam`, `charly` or `main`, and never commit straight to `main`: always go through a PR.
 - GitHub doesn't enforce any of this (no branch protection), so it's on you to keep to it. Squash and rebase merges are switched off in the repo settings, so every PR merges with a merge commit.
-- Never push to the other person's branch. If you need their change before it reaches you, ask your human; don't cherry-pick it.
-- For a big or risky experiment, you can branch off your own branch (`charly/<topic>`), then merge it back into yours when it works.
+- Never push to the other person's branch, and don't merge their PR. If you need their change before it reaches `main`, ask your human; don't cherry-pick it.
+- For a big or risky experiment, you can branch off your own branch (`charly/<topic>`), then merge it back into yours when it works. Topic branches don't deploy.
 - When a conflict is about intent, not just text, don't guess. Keep their version, note it in the log, and ask your human.
 
 ### The shared log: [.agents/log.md](.agents/log.md)
@@ -66,7 +72,7 @@ Lasting project facts go here, one topic per file: things you learned the hard w
 - [room-walkaround-rendering.md](.agents/knowledge/room-walkaround-rendering.md): Chrome tile memory limits for the 3D rooms: small planes, canvas tiles, doorway culling, and how to measure with LayerTree
 - [headless-chrome-3d-screenshots.md](.agents/knowledge/headless-chrome-3d-screenshots.md): screenshotting and driving the rooms in headless Chrome; keep the GPU on
 - [ios-safari-testing.md](.agents/knowledge/ios-safari-testing.md): testing in the Xcode iPhone/iPad simulator, and what Safari gets wrong with 3D planes
-- [vercel-deploys.md](.agents/knowledge/vercel-deploys.md): only Adam's commits deploy (Hobby plan), so Charly's work gets previewed after Adam merges it into `adam`
+- [vercel-deploys.md](.agents/knowledge/vercel-deploys.md): deploys go through GitHub Actions with Adam's Vercel token; branch preview links, secrets, and what to do when a deploy fails
 - [collage-mode.md](.agents/knowledge/collage-mode.md): collage mode and the All photos wall: routes, the remembered switch, the salon-hang layout, image sizes, and keeping it off the GPU
 
 Read the relevant file before changing room surfaces, rendering or anything you will test visually.

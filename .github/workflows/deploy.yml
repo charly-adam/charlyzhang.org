@@ -1,0 +1,72 @@
+# Deploys the site to Vercel with Adam's token (Vercel's own Git integration can't deploy
+# a private org repo on the Hobby plan). main -> production; adam/charly -> a preview,
+# also aliased to charlyzhang-<branch>.vercel.app. See .agents/knowledge/vercel-deploys.md.
+name: Deploy to Vercel
+
+on:
+  push:
+    branches: [main, adam, charly]
+  workflow_dispatch:
+
+# A newer push to the same branch cancels the deploy still running for it.
+concurrency:
+  group: deploy-${{ github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@65.15.0
+
+      - name: Pick target
+        id: target
+        run: |
+          if [ "$GITHUB_REF_NAME" = main ]; then
+            echo "env=production" >> "$GITHUB_OUTPUT"; echo "flag=--prod" >> "$GITHUB_OUTPUT"
+          else
+            echo "env=preview" >> "$GITHUB_OUTPUT"; echo "flag=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Pull project settings
+        run: vercel pull --yes --environment=${{ steps.target.outputs.env }} --token="$VERCEL_TOKEN"
+
+      - name: Build
+        run: vercel build ${{ steps.target.outputs.flag }} --token="$VERCEL_TOKEN"
+
+      - name: Deploy
+        id: deploy
+        run: |
+          url=$(vercel deploy --prebuilt ${{ steps.target.outputs.flag }} --token="$VERCEL_TOKEN")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Fixed preview link for the branch
+        if: github.ref_name != 'main'
+        # Through the API, not `vercel alias`: the CLI looks up a user, which a team-scoped token doesn't have.
+        run: |
+          host="${{ steps.deploy.outputs.url }}"; host="${host#https://}"
+          api="https://api.vercel.com"; auth="Authorization: Bearer $VERCEL_TOKEN"
+          id=$(curl -fsS -H "$auth" "$api/v13/deployments/$host?teamId=$VERCEL_ORG_ID" | jq -r .id)
+          curl -fsS -X POST -H "$auth" -H "Content-Type: application/json" \
+            -d "{\"alias\":\"charlyzhang-$GITHUB_REF_NAME.vercel.app\"}" \
+            "$api/v2/deployments/$id/aliases?teamId=$VERCEL_ORG_ID" | jq -r '.alias // .error.message'
+
+      - name: Summary
+        run: |
+          {
+            echo "Deployed **$GITHUB_REF_NAME** to ${{ steps.deploy.outputs.url }}"
+            [ "$GITHUB_REF_NAME" = main ] && echo "Production: https://charlyzhang.org" || echo "Branch link: https://charlyzhang-$GITHUB_REF_NAME.vercel.app"
+          } >> "$GITHUB_STEP_SUMMARY"
