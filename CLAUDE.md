@@ -1,6 +1,6 @@
 # charlyzhang.org
 
-Charly Zhang's photography site: a walk-through 3D gallery (React 19, Vite, Tailwind 4, CSS 3D), deployed on Vercel.
+Charly Zhang's photography site: a walk-through 3D gallery (React 19, Vite, Tailwind 4, CSS 3D), hosted on Cloudflare Pages.
 
 ## Two agents, one repo
 
@@ -12,10 +12,10 @@ Repo: https://github.com/charlyzhang-org/charlyzhang.org (private, owned by the 
 
 Each person has one long-lived branch, and **each ships their own work to `main`**:
 
-- **`charly`** and **`adam`**: each agent works on its own. Every push deploys a **preview** to a link that stays the same, **https://charlyzhang-charly.vercel.app** or **https://charlyzhang-adam.vercel.app**, about a minute later.
+- **`charly`** and **`adam`**: each agent works on its own. Every push deploys a **preview** to a link that stays the same, **https://charly.charlyzhang.pages.dev** or **https://adam.charlyzhang.pages.dev**, about a minute later.
 - **`main`**: production, **https://charlyzhang.org**. A PR from your branch to `main`, merged with a merge commit, deploys it. Either person can merge their own PR when they say it's ready.
 
-Deploys run in GitHub Actions ([.github/workflows/deploy.yml](.github/workflows/deploy.yml)), not through Vercel's Git integration. See [vercel-deploys.md](.agents/knowledge/vercel-deploys.md).
+Deploys run in GitHub Actions ([.github/workflows/deploy.yml](.github/workflows/deploy.yml)), and upload to Cloudflare Pages. See [cloudflare-deploys.md](.agents/knowledge/cloudflare-deploys.md).
 
 Whatever lands on `main` gets merged back into both branches. The SessionStart hook does this for you.
 
@@ -72,7 +72,7 @@ Lasting project facts go here, one topic per file: things you learned the hard w
 - [room-walkaround-rendering.md](.agents/knowledge/room-walkaround-rendering.md): Chrome tile memory limits for the 3D rooms: small planes, canvas tiles, doorway culling, and how to measure with LayerTree
 - [headless-chrome-3d-screenshots.md](.agents/knowledge/headless-chrome-3d-screenshots.md): screenshotting and driving the rooms in headless Chrome; keep the GPU on
 - [ios-safari-testing.md](.agents/knowledge/ios-safari-testing.md): testing in the Xcode iPhone/iPad simulator, and what Safari gets wrong with 3D planes
-- [vercel-deploys.md](.agents/knowledge/vercel-deploys.md): deploys go through GitHub Actions with Adam's Vercel token; branch preview links, secrets, and what to do when a deploy fails
+- [cloudflare-deploys.md](.agents/knowledge/cloudflare-deploys.md): Cloudflare Pages deploys from GitHub Actions: preview links per branch, `_redirects`/`_headers`, secrets, failed deploys, rollback
 - [collage-mode.md](.agents/knowledge/collage-mode.md): collage mode and the All photos wall: routes, the remembered switch, the salon-hang layout, image sizes, and keeping it off the GPU
 
 Read the relevant file before changing room surfaces, rendering or anything you will test visually.
