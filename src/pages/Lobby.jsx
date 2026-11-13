@@ -310,8 +310,12 @@ function Charly({ up }) {
       </div>
       <p key={said} className={`bubble${again}`}>
         {WELCOMES[said % WELCOMES.length]}
-        <svg className="bubble-tail" viewBox="0 0 26 22" aria-hidden="true">
-          <path d="M3 -2 L5 19 L22 -2" />
+        {/* drawn at 1:1 in the bubble's own px, from the inside of its bottom border (0, 0 is
+            its bottom-left inner corner): white over the border between the tail's two sides,
+            then the two sides, from the middle of the border down to the tip by his head */}
+        <svg className="bubble-tail" viewBox="-20 -4 70 56" aria-hidden="true">
+          <path className="fill" d="M16 -2 L38 -2 L-6 42 Z" />
+          <path className="edge" d="M16 1 L-6 42 L38 1" />
         </svg>
       </p>
       <button type="button" className="charly-face" tabIndex={-1} onClick={() => setSaid((n) => n + 1)} />

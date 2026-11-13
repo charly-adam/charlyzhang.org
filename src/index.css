@@ -1731,18 +1731,23 @@ body:has(.stage:not(.ready)) .dock {
   transform: scale(0.6);
   transform-origin: 10% 100%;
 }
-/* the tail, pointing down and left to his mouth: two strokes, its white covering the bubble's
-   border where they meet */
-.bubble-tail {
+/* the tail, from the bubble's bottom edge down and left to just beside his head: its white
+   covers the bubble's border between its two sides, which stop at the border, 2 px like it.
+   Its box matches its viewBox exactly, so it's drawn 1:1 (the .desk-scene svg rule would
+   otherwise stretch it to the bubble's size, and thicken its lines with it). */
+.desk-scene .bubble-tail {
   position: absolute;
-  left: 14px;
-  top: calc(100% - 2px);
-  width: 26px;
-  height: 22px;
+  left: -20px;
+  top: calc(100% - 4px);
+  width: 70px;
+  height: 56px;
   overflow: visible;
 }
-.bubble-tail path {
+.bubble-tail .fill {
   fill: #fff;
+}
+.bubble-tail .edge {
+  fill: none;
   stroke: #141414;
   stroke-width: 2;
   stroke-linejoin: round;

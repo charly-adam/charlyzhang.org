@@ -224,3 +224,6 @@ Deploys now go to Cloudflare Pages (project `charlyzhang`) from `.github/workflo
 
 ## 2026-11-12 · charly · charly · done: camera for North Window Arch lit at night
 Pushed to charly; not shipped yet. Added the camera (Nikon D750) that Charly filled in for "North Window Arch lit at night" in his photo descriptions doc (src/data/gallery.js). Checked all 80 photos against the doc: every year, place, camera, lens and film stock now matches the site.
+
+## 2026-11-12 · charly · charly · done: welcome bubble tail
+Pushed to charly; not shipped. The front desk's "Welcome!" bubble tail was drawn about 2.6 times too thick: the `.desk-scene svg` rule (width/height 100%) stretched its small SVG to the bubble's size. Its lines also ran past the bubble's border into it. Now `.desk-scene .bubble-tail` sizes it to its viewBox (1:1, 2 px lines like the border), the lines stop in the middle of the border, a white fill covers the border between them, and the tip points down and left to the side of Charly's head. Heads-up for anyone adding SVGs to the desk scene: that rule stretches every one unless you size it with a more specific selector.
