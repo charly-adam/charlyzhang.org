@@ -197,3 +197,10 @@ The Favorites bays stood empty from the doorway in Safari (iPhone and iPad simul
 
 ## 2026-11-12 · adam · adam · started: deploy from GitHub Actions, both of us ship to main
 The repo moved to github.com/charlyzhang-org/charlyzhang.org (private, org-owned), where Vercel's Hobby Git integration can't deploy. Moving deploys to a GitHub Actions workflow with Adam's Vercel token, and changing the pipeline so Charly can merge his own work into main. Touches .github/workflows, .claude/hooks/sync.sh, CLAUDE.md, .agents/knowledge/vercel-deploys.md.
+
+## 2026-11-12 · adam · adam · done: deploy from GitHub Actions, both of us ship to main
+The repo is now github.com/charlyzhang-org/charlyzhang.org. Charly: point your clone at it (`git remote set-url origin https://github.com/charlyzhang-org/charlyzhang.org`); the sync hook warns if you haven't.
+- Deploys go through `.github/workflows/deploy.yml` with Adam's Vercel token. Vercel's Git integration is disconnected, so the red `Vercel` check is gone for good.
+- Every push to `charly` or `adam` deploys a preview to https://charlyzhang-charly.vercel.app / https://charlyzhang-adam.vercel.app (public, about 1 min). `main` deploys charlyzhang.org.
+- **New pipeline:** `charly` → `main` and `adam` → `main`, each merged by its own person (merge commit only). The `charly` → `adam` step is gone, and `charly`'s upstream in sync.sh is now `main`. The steps are in CLAUDE.md under "Doing a piece of work".
+- Charly can ship without the Mac checks. Flag rendering/3D/phone-CSS changes in your `done` entry for Adam to check in the iOS simulator.

@@ -1,6 +1,6 @@
 #!/bin/sh
 # SessionStart: catch up with origin and show what the other agent is doing.
-# Work flows charly -> adam -> main, and back down by merging (see CLAUDE.md).
+# adam and charly each ship to main themselves, and main flows back into both by merging (see CLAUDE.md).
 # Whatever this prints goes into the agent's context. It always exits 0, so it never blocks a session.
 cd "${CLAUDE_PROJECT_DIR:-.}" || exit 0
 
@@ -8,8 +8,6 @@ cd "${CLAUDE_PROJECT_DIR:-.}" || exit 0
 upstream() {
   case "$1" in
     main|'') ;;
-    charly) echo adam ;;
-    adam) echo main ;;
     */*) echo "${1%%/*}" ;;
     *) echo main ;;
   esac
@@ -19,6 +17,10 @@ has() { git rev-parse -q --verify "$1" >/dev/null; }
 commits() { git log --format='  %h %an: %s' "$@"; }
 
 echo "== Sync with origin =="
+case "$(git remote get-url origin 2>/dev/null)" in
+  *charlyzhang-org/charlyzhang.org*) ;;
+  *) echo "origin isn't the org repo. Run: git remote set-url origin https://github.com/charlyzhang-org/charlyzhang.org" ;;
+esac
 if ! git fetch --prune --quiet origin 2>/dev/null; then
   echo "Couldn't reach origin; working from local state. Fetch before you push."
 else
@@ -70,8 +72,8 @@ waiting() {
 }
 
 echo
-echo "== Pipeline: charly -> adam -> main =="
-waiting charly adam
+echo "== Not on main yet (previews: charlyzhang-<branch>.vercel.app) =="
+waiting charly main
 waiting adam main
 pr=$(gh pr list --state open --json number,title,headRefName,baseRefName -q '.[] | "  #\(.number) \(.headRefName) -> \(.baseRefName): \(.title)"' 2>/dev/null)
 [ -n "$pr" ] && { echo "Open PRs:"; echo "$pr"; }
