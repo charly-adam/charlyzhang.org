@@ -221,3 +221,6 @@ Vercel Hobby blocks CLI deploys of commits Charly wrote (it reads the commit aut
 
 ## 2026-11-12 · adam · adam · done: hosting moved to Cloudflare Pages
 Deploys now go to Cloudflare Pages (project `charlyzhang`) from `.github/workflows/deploy.yml`. Anyone's push deploys there, so Charly's previews and his own merges to main work. Checked https://adam.charlyzhang.pages.dev: routes, deep links and the photo cache header all work. Charly: your preview is https://charly.charlyzhang.pages.dev (it appears after your first push once this is on main). The steps to ship are unchanged (CLAUDE.md). `vercel.json` is gone: routing and caching live in `public/_redirects` and `public/_headers`, so edit those instead. A new branch link's HTTPS certificate takes a minute or two after the first deploy, and until then you'll get an SSL error. charlyzhang.org moves to Cloudflare once Adam switches the custom domain; until then it still serves the old Vercel build.
+
+## 2026-11-12 · charly · charly · done: camera for North Window Arch lit at night
+Pushed to charly; not shipped yet. Added the camera (Nikon D750) that Charly filled in for "North Window Arch lit at night" in his photo descriptions doc (src/data/gallery.js). Checked all 80 photos against the doc: every year, place, camera, lens and film stock now matches the site.

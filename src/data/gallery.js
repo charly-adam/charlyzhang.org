@@ -74,7 +74,7 @@ export const photos = [
   { room: 'nature', file: '/photos/nature/14.jpg', title: 'Ridgeline at dusk', year: '2021', place: 'Kings Canyon National Park', camera: 'Nikon D750', lens: '', film: '', note: '' },
   { room: 'nature', file: '/photos/nature/15.jpg', title: 'Night over the canyon', year: '2021', place: 'Kings Canyon National Park', camera: 'Nikon D750', lens: '', film: '', note: '' },
   { room: 'nature', file: '/photos/nature/16.jpg', title: 'Morning light on the ridge', year: '2021', place: 'Kings Canyon National Park', camera: 'Nikon D750', lens: '', film: '', note: '' },
-  { room: 'nature', file: '/photos/nature/17.jpg', title: 'North Window Arch lit at night', year: '2018', place: 'The Windows, Arches National Park', camera: '', lens: '', film: '', note: '' },
+  { room: 'nature', file: '/photos/nature/17.jpg', title: 'North Window Arch lit at night', year: '2018', place: 'The Windows, Arches National Park', camera: 'Nikon D750', lens: '', film: '', note: '' },
   { room: 'nature', file: '/photos/nature/18.jpg', title: 'Rainbow in Yosemite Falls', year: '2021', place: 'Glacier Point, Yosemite', camera: 'Nikon D750', lens: '', film: '', note: '' },
   { room: 'nature', file: '/photos/nature/19.jpg', title: 'Canyon from above', year: '2018', place: 'Zion National Park', camera: 'Nikon D750', lens: '', film: '', note: '' },
 
