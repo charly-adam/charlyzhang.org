@@ -1731,6 +1731,11 @@ body:has(.stage:not(.ready)) .dock {
   transform: scale(0.6);
   transform-origin: 10% 100%;
 }
+/* once up, the bubble takes a click too: the next language */
+.charly.up .bubble {
+  cursor: pointer;
+  pointer-events: auto;
+}
 /* the tail, from the bubble's bottom edge down and left to just beside his head: its white
    covers the bubble's border between its two sides, which stop at the border, 2 px like it.
    Its box matches its viewBox exactly, so it's drawn 1:1 (the .desk-scene svg rule would
@@ -2094,8 +2099,7 @@ body:has(.stage:not(.ready)) .dock {
   cursor: pointer;
   pointer-events: auto;
 }
-.desk-scene .dl > button:focus-visible,
-.feature-frame:focus-visible {
+.desk-scene .dl > button:focus-visible {
   outline: 2px solid #141414;
   outline-offset: 4px;
 }
@@ -2127,8 +2131,6 @@ body:has(.stage:not(.ready)) .dock {
   background: #f8f8f6;
   border: 6px solid #1b1a19;
   box-shadow: 0 14px 22px -8px rgba(0, 0, 0, 0.35), 0 2px 3px rgba(0, 0, 0, 0.2), inset 0 3px 5px -3px rgba(0, 0, 0, 0.3);
-  cursor: pointer;
-  pointer-events: auto;
 }
 .feature-frame img {
   display: block;
@@ -2136,14 +2138,6 @@ body:has(.stage:not(.ready)) .dock {
   height: 100%;
   object-fit: cover;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
-}
-.feature-frame:hover {
-  filter: brightness(1.04);
-}
-/* clicked: it brightens for a moment as you set off to it */
-.feature.lit .feature-frame {
-  filter: brightness(1.12);
-  transition: filter 0.35s ease;
 }
 /* "Start here", the first visit: an ink circle draws itself round the map stand and a note
    comes up beside it, then it all fades (Lobby.jsx StartHere) */

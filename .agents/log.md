@@ -227,3 +227,10 @@ Pushed to charly; not shipped yet. Added the camera (Nikon D750) that Charly fil
 
 ## 2026-11-12 · charly · charly · done: welcome bubble tail
 Pushed to charly; not shipped. The front desk's "Welcome!" bubble tail was drawn about 2.6 times too thick: the `.desk-scene svg` rule (width/height 100%) stretched its small SVG to the bubble's size. Its lines also ran past the bubble's border into it. Now `.desk-scene .bubble-tail` sizes it to its viewBox (1:1, 2 px lines like the border), the lines stop in the middle of the border, a white fill covers the border between them, and the tip points down and left to the side of Charly's head. Heads-up for anyone adding SVGs to the desk scene: that rule stretches every one unless you size it with a more specific selector.
+
+## 2026-11-12 · charly · charly · done: bubble tail lined up, bubble click, print no link, view mode per visit
+Pushed to charly; not shipped.
+- **Bubble tail:** its base is on the bubble's flat bottom edge now (x 24–44; before, it started on the rounded corner). The white between the sides runs along the same lines, so it meets each side down its middle.
+- **Clicking the bubble** says welcome in the next language, as clicking his face does (`.charly.up .bubble` takes clicks). Before, the click fell through to the featured print and opened Favorites.
+- **The featured print isn't a link any more** (Charly's call): FeaturedPrint is a plain framed picture, with no click, hover, light-up or navigation, and Lobby.jsx no longer imports viewMode.
+- **View mode lasts for the visit only:** `sessionStorage` instead of `localStorage`. Each visit starts at collage on phones and gallery on desktop. Charly's desktop had been opening in collage from a choice saved for good. viewMode.js removes the old localStorage key once. collage-mode.md is updated.

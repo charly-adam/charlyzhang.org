@@ -6,7 +6,6 @@ import { Arrow, Pictogram } from '../components/Icons.jsx';
 import { Curtain, Lens, Shell } from '../components/Scene.jsx';
 import { usePreload } from '../hooks/usePreload.js';
 import { sound } from '../sound.js';
-import { getViewMode } from '../viewMode.js';
 
 const PHONE = '(max-width: 700px)';
 const SEEN_KEY = 'charlyzhang.seen-desk';
@@ -282,8 +281,8 @@ function Signage() {
 // pivots, the arms behind the torso and in front of the underarms, which stay still. Coming up
 // he says welcome: a
 // speech bubble, and his jaw (a copy of his chin, cut along the line of his lips) flaps up and
-// down like a cut-out cartoon's, over a dark gap that shows when it drops. Click his face and he
-// says it again, in the next language round.
+// down like a cut-out cartoon's, over a dark gap that shows when it drops. Click his face or the
+// bubble and he says it again, in the next language round.
 const LAYERS = ['underarm', 'arm-l', 'arm-r', 'torso', 'head'];
 const WELCOMES = ['Welcome!', 'Bienvenue !', '¡Bienvenido!', 'Willkommen!', 'Benvenuto!', '欢迎！', 'ようこそ！', '환영합니다!', 'Bem-vindo!', 'Добро пожаловать!', 'Karibu!', 'Witaj!', 'Hoş geldiniz!', 'Velkommen!', 'स्वागत है!', 'Selamat datang!'];
 function Charly({ up }) {
@@ -308,14 +307,17 @@ function Charly({ up }) {
           </div>
         ))}
       </div>
-      <p key={said} className={`bubble${again}`}>
+      <p key={said} className={`bubble${again}`} onClick={() => setSaid((n) => n + 1)}>
         {WELCOMES[said % WELCOMES.length]}
         {/* drawn at 1:1 in the bubble's own px, from the inside of its bottom border (0, 0 is
-            its bottom-left inner corner): white over the border between the tail's two sides,
-            then the two sides, from the middle of the border down to the tip by his head */}
+            its bottom-left inner corner; the border runs from y 0 to 2, and its flat part
+            starts at x 20, past the rounded corner). The two sides run from the tip by his head
+            (-6, 42) up to the middle of the border at x 24 and 44, and the white between them is
+            the same two lines carried on 3 px into the bubble, so it covers the border there
+            and meets each side down its middle. */}
         <svg className="bubble-tail" viewBox="-20 -4 70 56" aria-hidden="true">
-          <path className="fill" d="M16 -2 L38 -2 L-6 42 Z" />
-          <path className="edge" d="M16 1 L-6 42 L38 1" />
+          <path className="fill" d="M26.2 -2 L47.66 -2 L-6 42 Z" />
+          <path className="edge" d="M24 1 L-6 42 L44 1" />
         </svg>
       </p>
       <button type="button" className="charly-face" tabIndex={-1} onClick={() => setSaid((n) => n + 1)} />
@@ -482,30 +484,17 @@ function Bell({ onCall }) {
   );
 }
 
-// The print hung on the wall behind the desk (site.featured).
-// Clicked, it brightens a moment and you go to it in its room.
+// The print hung on the wall behind the desk (site.featured): just a picture on the wall, not a
+// link (Charly's speech bubble pops up over it, and a click meant for the bubble took you away).
 const featuredRoom = roomList.find((r) => r.photos.some((p) => p.file.split('?')[0] === site.featured));
 const featured = featuredRoom?.photos.find((p) => p.file.split('?')[0] === site.featured);
 function FeaturedPrint() {
-  const navigate = useNavigate();
-  const [lit, setLit] = useState(false);
-  useEffect(() => {
-    if (!lit) return undefined;
-    const to = getViewMode() === 'collage' ? `/room/${featuredRoom.slug}/collage/${featured.id}` : `/room/${featuredRoom.slug}/${featured.id}`;
-    const id = setTimeout(() => navigate(to), 750);
-    return () => clearTimeout(id);
-  }, [lit, navigate]);
   if (!featured) return null;
-  const go = () => {
-    if (lit) return;
-    sound.click();
-    setLit(true);
-  };
   return (
-    <div className={lit ? 'feature lit' : 'feature'}>
-      <button type="button" className="feature-frame" onClick={go} aria-label={`Now showing: ${featured.title}. See it in ${featuredRoom.name}`}>
-        <img src={featured.wall} alt="" width={featured.width} height={featured.height} draggable="false" />
-      </button>
+    <div className="feature">
+      <div className="feature-frame">
+        <img src={featured.wall} alt={`${featured.title}, in ${featuredRoom.name}`} width={featured.width} height={featured.height} draggable="false" />
+      </div>
     </div>
   );
 }
