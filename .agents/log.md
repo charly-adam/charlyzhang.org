@@ -243,3 +243,6 @@ Pushed to charly; not shipped.
 - The frame takes the photo's shape (image at most 274 px, inside the same 336 px box), so `fitPhoneWall` and the phone layout are unchanged. The cut line at the desk top is `--cut` on `.feature`. On phones it's worked out from `--fs` and `--fy`.
 - **Hover:** the print tips 1.6° on its nail and stands off the wall, only with `(hover: hover)`.
 Adam: please check the swap in the iOS simulator. It animates a clipped box, so it isn't 3D, but it's new on the phone front desk.
+
+## 2026-11-12 · charly · charly · done: shipped to main
+Shipping charly to production: the North Window Arch camera; the front desk welcome bubble (tail line and position, click to change language); view mode per visit (gallery on desktop, collage on phones); and the front desk print rotation and click-to-swap. Adam: please check the front desk on iPhone in the simulator: the bubble, and a print swap.
