@@ -234,3 +234,12 @@ Pushed to charly; not shipped.
 - **Clicking the bubble** says welcome in the next language, as clicking his face does (`.charly.up .bubble` takes clicks). Before, the click fell through to the featured print and opened Favorites.
 - **The featured print isn't a link any more** (Charly's call): FeaturedPrint is a plain framed picture, with no click, hover, light-up or navigation, and Lobby.jsx no longer imports viewMode.
 - **View mode lasts for the visit only:** `sessionStorage` instead of `localStorage`. Each visit starts at collage on phones and gallery on desktop. Charly's desktop had been opening in collage from a choice saved for good. viewMode.js removes the old localStorage key once. collage-mode.md is updated.
+
+## 2026-11-12 · charly · charly · done: front desk print changes each visit, and swaps on click
+Pushed to charly; not shipped.
+- `site.featured` in gallery.js is now a list of 12 files. Delicate Arch is first (the first visit's), then the rest of Favorites except Hume Lake (a panorama would hang as a sliver), plus Charly's picks from other rooms. Keep it to photos between 2:3 and 3:2.
+- **Each visit hangs the next one:** localStorage `charlyzhang.desk-print` holds the index the next visit shows. Lobby picks it once (`firstPrint`) and preloads it with the rest.
+- **Clicking the print swaps it.** It comes off its nail, drops behind the desk and is cut off at the desk top. The next comes up from there, is hung, and swings to a stop (keyframes `print-out` and `print-in`, with `sound.lift` and `sound.hang` in sound.js). It's a button again, but not a link. Charly's bubble is in the layer above, so it keeps its own clicks.
+- The frame takes the photo's shape (image at most 274 px, inside the same 336 px box), so `fitPhoneWall` and the phone layout are unchanged. The cut line at the desk top is `--cut` on `.feature`. On phones it's worked out from `--fs` and `--fy`.
+- **Hover:** the print tips 1.6° on its nail and stands off the wall, only with `(hover: hover)`.
+Adam: please check the swap in the iOS simulator. It animates a clipped box, so it isn't 3D, but it's new on the phone front desk.

@@ -32,7 +32,9 @@ export default function Lobby() {
   const openMap = useContext(MapContext);
   const stageRef = useRef(null);
   // Charly's layers come in with the rest, so he comes up whole when the bell calls him
-  const { done, progress } = usePreload('lobby', [...LAYERS.map((p) => `/lobby/charly-${p}.png`), featured?.wall, '/textures/floor-stone.jpg', '/textures/wall-grain.png']);
+  // (this visit's print, picked once: it's loaded with the rest)
+  const [print] = useState(firstPrint);
+  const { done, progress } = usePreload('lobby', [...LAYERS.map((p) => `/lobby/charly-${p}.png`), PRINTS[print]?.wall, '/textures/floor-stone.jpg', '/textures/wall-grain.png']);
   // Charly is out of sight behind the desk until the bell is rung three times quickly, and goes
   // back down when it's rung three times again
   const [charly, setCharly] = useState(false);
@@ -93,7 +95,7 @@ export default function Lobby() {
       <Signage />
       <div className="desk-scene">
         <div className="dl dl-wall">
-          <FeaturedPrint />
+          <FeaturedPrint first={print} />
         </div>
         <div className="dl dl-char">
           <Charly up={charly} />
@@ -484,17 +486,83 @@ function Bell({ onCall }) {
   );
 }
 
-// The print hung on the wall behind the desk (site.featured): just a picture on the wall, not a
-// link (Charly's speech bubble pops up over it, and a click meant for the bubble took you away).
-const featuredRoom = roomList.find((r) => r.photos.some((p) => p.file.split('?')[0] === site.featured));
-const featured = featuredRoom?.photos.find((p) => p.file.split('?')[0] === site.featured);
-function FeaturedPrint() {
-  if (!featured) return null;
+// The print hung on the wall behind the desk: one of site.featured, a different one each visit
+// (the first visit gets the first). Clicked, it comes off its nail and drops down behind the
+// desk, and the next comes up from behind it and is hung in its place. On hover it tips a
+// little on its nail, as if about to come down. It isn't a link: Charly's speech bubble pops up
+// over it (and takes its own clicks, being in the layer above).
+const allPhotos = roomList.flatMap((r) => r.photos);
+const PRINTS = site.featured.map((f) => allPhotos.find((p) => p.file.split('?')[0] === f)).filter(Boolean);
+const PRINT_KEY = 'charlyzhang.desk-print'; // the index of the print the next visit hangs
+const firstPrint = () => {
+  try {
+    const i = parseInt(localStorage.getItem(PRINT_KEY), 10);
+    return Number.isFinite(i) ? ((i % PRINTS.length) + PRINTS.length) % PRINTS.length : 0;
+  } catch {
+    return 0;
+  }
+};
+// The frame takes the photo's own shape, its picture at most 274 px either way (the 336 px
+// box, less the 25 px mat and 6 px moulding each side), and hangs centred in the box.
+const IMG_MAX = 274;
+const FRAME_EDGE = 31;
+const frameStyle = (p) => {
+  const a = p.width / p.height;
+  const w = (a >= 1 ? IMG_MAX : IMG_MAX * a) + 2 * FRAME_EDGE;
+  const h = (a >= 1 ? IMG_MAX / a : IMG_MAX) + 2 * FRAME_EDGE;
+  return { width: `${w}px`, height: `${h}px`, left: `${(336 - w) / 2}px`, top: `${(336 - h) / 2}px` };
+};
+const decoded = (src) => {
+  const im = new Image();
+  im.src = src;
+  return im.decode().catch(() => {});
+};
+function FeaturedPrint({ first }) {
+  const [i, setI] = useState(first);
+  // 'up' hanging; 'out' coming off and dropping behind the desk; 'in' the next coming up and
+  // being hung
+  const [phase, setPhase] = useState('up');
+  const next = (i + 1) % PRINTS.length;
+  // the next visit hangs the one after this; and the next one is loaded, ready to swap in
+  useEffect(() => {
+    try {
+      localStorage.setItem(PRINT_KEY, String(next));
+    } catch {
+      // the next visit starts from the first again
+    }
+    decoded(PRINTS[next].wall);
+  }, [next]);
+  if (!PRINTS.length) return null;
+  const p = PRINTS[i];
+  const swap = () => {
+    if (phase !== 'up' || PRINTS.length < 2) return;
+    sound.lift();
+    setPhase('out');
+  };
+  const onEnd = (e) => {
+    if (e.target !== e.currentTarget) return;
+    if (phase === 'out') {
+      decoded(PRINTS[next].wall).then(() => {
+        setI(next);
+        setPhase('in');
+      });
+    } else if (phase === 'in') {
+      setPhase('up');
+    }
+  };
   return (
-    <div className="feature">
-      <div className="feature-frame">
-        <img src={featured.wall} alt={`${featured.title}, in ${featuredRoom.name}`} width={featured.width} height={featured.height} draggable="false" />
-      </div>
+    <div className={`feature ${phase}`}>
+      <button
+        type="button"
+        className="feature-frame"
+        style={frameStyle(p)}
+        onClick={swap}
+        onAnimationEnd={onEnd}
+        onAnimationStart={(e) => e.target === e.currentTarget && phase === 'in' && sound.hang(0.62)}
+        aria-label={`${p.title}. Show another photo`}
+      >
+        <img key={p.file} src={p.wall} alt="" width={p.width} height={p.height} draggable="false" />
+      </button>
     </div>
   );
 }

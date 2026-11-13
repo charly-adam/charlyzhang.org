@@ -32,8 +32,23 @@ import sizes from './photo-sizes.json';
 export const site = {
   name: 'Charly Zhang',
   subtitle: 'Photography',
-  // the print hung on the wall behind the front desk (its file, as in `photos` below)
-  featured: '/photos/favorites/01.jpg',
+  // the prints hung on the wall behind the front desk, one per visit in this order (the first
+  // visit gets the first), and clicked, the next (their files, as in `photos` below). Kept to
+  // photos between 2:3 and 3:2: a panorama would hang as a sliver.
+  featured: [
+    '/photos/favorites/01.jpg', // Delicate Arch
+    '/photos/film/09.jpg', // Lifeguard tower in snow
+    '/photos/favorites/03.jpg', // Moon Rose
+    '/photos/nature/05.jpg', // Half Dome, last light
+    '/photos/travel/09.jpg', // Fisherman on the Yangtze River
+    '/photos/favorites/05.jpg', // Turret Arch with a rainbow
+    '/photos/birds/02.jpg', // Great Blue Heron taking off
+    '/photos/favorites/02.jpg', // Delicate Arch Under the Milky Way
+    '/photos/benches/03.jpg', // Log bench at Emerald Lake
+    '/photos/nature/18.jpg', // Rainbow in Yosemite Falls
+    '/photos/nature/12.jpg', // Headlamp under the Milky Way
+    '/photos/favorites/06.jpg', // Valley View
+  ],
 };
 
 export const rooms = [
