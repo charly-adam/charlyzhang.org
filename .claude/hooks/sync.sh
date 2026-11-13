@@ -72,7 +72,7 @@ waiting() {
 }
 
 echo
-echo "== Not on main yet (previews: charlyzhang-<branch>.vercel.app) =="
+echo "== Not on main yet (previews: <branch>.charlyzhang.pages.dev) =="
 waiting charly main
 waiting adam main
 pr=$(gh pr list --state open --json number,title,headRefName,baseRefName -q '.[] | "  #\(.number) \(.headRefName) -> \(.baseRefName): \(.title)"' 2>/dev/null)
