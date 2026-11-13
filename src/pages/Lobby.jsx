@@ -6,7 +6,6 @@ import { Arrow, Pictogram } from '../components/Icons.jsx';
 import { Curtain, Lens, Shell } from '../components/Scene.jsx';
 import { usePreload } from '../hooks/usePreload.js';
 import { sound } from '../sound.js';
-import { getViewMode } from '../viewMode.js';
 
 const PHONE = '(max-width: 700px)';
 const SEEN_KEY = 'charlyzhang.seen-desk';
@@ -33,7 +32,9 @@ export default function Lobby() {
   const openMap = useContext(MapContext);
   const stageRef = useRef(null);
   // Charly's layers come in with the rest, so he comes up whole when the bell calls him
-  const { done, progress } = usePreload('lobby', [...LAYERS.map((p) => `/lobby/charly-${p}.png`), featured?.wall, '/textures/floor-stone.jpg', '/textures/wall-grain.png']);
+  // (this visit's print, picked once: it's loaded with the rest)
+  const [print] = useState(firstPrint);
+  const { done, progress } = usePreload('lobby', [...LAYERS.map((p) => `/lobby/charly-${p}.png`), PRINTS[print]?.wall, '/textures/floor-stone.jpg', '/textures/wall-grain.png']);
   // Charly is out of sight behind the desk until the bell is rung three times quickly, and goes
   // back down when it's rung three times again
   const [charly, setCharly] = useState(false);
@@ -94,7 +95,7 @@ export default function Lobby() {
       <Signage />
       <div className="desk-scene">
         <div className="dl dl-wall">
-          <FeaturedPrint />
+          <FeaturedPrint first={print} />
         </div>
         <div className="dl dl-char">
           <Charly up={charly} />
@@ -282,8 +283,8 @@ function Signage() {
 // pivots, the arms behind the torso and in front of the underarms, which stay still. Coming up
 // he says welcome: a
 // speech bubble, and his jaw (a copy of his chin, cut along the line of his lips) flaps up and
-// down like a cut-out cartoon's, over a dark gap that shows when it drops. Click his face and he
-// says it again, in the next language round.
+// down like a cut-out cartoon's, over a dark gap that shows when it drops. Click his face or the
+// bubble and he says it again, in the next language round.
 const LAYERS = ['underarm', 'arm-l', 'arm-r', 'torso', 'head'];
 const WELCOMES = ['Welcome!', 'Bienvenue !', '¡Bienvenido!', 'Willkommen!', 'Benvenuto!', '欢迎！', 'ようこそ！', '환영합니다!', 'Bem-vindo!', 'Добро пожаловать!', 'Karibu!', 'Witaj!', 'Hoş geldiniz!', 'Velkommen!', 'स्वागत है!', 'Selamat datang!'];
 function Charly({ up }) {
@@ -308,10 +309,17 @@ function Charly({ up }) {
           </div>
         ))}
       </div>
-      <p key={said} className={`bubble${again}`}>
+      <p key={said} className={`bubble${again}`} onClick={() => setSaid((n) => n + 1)}>
         {WELCOMES[said % WELCOMES.length]}
-        <svg className="bubble-tail" viewBox="0 0 26 22" aria-hidden="true">
-          <path d="M3 -2 L5 19 L22 -2" />
+        {/* drawn at 1:1 in the bubble's own px, from the inside of its bottom border (0, 0 is
+            its bottom-left inner corner; the border runs from y 0 to 2, and its flat part
+            starts at x 20, past the rounded corner). The two sides run from the tip by his head
+            (-6, 42) up to the middle of the border at x 24 and 44, and the white between them is
+            the same two lines carried on 3 px into the bubble, so it covers the border there
+            and meets each side down its middle. */}
+        <svg className="bubble-tail" viewBox="-20 -4 70 56" aria-hidden="true">
+          <path className="fill" d="M26.2 -2 L47.66 -2 L-6 42 Z" />
+          <path className="edge" d="M24 1 L-6 42 L44 1" />
         </svg>
       </p>
       <button type="button" className="charly-face" tabIndex={-1} onClick={() => setSaid((n) => n + 1)} />
@@ -478,29 +486,82 @@ function Bell({ onCall }) {
   );
 }
 
-// The print hung on the wall behind the desk (site.featured).
-// Clicked, it brightens a moment and you go to it in its room.
-const featuredRoom = roomList.find((r) => r.photos.some((p) => p.file.split('?')[0] === site.featured));
-const featured = featuredRoom?.photos.find((p) => p.file.split('?')[0] === site.featured);
-function FeaturedPrint() {
-  const navigate = useNavigate();
-  const [lit, setLit] = useState(false);
+// The print hung on the wall behind the desk: one of site.featured, a different one each visit
+// (the first visit gets the first). Clicked, it comes off its nail and drops down behind the
+// desk, and the next comes up from behind it and is hung in its place. On hover it tips a
+// little on its nail, as if about to come down. It isn't a link: Charly's speech bubble pops up
+// over it (and takes its own clicks, being in the layer above).
+const allPhotos = roomList.flatMap((r) => r.photos);
+const PRINTS = site.featured.map((f) => allPhotos.find((p) => p.file.split('?')[0] === f)).filter(Boolean);
+const PRINT_KEY = 'charlyzhang.desk-print'; // the index of the print the next visit hangs
+const firstPrint = () => {
+  try {
+    const i = parseInt(localStorage.getItem(PRINT_KEY), 10);
+    return Number.isFinite(i) ? ((i % PRINTS.length) + PRINTS.length) % PRINTS.length : 0;
+  } catch {
+    return 0;
+  }
+};
+// The frame takes the photo's own shape, its picture at most 274 px either way (the 336 px
+// box, less the 25 px mat and 6 px moulding each side), and hangs centred in the box.
+const IMG_MAX = 274;
+const FRAME_EDGE = 31;
+const frameStyle = (p) => {
+  const a = p.width / p.height;
+  const w = (a >= 1 ? IMG_MAX : IMG_MAX * a) + 2 * FRAME_EDGE;
+  const h = (a >= 1 ? IMG_MAX / a : IMG_MAX) + 2 * FRAME_EDGE;
+  return { width: `${w}px`, height: `${h}px`, left: `${(336 - w) / 2}px`, top: `${(336 - h) / 2}px` };
+};
+const decoded = (src) => {
+  const im = new Image();
+  im.src = src;
+  return im.decode().catch(() => {});
+};
+function FeaturedPrint({ first }) {
+  const [i, setI] = useState(first);
+  // 'up' hanging; 'out' coming off and dropping behind the desk; 'in' the next coming up and
+  // being hung
+  const [phase, setPhase] = useState('up');
+  const next = (i + 1) % PRINTS.length;
+  // the next visit hangs the one after this; and the next one is loaded, ready to swap in
   useEffect(() => {
-    if (!lit) return undefined;
-    const to = getViewMode() === 'collage' ? `/room/${featuredRoom.slug}/collage/${featured.id}` : `/room/${featuredRoom.slug}/${featured.id}`;
-    const id = setTimeout(() => navigate(to), 750);
-    return () => clearTimeout(id);
-  }, [lit, navigate]);
-  if (!featured) return null;
-  const go = () => {
-    if (lit) return;
-    sound.click();
-    setLit(true);
+    try {
+      localStorage.setItem(PRINT_KEY, String(next));
+    } catch {
+      // the next visit starts from the first again
+    }
+    decoded(PRINTS[next].wall);
+  }, [next]);
+  if (!PRINTS.length) return null;
+  const p = PRINTS[i];
+  const swap = () => {
+    if (phase !== 'up' || PRINTS.length < 2) return;
+    sound.lift();
+    setPhase('out');
+  };
+  const onEnd = (e) => {
+    if (e.target !== e.currentTarget) return;
+    if (phase === 'out') {
+      decoded(PRINTS[next].wall).then(() => {
+        setI(next);
+        setPhase('in');
+      });
+    } else if (phase === 'in') {
+      setPhase('up');
+    }
   };
   return (
-    <div className={lit ? 'feature lit' : 'feature'}>
-      <button type="button" className="feature-frame" onClick={go} aria-label={`Now showing: ${featured.title}. See it in ${featuredRoom.name}`}>
-        <img src={featured.wall} alt="" width={featured.width} height={featured.height} draggable="false" />
+    <div className={`feature ${phase}`}>
+      <button
+        type="button"
+        className="feature-frame"
+        style={frameStyle(p)}
+        onClick={swap}
+        onAnimationEnd={onEnd}
+        onAnimationStart={(e) => e.target === e.currentTarget && phase === 'in' && sound.hang(0.62)}
+        aria-label={`${p.title}. Show another photo`}
+      >
+        <img key={p.file} src={p.wall} alt="" width={p.width} height={p.height} draggable="false" />
       </button>
     </div>
   );

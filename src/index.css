@@ -1731,18 +1731,28 @@ body:has(.stage:not(.ready)) .dock {
   transform: scale(0.6);
   transform-origin: 10% 100%;
 }
-/* the tail, pointing down and left to his mouth: two strokes, its white covering the bubble's
-   border where they meet */
-.bubble-tail {
+/* once up, the bubble takes a click too: the next language */
+.charly.up .bubble {
+  cursor: pointer;
+  pointer-events: auto;
+}
+/* the tail, from the bubble's bottom edge down and left to just beside his head: its white
+   covers the bubble's border between its two sides, which stop at the border, 2 px like it.
+   Its box matches its viewBox exactly, so it's drawn 1:1 (the .desk-scene svg rule would
+   otherwise stretch it to the bubble's size, and thicken its lines with it). */
+.desk-scene .bubble-tail {
   position: absolute;
-  left: 14px;
-  top: calc(100% - 2px);
-  width: 26px;
-  height: 22px;
+  left: -20px;
+  top: calc(100% - 4px);
+  width: 70px;
+  height: 56px;
   overflow: visible;
 }
-.bubble-tail path {
+.bubble-tail .fill {
   fill: #fff;
+}
+.bubble-tail .edge {
+  fill: none;
   stroke: #141414;
   stroke-width: 2;
   stroke-linejoin: round;
@@ -2089,8 +2099,7 @@ body:has(.stage:not(.ready)) .dock {
   cursor: pointer;
   pointer-events: auto;
 }
-.desk-scene .dl > button:focus-visible,
-.feature-frame:focus-visible {
+.desk-scene .dl > button:focus-visible {
   outline: 2px solid #141414;
   outline-offset: 4px;
 }
@@ -2101,29 +2110,105 @@ body:has(.stage:not(.ready)) .dock {
   overflow: visible;
 }
 
-/* the featured print: black frame, white mat */
+/* the featured print: black frame, white mat, in the shape of its photo (Lobby.jsx sizes it),
+   hung centred in a 336 px box. Swapped, it drops behind the desk and the next comes up from
+   there: the box is cut off at the desk top (--cut, from the box's top: the desk top is at 560
+   in the scene, the box's top at 172; on a phone the box is scaled by --fs about its middle and
+   moved by --fy, so the same line works out as below), so nothing shows below the desk. */
 .desk-scene .dl-wall > .feature {
+  --cut: 388px;
+  --drop: calc(var(--cut) + 24px);
   left: 552px;
   top: 172px;
   width: 336px;
   height: 336px;
   cursor: default;
   pointer-events: none;
+  clip-path: inset(-120px -120px calc(100% - var(--cut)) -120px);
 }
 .feature-frame {
   position: absolute;
-  left: 0;
-  top: 0;
-  width: 336px;
-  height: 336px;
   box-sizing: border-box;
   margin: 0;
   padding: 25px;
+  font: inherit;
   background: #f8f8f6;
   border: 6px solid #1b1a19;
   box-shadow: 0 14px 22px -8px rgba(0, 0, 0, 0.35), 0 2px 3px rgba(0, 0, 0, 0.2), inset 0 3px 5px -3px rgba(0, 0, 0, 0.3);
   cursor: pointer;
   pointer-events: auto;
+  /* it hangs from a nail above its top edge */
+  transform-origin: 50% -14px;
+  transition: rotate 0.35s cubic-bezier(0.3, 1.6, 0.5, 1), translate 0.35s ease, box-shadow 0.35s ease;
+}
+/* hover: it tips a little on its nail and stands off the wall, as if about to come down (only
+   with a real pointer: a tap on a phone would leave it tipped) */
+@media (hover: hover) {
+  .feature.up .feature-frame:hover {
+    rotate: -1.6deg;
+    translate: 0 -3px;
+    box-shadow: 0 22px 30px -10px rgba(0, 0, 0, 0.4), 0 3px 5px rgba(0, 0, 0, 0.22), inset 0 3px 5px -3px rgba(0, 0, 0, 0.3);
+  }
+}
+.feature:not(.up) .feature-frame {
+  pointer-events: none;
+}
+.feature.out .feature-frame {
+  animation: print-out 0.75s both;
+}
+.feature.in .feature-frame {
+  animation: print-in 1.15s both;
+}
+/* off the nail (up, and away from the wall), then falling behind the desk */
+@keyframes print-out {
+  0% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0.3, 0, 0.4, 1);
+  }
+  24% {
+    transform: translateY(-16px) rotate(-2.5deg) scale(1.025);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.5);
+  }
+  100% {
+    transform: translateY(var(--drop)) rotate(3deg) scale(1.025);
+  }
+}
+/* up from behind the desk, lifted a little past its nail, then hung: it drops onto the nail
+   and swings to a stop */
+@keyframes print-in {
+  0% {
+    transform: translateY(var(--drop)) rotate(-2deg) scale(1.025);
+    animation-timing-function: cubic-bezier(0.15, 0.6, 0.3, 1);
+  }
+  48% {
+    transform: translateY(-16px) rotate(1deg) scale(1.025);
+    animation-timing-function: cubic-bezier(0.5, 0, 0.8, 0.4);
+  }
+  58% {
+    transform: translateY(0) rotate(2.4deg);
+    animation-timing-function: ease-in-out;
+  }
+  70% {
+    transform: rotate(-1.6deg);
+  }
+  81% {
+    transform: rotate(0.9deg);
+  }
+  91% {
+    transform: rotate(-0.35deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .feature.out .feature-frame,
+  .feature.in .feature-frame {
+    animation-duration: 0.01s;
+  }
+  .feature.up .feature-frame:hover {
+    rotate: none;
+  }
 }
 .feature-frame img {
   display: block;
@@ -2131,14 +2216,6 @@ body:has(.stage:not(.ready)) .dock {
   height: 100%;
   object-fit: cover;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
-}
-.feature-frame:hover {
-  filter: brightness(1.04);
-}
-/* clicked: it brightens for a moment as you set off to it */
-.feature.lit .feature-frame {
-  filter: brightness(1.12);
-  transition: filter 0.35s ease;
 }
 /* "Start here", the first visit: an ink circle draws itself round the map stand and a note
    comes up beside it, then it all fades (Lobby.jsx StartHere) */
@@ -2457,6 +2534,7 @@ body:has(.stage:not(.ready)) .dock {
   /* and the print a little smaller, to clear the signs above it */
   /* the print, centred, as big as the wall under the lettering allows (--fs, --fy: Lobby.jsx) */
   .desk-scene .dl-wall > .feature {
+    --cut: calc(168px + (220px - var(--fy, 0px)) / var(--fs, 0.62));
     scale: var(--fs, 0.62);
     translate: 0 var(--fy, 0);
     transform-origin: 50% 50%;
