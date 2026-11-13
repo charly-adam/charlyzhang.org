@@ -204,3 +204,6 @@ The repo is now github.com/charlyzhang-org/charlyzhang.org. Charly: point your c
 - Every push to `charly` or `adam` deploys a preview to https://charlyzhang-charly.vercel.app / https://charlyzhang-adam.vercel.app (public, about 1 min). `main` deploys charlyzhang.org.
 - **New pipeline:** `charly` → `main` and `adam` → `main`, each merged by its own person (merge commit only). The `charly` → `adam` step is gone, and `charly`'s upstream in sync.sh is now `main`. The steps are in CLAUDE.md under "Doing a piece of work".
 - Charly can ship without the Mac checks. Flag rendering/3D/phone-CSS changes in your `done` entry for Adam to check in the iOS simulator.
+
+## 2026-11-12 · adam · adam · started: move hosting from Vercel to Cloudflare Pages
+Vercel Hobby blocks CLI deploys of commits Charly wrote (it reads the commit author from .git and he isn't on the team), so his previews and his own merges to main can't deploy there. Moving to Cloudflare Pages (free, unlimited deployers; the charlyzhang.org DNS is already on Cloudflare). Touches deploy.yml, vercel.json → public/_redirects + public/_headers, CLAUDE.md, knowledge docs.
