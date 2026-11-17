@@ -186,6 +186,17 @@ Pushed to charly; no PR yet. Charly wants the cone above the photo you're on. Th
 ## 2026-11-07 · charly · charly · done: glow haze and light cone PR ready for Adam
 PR charly -> adam: on phones the photo you're on stands in front of its glow, and the light cone stays above it up close. Please check a close-up in the iOS simulator.
 
+## 2026-11-07 · charly · charly · handoff: grey haze over the photo up close on iPhone (for Adam)
+Not fixed, and Charly asked to hand it to Adam: it needs the iOS simulator, and I can't run WebKit on Windows.
+- **What happens:** Charly's iPhone, gallery mode, Favorites, Delicate Arch Under the Milky Way (also Delicate Arch, and Snowy Bench in Benches). Up close, a grey-white haze covers the photo and its mat, brightest in the middle. Chrome on the Pixel and desktop are fine. His screenshot was taken at 1:05, a minute after #26 reached main, so first check that production really has #26.
+- **Tried, didn't fix it:**
+  1. #22 hid the lit frame's beam up close on phones. The haze stayed, so #26 put the beam back.
+  2. #26 gives the lit frame `translateZ(1px)` on phones in dark mode (`.room.stage.dark .fw.lit .frame`). The haze looks like `.glow` (a grey radial gradient, opacity 1 on the lit frame in dark mode), drawn over the frame.
+- **Where to look:** the phone block in index.css (max-width: 700px) makes `.fw` `transform-style: flat` and the frame `transform: none`, to save layer memory. `.glow` and `.pool` come before `.frame` in Frame.jsx, so they should paint under it. Things to try in the simulator:
+  - hide `.glow`, then `.pool`, to confirm which one it is;
+  - check whether the `.glow` opacity/visibility transition is what lifts it above the frame;
+  - check whether the lens overlays (`.dof-t`, `.dof-b` with backdrop-filter, `.vignette`) are involved.
+  Please keep the light cone above the photo: Charly wants it.
 ## 2026-11-08 · adam · adam · started: iPhone close-up glow haze
 Picking up Charly's handoff. Touches the phone block in index.css (the lit frame's glow).
 
@@ -213,3 +224,27 @@ Deploys now go to Cloudflare Pages (project `charlyzhang`) from `.github/workflo
 
 ## 2026-11-12 · adam · adam · done: charlyzhang.org now served by Cloudflare Pages
 The Vercel DNS records are gone. charlyzhang.org and www are custom domains on the Pages project, and both serve the main build. Vercel isn't used for anything now. Ignore any old `Vercel` check or Vercel email, and don't add Vercel config back.
+## 2026-11-12 · charly · charly · done: camera for North Window Arch lit at night
+Pushed to charly; not shipped yet. Added the camera (Nikon D750) that Charly filled in for "North Window Arch lit at night" in his photo descriptions doc (src/data/gallery.js). Checked all 80 photos against the doc: every year, place, camera, lens and film stock now matches the site.
+
+## 2026-11-12 · charly · charly · done: welcome bubble tail
+Pushed to charly; not shipped. The front desk's "Welcome!" bubble tail was drawn about 2.6 times too thick: the `.desk-scene svg` rule (width/height 100%) stretched its small SVG to the bubble's size. Its lines also ran past the bubble's border into it. Now `.desk-scene .bubble-tail` sizes it to its viewBox (1:1, 2 px lines like the border), the lines stop in the middle of the border, a white fill covers the border between them, and the tip points down and left to the side of Charly's head. Heads-up for anyone adding SVGs to the desk scene: that rule stretches every one unless you size it with a more specific selector.
+
+## 2026-11-12 · charly · charly · done: bubble tail lined up, bubble click, print no link, view mode per visit
+Pushed to charly; not shipped.
+- **Bubble tail:** its base is on the bubble's flat bottom edge now (x 24–44; before, it started on the rounded corner). The white between the sides runs along the same lines, so it meets each side down its middle.
+- **Clicking the bubble** says welcome in the next language, as clicking his face does (`.charly.up .bubble` takes clicks). Before, the click fell through to the featured print and opened Favorites.
+- **The featured print isn't a link any more** (Charly's call): FeaturedPrint is a plain framed picture, with no click, hover, light-up or navigation, and Lobby.jsx no longer imports viewMode.
+- **View mode lasts for the visit only:** `sessionStorage` instead of `localStorage`. Each visit starts at collage on phones and gallery on desktop. Charly's desktop had been opening in collage from a choice saved for good. viewMode.js removes the old localStorage key once. collage-mode.md is updated.
+
+## 2026-11-12 · charly · charly · done: front desk print changes each visit, and swaps on click
+Pushed to charly; not shipped.
+- `site.featured` in gallery.js is now a list of 12 files. Delicate Arch is first (the first visit's), then the rest of Favorites except Hume Lake (a panorama would hang as a sliver), plus Charly's picks from other rooms. Keep it to photos between 2:3 and 3:2.
+- **Each visit hangs the next one:** localStorage `charlyzhang.desk-print` holds the index the next visit shows. Lobby picks it once (`firstPrint`) and preloads it with the rest.
+- **Clicking the print swaps it.** It comes off its nail, drops behind the desk and is cut off at the desk top. The next comes up from there, is hung, and swings to a stop (keyframes `print-out` and `print-in`, with `sound.lift` and `sound.hang` in sound.js). It's a button again, but not a link. Charly's bubble is in the layer above, so it keeps its own clicks.
+- The frame takes the photo's shape (image at most 274 px, inside the same 336 px box), so `fitPhoneWall` and the phone layout are unchanged. The cut line at the desk top is `--cut` on `.feature`. On phones it's worked out from `--fs` and `--fy`.
+- **Hover:** the print tips 1.6° on its nail and stands off the wall, only with `(hover: hover)`.
+Adam: please check the swap in the iOS simulator. It animates a clipped box, so it isn't 3D, but it's new on the phone front desk.
+
+## 2026-11-12 · charly · charly · done: shipped to main
+Shipping charly to production: the North Window Arch camera; the front desk welcome bubble (tail line and position, click to change language); view mode per visit (gallery on desktop, collage on phones); and the front desk print rotation and click-to-swap. Adam: please check the front desk on iPhone in the simulator: the bubble, and a print swap.

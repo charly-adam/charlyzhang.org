@@ -32,8 +32,23 @@ import sizes from './photo-sizes.json';
 export const site = {
   name: 'Charly Zhang',
   subtitle: 'Photography',
-  // the print hung on the wall behind the front desk (its file, as in `photos` below)
-  featured: '/photos/favorites/01.jpg',
+  // the prints hung on the wall behind the front desk, one per visit in this order (the first
+  // visit gets the first), and clicked, the next (their files, as in `photos` below). Kept to
+  // photos between 2:3 and 3:2: a panorama would hang as a sliver.
+  featured: [
+    '/photos/favorites/01.jpg', // Delicate Arch
+    '/photos/film/09.jpg', // Lifeguard tower in snow
+    '/photos/favorites/03.jpg', // Moon Rose
+    '/photos/nature/05.jpg', // Half Dome, last light
+    '/photos/travel/09.jpg', // Fisherman on the Yangtze River
+    '/photos/favorites/05.jpg', // Turret Arch with a rainbow
+    '/photos/birds/02.jpg', // Great Blue Heron taking off
+    '/photos/favorites/02.jpg', // Delicate Arch Under the Milky Way
+    '/photos/benches/03.jpg', // Log bench at Emerald Lake
+    '/photos/nature/18.jpg', // Rainbow in Yosemite Falls
+    '/photos/nature/12.jpg', // Headlamp under the Milky Way
+    '/photos/favorites/06.jpg', // Valley View
+  ],
 };
 
 export const rooms = [
@@ -74,7 +89,7 @@ export const photos = [
   { room: 'nature', file: '/photos/nature/14.jpg', title: 'Ridgeline at dusk', year: '2021', place: 'Kings Canyon National Park', camera: 'Nikon D750', lens: '', film: '', note: '' },
   { room: 'nature', file: '/photos/nature/15.jpg', title: 'Night over the canyon', year: '2021', place: 'Kings Canyon National Park', camera: 'Nikon D750', lens: '', film: '', note: '' },
   { room: 'nature', file: '/photos/nature/16.jpg', title: 'Morning light on the ridge', year: '2021', place: 'Kings Canyon National Park', camera: 'Nikon D750', lens: '', film: '', note: '' },
-  { room: 'nature', file: '/photos/nature/17.jpg', title: 'North Window Arch lit at night', year: '2018', place: 'The Windows, Arches National Park', camera: '', lens: '', film: '', note: '' },
+  { room: 'nature', file: '/photos/nature/17.jpg', title: 'North Window Arch lit at night', year: '2018', place: 'The Windows, Arches National Park', camera: 'Nikon D750', lens: '', film: '', note: '' },
   { room: 'nature', file: '/photos/nature/18.jpg', title: 'Rainbow in Yosemite Falls', year: '2021', place: 'Glacier Point, Yosemite', camera: 'Nikon D750', lens: '', film: '', note: '' },
   { room: 'nature', file: '/photos/nature/19.jpg', title: 'Canyon from above', year: '2018', place: 'Zion National Park', camera: 'Nikon D750', lens: '', film: '', note: '' },
 

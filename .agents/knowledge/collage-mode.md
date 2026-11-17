@@ -6,11 +6,13 @@ and `/collage[/:photoId]`, the All photos wall (every photo once, deduped by fil
 title + year, shuffled from a fixed seed, plain white theme).
 
 - **The switch** (components/ModeSwitch.jsx, rendered by App) shows on a room's page in either
-  mode, never up close on a photo. The choice is kept in localStorage (`charlyzhang.view`,
-  src/viewMode.js). With "collage" kept, RoomRoute redirects `/room/x` to `/room/x/collage`,
-  except when the gallery itself navigates back to `/room/x` (it passes `state: { gallery: true }`).
-  Switching uses `replace`, so Back isn't trapped between the two. With nothing kept, it's collage
-  on phones (max-width: 700px) and gallery elsewhere.
+  mode, never up close on a photo. The choice lasts for the visit only, in sessionStorage
+  (`charlyzhang.view`, src/viewMode.js). Each new visit starts from the default: collage on phones
+  (max-width: 700px), gallery elsewhere. (It used to be localStorage, kept for good, and one
+  switch left Charly's desktop opening in collage; viewMode.js clears that old key.) With
+  "collage" chosen, RoomRoute redirects `/room/x` to `/room/x/collage`, except when the gallery
+  itself navigates back to `/room/x` (it passes `state: { gallery: true }`). Switching uses
+  `replace`, so Back isn't trapped between the two.
 - **Up close**, a swipe or arrow key goes to the nearest photo whose middle lies that way on the
   wall (within about 60 degrees, favouring straight across); at the wall's edge it stays put.
 - **Layout**: a binary cut tree whose pieces keep their photos' exact proportions (h = p·w + q

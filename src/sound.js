@@ -101,6 +101,25 @@ export const sound = {
     partial(c, t + 0.32, 1320, 0.07, 0.25);
     partial(c, t + 0.32, 3170, 0.025, 0.15);
   },
+  // a frame lifted off its nail: a scrape of the hanging wire, then a soft whoosh as it drops
+  lift() {
+    const c = audio();
+    if (!c) return;
+    const t = at(c);
+    noise(c, t, 0.08, { freq: 2600, q: 2, a: 0.08, attack: 0.01 });
+    const { fl } = noise(c, t + 0.18, 0.4, { type: 'lowpass', freq: 1800, q: 0.5, a: 0.06, attack: 0.12 });
+    fl.frequency.setValueAtTime(1800, t + 0.18);
+    fl.frequency.exponentialRampToValueAtTime(300, t + 0.58);
+  },
+  // a frame hung back on its nail: a soft knock of wood on the wall (after `delay` s)
+  hang(delay = 0) {
+    const c = audio();
+    if (!c) return;
+    const t = at(c, delay);
+    noise(c, t, 0.06, { type: 'lowpass', freq: 900, a: 0.22 });
+    partial(c, t, 190, 0.16, 0.14);
+    partial(c, t, 410, 0.05, 0.08);
+  },
   // a light switched on
   click() {
     const c = audio();
