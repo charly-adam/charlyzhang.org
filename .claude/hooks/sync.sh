@@ -18,10 +18,10 @@ commits() { git log --format='  %h %an: %s' "$@"; }
 
 echo "== Sync with origin =="
 case "$(git remote get-url origin 2>/dev/null)" in
-  *charly-adam/charlyzhang.org*) ;;
-  # Old org name (renamed Nov 2026). GitHub still redirects it, but switch over.
-  *charlyzhang-org/charlyzhang.org*) echo "origin uses the old org name. Run: git remote set-url origin https://github.com/charly-adam/charlyzhang.org" ;;
-  *) echo "origin isn't the org repo. Run: git remote set-url origin https://github.com/charly-adam/charlyzhang.org" ;;
+  *zhang-org/charlyzhang.org*) ;;
+  # Old org names (charlyzhang-org, then charly-adam; renamed Nov 2026). GitHub still redirects them, but switch over.
+  *charlyzhang-org/charlyzhang.org*|*charly-adam/charlyzhang.org*) echo "origin uses an old org name. Run: git remote set-url origin https://github.com/zhang-org/charlyzhang.org" ;;
+  *) echo "origin isn't the org repo. Run: git remote set-url origin https://github.com/zhang-org/charlyzhang.org" ;;
 esac
 if ! git fetch --prune --quiet origin 2>/dev/null; then
   echo "Couldn't reach origin; working from local state. Fetch before you push."

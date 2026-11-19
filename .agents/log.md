@@ -278,3 +278,9 @@ Charly agreed to make the repo public. LICENSE: photos (public/photos, og.jpg, l
 
 ## 2026-11-19 · adam · adam · done: shipped to main
 Shipping adam to production. It's notes only, with no site changes: the Cloudflare Pages switch log, the stray Workers Builds check explained, the org rename to `charly-adam` (sync.sh and CLAUDE.md), and the LICENSE. Charly: run `git remote set-url origin https://github.com/charly-adam/charlyzhang.org` once.
+
+## 2026-11-19 · adam · adam · done: org renamed again, to zhang-org
+The org is now `zhang-org`, because Qunyuan (our dad) has joined. The repo is https://github.com/zhang-org/charlyzhang.org, and it's public now. Both old URLs (`charlyzhang-org`, `charly-adam`) still redirect, but run `git remote set-url origin https://github.com/zhang-org/charlyzhang.org`. sync.sh reminds you until you do. The org's profile README is in `zhang-org/.github`, at `profile/README.md`.
+
+## 2026-11-19 · adam · adam · done: shipped to main
+Shipping the zhang-org rename (sync.sh, CLAUDE.md), plus a public-repo warning in CLAUDE.md. Notes only; the site is unchanged.
