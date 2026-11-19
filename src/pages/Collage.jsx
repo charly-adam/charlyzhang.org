@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router';
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router';
 import { getRoom, roomList } from '../data/gallery.js';
 import { Curtain } from '../components/Scene.jsx';
 import { metaLine, titleLine } from '../components/Frame.jsx';
@@ -34,13 +34,17 @@ const allPhotos = (() => {
 export const allPhotoCount = allPhotos.length;
 
 export function RoomCollage() {
-  const { slug } = useParams();
+  const { slug, photoId } = useParams();
   const room = getRoom(slug);
   if (!room) return <Navigate to="/" replace />;
+  // a link to a photo that isn't in this room (renumbered, or mistyped): the room's wall
+  if (photoId && !room.photos.some((p) => p.id === photoId)) return <Navigate to={`/room/${slug}/collage`} replace />;
   return <Collage key={slug} id={slug} name={room.name} theme={room.theme} photos={room.photos} base={`/room/${slug}/collage`} />;
 }
 
 export function AllCollage() {
+  const { photoId } = useParams();
+  if (photoId && !allPhotos.some((p) => p.id === photoId)) return <Navigate to="/collage" replace />;
   return <Collage key="all" id="all" name="All photos" theme={ALL_THEME} photos={allPhotos} favored={favored} base="/collage" />;
 }
 
@@ -238,8 +242,20 @@ function Collage({ id, name, theme, photos, favored, base }) {
   const backRef = useRef(null); // the view to go back to
   const prevNear = useRef(undefined);
 
-  const open = useCallback((p) => navigate(`${base}/${p.id}`), [navigate, base]);
-  const stepBack = useCallback(() => navigate(base), [navigate, base]);
+  // History: walking up to a photo from the wall is a step Back undoes; moving on to the next
+  // photo up close replaces it, and stepping back to the wall goes back the way you came (or,
+  // having come in by a link to the photo, replaces it with the wall). So Back always leaves the
+  // close-up, never reopens it.
+  const { state: navState } = useLocation();
+  const opened = !!navState?.opened;
+  const open = useCallback((p) => {
+    if (nearRef.current) navigate(`${base}/${p.id}`, { replace: true, state: { opened } });
+    else navigate(`${base}/${p.id}`, { state: { opened: true } });
+  }, [navigate, base, opened]);
+  const stepBack = useCallback(() => {
+    if (opened) navigate(-1);
+    else navigate(base, { replace: true });
+  }, [navigate, base, opened]);
   // up close, a swipe or an arrow key goes to the photo next to this one on the wall in that
   // direction (dx, dy: -1, 0 or 1): the nearest whose middle lies that way, favouring ones
   // straight across over ones off to the side. At the wall's edge there's none, and it stays.
@@ -270,7 +286,12 @@ function Collage({ id, name, theme, photos, favored, base }) {
 
   // measure the screen, now and on every resize
   useLayoutEffect(() => {
-    const m = () => stageRef.current && setBox(measureBox(stageRef.current));
+    // (only a real change of size: a new box re-fits the wall, throwing away where you'd looked)
+    const m = () => {
+      if (!stageRef.current) return;
+      const b = measureBox(stageRef.current);
+      setBox((o) => (o && o.vw === b.vw && o.vh === b.vh ? o : b));
+    };
     m();
     window.addEventListener('resize', m);
     return () => window.removeEventListener('resize', m);

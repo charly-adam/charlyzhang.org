@@ -15,6 +15,8 @@ export default function RoomRoute() {
   const { state } = useLocation();
   const room = getRoom(slug);
   if (!room) return <Navigate to="/" replace />;
+  // a link to a photo that isn't in this room (renumbered, or mistyped): the room itself
+  if (photoId && !room.photos.some((p) => p.id === photoId)) return <Navigate to={`/room/${slug}`} replace state={{ gallery: true }} />;
   // someone who'd rather see rooms as collages gets one, coming in; not stepping back from a
   // photo they were sent a link to (state.gallery: stepping back within the gallery)
   if (!photoId && !state?.gallery && getViewMode() === 'collage') return <Navigate to={`/room/${slug}/collage`} replace />;
@@ -26,6 +28,7 @@ const displayed = (el) => (el && el.offsetParent ? el : null); // an element, un
 
 function Room({ room }) {
   const { photoId } = useParams();
+  const { state: navState } = useLocation();
   const navigate = useNavigate();
   const [atIntro, setAtIntro] = useState(false);
   // up close on a phone the arrows fade away to leave the photo; a touch brings them back a while
@@ -71,6 +74,9 @@ function Room({ room }) {
 
   // What the camera has walked up to: a photo (in the URL), the room's introduction, or nothing.
   const near = room.photos.find((p) => p.id === photoId) || null;
+  // up close is always inside: a photo can be reached without walking in (a link, or Forward
+  // onto one after the room was left)
+  if (near && !entered) setEntered(true);
   const focus = near ? near.id : atIntro ? 'intro' : null;
   const nearIndex = near ? room.photos.indexOf(near) : -1;
   // lamps switch off (and back on) in a ripple outward from the photo you walked up to
@@ -432,7 +438,10 @@ function Room({ room }) {
     if (!focus) fromRef.current = cam.getMode() === 'rail' ? { t: cam.getT(), pose: { ...cam.getPose() } } : { t: null, pose: doorPoseRef.current };
     else fromRef.current = null;
     setAtIntro(false);
-    navigate(`/room/${room.slug}/${p.id}`);
+    // History: walking up to a photo is a step Back undoes; moving on to the next one up close
+    // replaces it, and stepping back goes back the way you came (see stepBack)
+    if (focus) navigate(`/room/${room.slug}/${p.id}`, { replace: true, state: { opened: !!navState?.opened } });
+    else navigate(`/room/${room.slug}/${p.id}`, { state: { opened: true } });
   };
   // going out: the room fades to black, then the front desk. (Walking out through the arch
   // would show the hallway, a closed box that isn't the lobby you came from.)
@@ -445,14 +454,19 @@ function Room({ room }) {
     const id = setTimeout(() => navigate('/'), 650);
     return () => clearTimeout(id);
   }, [leaving, navigate]);
+  // (back the way you came when you walked up to the photo here; come in by a link to it, the
+  // close-up is replaced by the room, so Back doesn't reopen it)
+  const opened = !!navState?.opened;
   const stepBack = useCallback(() => {
     setAtIntro(false);
-    if (photoId) navigate(`/room/${room.slug}`, { state: { gallery: true } });
-  }, [navigate, room.slug, photoId]);
+    if (!photoId) return;
+    if (opened) navigate(-1);
+    else navigate(`/room/${room.slug}`, { replace: true, state: { gallery: true } });
+  }, [navigate, room.slug, photoId, opened]);
   const toggleIntro = () => {
     if (atIntro) return stepBack();
     if (cam.getMode() !== 'door') return;
-    if (photoId) navigate(`/room/${room.slug}`, { state: { gallery: true } });
+    if (photoId) navigate(`/room/${room.slug}`, { replace: true, state: { gallery: true } });
     setAtIntro(true);
   };
   // in the doorway: go in, turning to the right, where the first photo hangs
