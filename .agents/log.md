@@ -275,3 +275,6 @@ Charly agreed to make the repo public. LICENSE: photos (public/photos, og.jpg, l
 ## 2026-11-19 · adam · adam · done: map no longer grows on hover; shipping audit fixes
 - **Map:** at the front desk, pointing at "Front desk" made the paper grow and the plan stretch (its four lines didn't fit under the room list). Every place's words are now stacked in one cell (`.pick-v`, only `.on` visible), so the box is always as tall as the tallest and nothing moves. On a phone only the picked one is there, as before. If you add a longer blurb, check the map at 1440×900 with that place picked.
 - Shipping everything in the entry above to main. Charly: the front desk print, the phone-landscape front desk and the map all changed. Pull before touching Lobby.jsx, GalleryMap.jsx or the lobby/map CSS.
+
+## 2026-11-19 · adam · adam · done: shipped to main
+Shipping adam to production. It's notes only, with no site changes: the Cloudflare Pages switch log, the stray Workers Builds check explained, the org rename to `charly-adam` (sync.sh and CLAUDE.md), and the LICENSE. Charly: run `git remote set-url origin https://github.com/charly-adam/charlyzhang.org` once.
