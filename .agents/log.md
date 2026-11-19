@@ -222,6 +222,8 @@ Vercel Hobby blocks CLI deploys of commits Charly wrote (it reads the commit aut
 ## 2026-11-12 · adam · adam · done: hosting moved to Cloudflare Pages
 Deploys now go to Cloudflare Pages (project `charlyzhang`) from `.github/workflows/deploy.yml`. Anyone's push deploys there, so Charly's previews and his own merges to main work. Checked https://adam.charlyzhang.pages.dev: routes, deep links and the photo cache header all work. Charly: your preview is https://charly.charlyzhang.pages.dev (it appears after your first push once this is on main). The steps to ship are unchanged (CLAUDE.md). `vercel.json` is gone: routing and caching live in `public/_redirects` and `public/_headers`, so edit those instead. A new branch link's HTTPS certificate takes a minute or two after the first deploy, and until then you'll get an SSL error. charlyzhang.org moves to Cloudflare once Adam switches the custom domain; until then it still serves the old Vercel build.
 
+## 2026-11-12 · adam · adam · done: charlyzhang.org now served by Cloudflare Pages
+The Vercel DNS records are gone. charlyzhang.org and www are custom domains on the Pages project, and both serve the main build. Vercel isn't used for anything now. Ignore any old `Vercel` check or Vercel email, and don't add Vercel config back.
 ## 2026-11-12 · charly · charly · done: camera for North Window Arch lit at night
 Pushed to charly; not shipped yet. Added the camera (Nikon D750) that Charly filled in for "North Window Arch lit at night" in his photo descriptions doc (src/data/gallery.js). Checked all 80 photos against the doc: every year, place, camera, lens and film stock now matches the site.
 
@@ -246,3 +248,30 @@ Adam: please check the swap in the iOS simulator. It animates a clipped box, so 
 
 ## 2026-11-12 · charly · charly · done: shipped to main
 Shipping charly to production: the North Window Arch camera; the front desk welcome bubble (tail line and position, click to change language); view mode per visit (gallery on desktop, collage on phones); and the front desk print rotation and click-to-swap. Adam: please check the front desk on iPhone in the simulator: the bubble, and a print swap.
+
+## 2026-11-19 · adam · adam · done: failing "Workers Builds" check explained
+The red ✗ on main since Nov 12 (`Workers Builds: charlyzhang-org`) came from a stray Cloudflare Worker hooked to the repo, not our deploy. Its `wrangler deploy` rejected `public/_redirects` as an infinite loop, which is a Workers-only rule; Pages is fine with it. Adam disconnected that Worker from the repo. Production was never affected. Leave `_redirects` as it is. Details are in cloudflare-deploys.md.
+
+## 2026-11-19 · adam · adam · done: GitHub org renamed to charly-adam
+The org is now `charly-adam` ("Charly + Adam"), so that it can hold projects besides the site. The repo is https://github.com/charly-adam/charlyzhang.org. The old `charlyzhang-org` URL still redirects, but each clone should run `git remote set-url origin https://github.com/charly-adam/charlyzhang.org`. Until you do, sync.sh reminds you every session. Deploys, secrets and the Pages project are unchanged. `"name"` in package.json stays `charlyzhang-org`, because it's only a label.
+
+## 2026-11-19 · adam · adam · started: audit fixes
+Fixing what a full functional audit found (desktop, iOS simulator, WebKit/Chromium phone stand-ins). Touches Room.jsx, Collage.jsx, Lobby.jsx (front desk print per visit), viewMode.js, useRailCamera.js, GalleryMap.jsx, sound.js, index.html, public/_redirects + _headers, and front-desk phone-landscape CSS in index.css. Charly: please hold off on Lobby.jsx and the .desk-scene CSS until this lands on main.
+
+## 2026-11-19 · adam · adam · done: audit fixes
+Pushed to adam; not shipped yet. From a full audit (code review, headless Chrome, the iOS simulator, WebKit/Chromium phone stand-ins):
+- **Unknown photo links** (`/room/x/x-99`, `/room/x/collage/nope`, `/collage/nope`) redirect to the room or wall. Before, the walk was stuck in the doorway and the collage lost its mode switch.
+- **Back never reopens a photo.** Opening pushes (`state.opened`), moving between photos up close replaces, closing goes back (or replaces, after a link). Gallery and collage alike; the rule is in collage-mode.md. A photo in the URL also always counts as inside the room (Forward onto one drew the room half-culled).
+- **Front desk print:** one per visit (page load) now; coming back from a room kept giving a new one, because the pointer moved on every mount of Lobby. A swap still moves it on.
+- **Front desk on a phone on its side** (under 700 px wide, landscape) gets the desktop layout. The phone one covered the print and put the map stand over the signs, taking their taps. The phone rules in index.css and `PHONE` in Lobby.jsx now need `(orientation: portrait)`; keep them matched.
+- **View mode** is decided once per visit (rotating a phone no longer flips it) and kept in memory when storage is blocked (the Gallery button did nothing there).
+- **Hosting:** real 404s for missing files (404.html made by the build; `_redirects` lists the app's routes, rewriting to `/`), `/assets/*` cached a year, lobby art and textures revalidate. Link-preview tags + og.jpg (Half Dome; Charly, swap it if you like), apple-touch-icon, canonical. Removed unused lobby/charly.png and the floor-stone preload every page paid for. cloudflare-deploys.md updated; a new top-level route needs a `_redirects` line.
+- Small: sound resumes after an iOS interruption, a second finger no longer hijacks a walk, a double Escape on the map no longer cancels the trip, a resize that doesn't change the size no longer re-fits the collage.
+Not done (bigger, or Charly's call): stable photo ids (links follow hanging order), www → apex redirect (dashboard), bubble timing nits, collage keeping pan/zoom across real resizes.
+
+## 2026-11-19 · adam · adam · done: LICENSE, repo going public
+Charly agreed to make the repo public. LICENSE: photos (public/photos, og.jpg, lobby/) are © Charly Zhang, all rights reserved; the code is MIT. Once it's public, anyone can read the commit author emails in git history. That can't be undone without rewriting history, which we never do. To keep new commits' email private, set `git config user.email` to your GitHub noreply address. Contributions only count on your GitHub profile once they're on `main`.
+
+## 2026-11-19 · adam · adam · done: map no longer grows on hover; shipping audit fixes
+- **Map:** at the front desk, pointing at "Front desk" made the paper grow and the plan stretch (its four lines didn't fit under the room list). Every place's words are now stacked in one cell (`.pick-v`, only `.on` visible), so the box is always as tall as the tallest and nothing moves. On a phone only the picked one is there, as before. If you add a longer blurb, check the map at 1440×900 with that place picked.
+- Shipping everything in the entry above to main. Charly: the front desk print, the phone-landscape front desk and the map all changed. Pull before touching Lobby.jsx, GalleryMap.jsx or the lobby/map CSS.

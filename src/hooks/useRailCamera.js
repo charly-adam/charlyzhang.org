@@ -221,7 +221,9 @@ export function useRailCamera({ stageRef, camRef, paused, onChoose, onPose }) {
     };
 
     const onDown = (e) => {
-      if (pausedRef.current || e.button !== 0 || s.mode === 'fly') return;
+      // (a second finger down doesn't take over a walk the first has started: that one's captured,
+      // so its pointerup comes)
+      if (pausedRef.current || e.button !== 0 || s.mode === 'fly' || s.drag?.moved) return;
       s.drag = { x0: e.clientX, tx0: s.tx, lastX: e.clientX, lastT: performance.now(), v: 0, id: e.pointerId, moved: false };
       s.dragged = false;
     };

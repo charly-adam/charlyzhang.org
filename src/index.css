@@ -2328,7 +2328,7 @@ body:has(.stage:not(.ready)) .dock {
     animation: none;
   }
 }
-@media (max-width: 700px) {
+@media (max-width: 700px) and (orientation: portrait) {
   /* no wall beside the stand on a phone: the note goes above it, the arrow pointing down */
   .sh-note {
     left: 958px;
@@ -2530,7 +2530,7 @@ body:has(.stage:not(.ready)) .dock {
   }
 }
 /* a phone shows the desk alone: the rope and plant would be cut off at the edges */
-@media (max-width: 700px) {
+@media (max-width: 700px) and (orientation: portrait) {
   /* and the print a little smaller, to clear the signs above it */
   /* the print, centred, as big as the wall under the lettering allows (--fs, --fy: Lobby.jsx) */
   .desk-scene .dl-wall > .feature {
@@ -2546,7 +2546,9 @@ body:has(.stage:not(.ready)) .dock {
 }
 
 /* phones: no parallax; the desk fills the width, the lettering sits above it */
-@media (max-width: 700px) {
+/* The front desk's phone layout is for a phone held upright (`PHONE` in Lobby.jsx): one on its
+   side is too short for it, and gets the desktop's, which fits the scene to the height */
+@media (max-width: 700px) and (orientation: portrait) {
   .stage.lobby {
     --S: var(--H);
     --px: 0;
@@ -2624,7 +2626,7 @@ body:has(.stage:not(.ready)) .dock {
 }
 /* a short phone: the lettering (and the signs beside it) a little smaller and higher, to leave
    the print some wall */
-@media (max-width: 700px) and (max-height: 760px) {
+@media (max-width: 700px) and (max-height: 760px) and (orientation: portrait) {
   .lettering,
   .signage {
     top: calc(var(--H) * 0.07);
@@ -3097,8 +3099,18 @@ dialog.map::backdrop {
 .key-pick {
   grid-area: pick;
   align-self: end;
-  padding-top: 16px;
+  display: grid;
+  align-items: end;
+  padding-top: 0; /* (it sits at the bottom, well clear of the list: room for the tallest) */
   padding-left: 26px;
+}
+/* every place's words, stacked in one cell (GalleryMap.jsx), so the box keeps the tallest's
+   height; only the picked one shows */
+.pick-v {
+  grid-area: 1 / 1;
+}
+.pick-v:not(.on) {
+  visibility: hidden;
 }
 .pick-room {
   font-size: 12px;
@@ -3195,6 +3207,9 @@ dialog.map::backdrop {
     margin: 0 -16px;
     padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
     background: #f4efe1;
+  }
+  .pick-v:not(.on) {
+    display: none;
   }
   .key-pick.picked {
     position: sticky;

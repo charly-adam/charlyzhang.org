@@ -8,7 +8,7 @@ Adam and his brother each run Claude Code on their own clone. You never talk to 
 
 ### Branches: `adam`, `charly`, `main`
 
-Repo: https://github.com/charlyzhang-org/charlyzhang.org (private, owned by the `charlyzhang-org` organisation).
+Repo: https://github.com/charly-adam/charlyzhang.org (private, owned by the `charly-adam` organisation, "Charly + Adam"; it was `charlyzhang-org` until Nov 2026, and GitHub still redirects the old URL).
 
 Each person has one long-lived branch, and **each ships their own work to `main`**:
 
