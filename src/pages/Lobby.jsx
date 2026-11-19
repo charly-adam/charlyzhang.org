@@ -494,13 +494,27 @@ function Bell({ onCall }) {
 const allPhotos = roomList.flatMap((r) => r.photos);
 const PRINTS = site.featured.map((f) => allPhotos.find((p) => p.file.split('?')[0] === f)).filter(Boolean);
 const PRINT_KEY = 'charlyzhang.desk-print'; // the index of the print the next visit hangs
+const savePrint = (i) => {
+  try {
+    localStorage.setItem(PRINT_KEY, String((i + 1) % PRINTS.length));
+  } catch {
+    // the next visit starts from the first again
+  }
+};
+// A visit is a page load: coming back to the desk from a room finds the same print still up
+// (the last one hung, if it was swapped). Only the visit's first showing moves the next visit's
+// on.
+let hung = null;
 const firstPrint = () => {
+  if (hung !== null || !PRINTS.length) return hung ?? 0;
   try {
     const i = parseInt(localStorage.getItem(PRINT_KEY), 10);
-    return Number.isFinite(i) ? ((i % PRINTS.length) + PRINTS.length) % PRINTS.length : 0;
+    hung = Number.isFinite(i) ? ((i % PRINTS.length) + PRINTS.length) % PRINTS.length : 0;
   } catch {
-    return 0;
+    hung = 0;
   }
+  savePrint(hung);
+  return hung;
 };
 // The frame takes the photo's own shape, its picture at most 274 px either way (the 336 px
 // box, less the 25 px mat and 6 px moulding each side), and hangs centred in the box.
@@ -522,15 +536,10 @@ function FeaturedPrint({ first }) {
   // 'up' hanging; 'out' coming off and dropping behind the desk; 'in' the next coming up and
   // being hung
   const [phase, setPhase] = useState('up');
-  const next = (i + 1) % PRINTS.length;
-  // the next visit hangs the one after this; and the next one is loaded, ready to swap in
+  const next = PRINTS.length ? (i + 1) % PRINTS.length : 0;
+  // the next one is loaded, ready to swap in
   useEffect(() => {
-    try {
-      localStorage.setItem(PRINT_KEY, String(next));
-    } catch {
-      // the next visit starts from the first again
-    }
-    decoded(PRINTS[next].wall);
+    if (PRINTS.length) decoded(PRINTS[next].wall);
   }, [next]);
   if (!PRINTS.length) return null;
   const p = PRINTS[i];
@@ -545,6 +554,10 @@ function FeaturedPrint({ first }) {
       decoded(PRINTS[next].wall).then(() => {
         setI(next);
         setPhase('in');
+        // (swapped: this one stays up for the rest of the visit, and the next visit hangs the
+        // one after it)
+        hung = next;
+        savePrint(next);
       });
     } else if (phase === 'in') {
       setPhase('up');
