@@ -3099,8 +3099,18 @@ dialog.map::backdrop {
 .key-pick {
   grid-area: pick;
   align-self: end;
-  padding-top: 16px;
+  display: grid;
+  align-items: end;
+  padding-top: 0; /* (it sits at the bottom, well clear of the list: room for the tallest) */
   padding-left: 26px;
+}
+/* every place's words, stacked in one cell (GalleryMap.jsx), so the box keeps the tallest's
+   height; only the picked one shows */
+.pick-v {
+  grid-area: 1 / 1;
+}
+.pick-v:not(.on) {
+  visibility: hidden;
 }
 .pick-room {
   font-size: 12px;
@@ -3197,6 +3207,9 @@ dialog.map::backdrop {
     margin: 0 -16px;
     padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
     background: #f4efe1;
+  }
+  .pick-v:not(.on) {
+    display: none;
   }
   .key-pick.picked {
     position: sticky;

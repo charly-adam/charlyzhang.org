@@ -134,36 +134,50 @@ export function GalleryMap({ here, onClose, onGo }) {
     disabled: !!going && sel !== key,
   });
 
-  let about;
-  if (room) {
-    about = (
-      <>
-        <p className="pick-name">{room.name}</p>
-        <p className="pick-blurb">{room.blurb}</p>
-        {room.slug === here && <p className="pick-here">You are here.</p>}
-      </>
-    );
-  } else if (sel === ALL) {
-    about = (
-      <>
-        <p className="pick-room">Collage</p>
-        <p className="pick-name">All photos</p>
-        <p className="pick-blurb">Every photo in the gallery on one wall.</p>
-        {here === ALL && <p className="pick-here">You are here.</p>}
-      </>
-    );
-  } else if (sel === DESK) {
-    about = (
-      <>
-        <p className="pick-room">The lobby</p>
-        <p className="pick-name">Front desk</p>
-        <p className="pick-blurb">Where you came in. Charly&rsquo;s at the desk, with the maps.</p>
-        {!here && <p className="pick-here">You are here.</p>}
-      </>
-    );
-  } else {
-    about = <p className="pick-blurb">Click a room on the plan or in the list to go there.</p>;
-  }
+  // what's said about a place: one room (by slug), All photos, the front desk, or nothing picked
+  const aboutFor = (key) => {
+    const r = roomList.find((x) => x.slug === key);
+    if (r) {
+      return (
+        <>
+          <p className="pick-name">{r.name}</p>
+          <p className="pick-blurb">{r.blurb}</p>
+          {r.slug === here && <p className="pick-here">You are here.</p>}
+        </>
+      );
+    }
+    if (key === ALL) {
+      return (
+        <>
+          <p className="pick-room">Collage</p>
+          <p className="pick-name">All photos</p>
+          <p className="pick-blurb">Every photo in the gallery on one wall.</p>
+          {here === ALL && <p className="pick-here">You are here.</p>}
+        </>
+      );
+    }
+    if (key === DESK) {
+      return (
+        <>
+          <p className="pick-room">The lobby</p>
+          <p className="pick-name">Front desk</p>
+          <p className="pick-blurb">Where you came in. Charly&rsquo;s at the desk, with the maps.</p>
+          {!here && <p className="pick-here">You are here.</p>}
+        </>
+      );
+    }
+    return <p className="pick-blurb">Click a room on the plan or in the list to go there.</p>;
+  };
+  // On a desktop every one is laid out, in the same place, and only the one picked shows: the
+  // box is as tall as the tallest, so pointing at another never makes the paper grow or the plan
+  // (beside it, spanning its row) stretch. (On a phone only the picked one is there: index.css.)
+  const ABOUT_KEYS = [null, ...roomList.map((r) => r.slug), ALL, DESK];
+  const shownKey = room ? room.slug : sel === ALL || sel === DESK ? sel : null;
+  const about = ABOUT_KEYS.map((k) => (
+    <div key={k ?? 'none'} className={k === shownKey ? 'pick-v on' : 'pick-v'} aria-hidden={k === shownKey ? undefined : true}>
+      {aboutFor(k)}
+    </div>
+  ));
 
   // What's printed on the paper: drawn once for the paper itself, and while it opens or folds
   // up, again on each of its two side flaps (inert copies, without ids), which turn on the creases.
