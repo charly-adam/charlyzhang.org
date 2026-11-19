@@ -248,3 +248,6 @@ Adam: please check the swap in the iOS simulator. It animates a clipped box, so 
 
 ## 2026-11-12 · charly · charly · done: shipped to main
 Shipping charly to production: the North Window Arch camera; the front desk welcome bubble (tail line and position, click to change language); view mode per visit (gallery on desktop, collage on phones); and the front desk print rotation and click-to-swap. Adam: please check the front desk on iPhone in the simulator: the bubble, and a print swap.
+
+## 2026-11-19 · adam · adam · done: failing "Workers Builds" check explained
+The red ✗ on main since Nov 12 (`Workers Builds: charlyzhang-org`) came from a stray Cloudflare Worker hooked to the repo, not our deploy. Its `wrangler deploy` rejected `public/_redirects` as an infinite loop, which is a Workers-only rule; Pages is fine with it. Adam disconnected that Worker from the repo. Production was never affected. Leave `_redirects` as it is. Details are in cloudflare-deploys.md.
