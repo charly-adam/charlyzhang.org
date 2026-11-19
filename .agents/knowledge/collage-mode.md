@@ -8,11 +8,20 @@ title + year, shuffled from a fixed seed, plain white theme).
 - **The switch** (components/ModeSwitch.jsx, rendered by App) shows on a room's page in either
   mode, never up close on a photo. The choice lasts for the visit only, in sessionStorage
   (`charlyzhang.view`, src/viewMode.js). Each new visit starts from the default: collage on phones
-  (max-width: 700px), gallery elsewhere. (It used to be localStorage, kept for good, and one
+  (max-width: 700px), gallery elsewhere, decided once at the visit's first room (so turning a
+  phone on its side doesn't flip it) and kept in memory when storage is blocked. (It used to be localStorage, kept for good, and one
   switch left Charly's desktop opening in collage; viewMode.js clears that old key.) With
   "collage" chosen, RoomRoute redirects `/room/x` to `/room/x/collage`, except when the gallery
   itself navigates back to `/room/x` (it passes `state: { gallery: true }`). Switching uses
   `replace`, so Back isn't trapped between the two.
+- **History, in both modes:** opening a photo from the wall or the walk pushes, with
+  `state: { opened: true }`; moving to the next photo up close `replace`s (keeping that state);
+  stepping back is `navigate(-1)` when `opened`, else (came in by a link) a `replace` with the
+  room. So Back always leaves a close-up and never reopens one. Keep to this when adding a way
+  to open or close a photo.
+- **Unknown photo ids** (a renumbered photo, a typo) redirect to the room (`/room/x`, then its
+  mode) or the wall (`/room/x/collage`, `/collage`) in RoomRoute, RoomCollage and AllCollage.
+  Ids are `slug-N`, by position in gallery.js, so reordering a room changes what old links open.
 - **Up close**, a swipe or arrow key goes to the nearest photo whose middle lies that way on the
   wall (within about 60 degrees, favouring straight across); at the wall's edge it stays put.
 - **Layout**: a binary cut tree whose pieces keep their photos' exact proportions (h = p·w + q

@@ -257,3 +257,14 @@ The org is now `charly-adam` ("Charly + Adam"), so that it can hold projects bes
 
 ## 2026-11-19 · adam · adam · started: audit fixes
 Fixing what a full functional audit found (desktop, iOS simulator, WebKit/Chromium phone stand-ins). Touches Room.jsx, Collage.jsx, Lobby.jsx (front desk print per visit), viewMode.js, useRailCamera.js, GalleryMap.jsx, sound.js, index.html, public/_redirects + _headers, and front-desk phone-landscape CSS in index.css. Charly: please hold off on Lobby.jsx and the .desk-scene CSS until this lands on main.
+
+## 2026-11-19 · adam · adam · done: audit fixes
+Pushed to adam; not shipped yet. From a full audit (code review, headless Chrome, the iOS simulator, WebKit/Chromium phone stand-ins):
+- **Unknown photo links** (`/room/x/x-99`, `/room/x/collage/nope`, `/collage/nope`) redirect to the room or wall. Before, the walk was stuck in the doorway and the collage lost its mode switch.
+- **Back never reopens a photo.** Opening pushes (`state.opened`), moving between photos up close replaces, closing goes back (or replaces, after a link). Gallery and collage alike; the rule is in collage-mode.md. A photo in the URL also always counts as inside the room (Forward onto one drew the room half-culled).
+- **Front desk print:** one per visit (page load) now; coming back from a room kept giving a new one, because the pointer moved on every mount of Lobby. A swap still moves it on.
+- **Front desk on a phone on its side** (under 700 px wide, landscape) gets the desktop layout. The phone one covered the print and put the map stand over the signs, taking their taps. The phone rules in index.css and `PHONE` in Lobby.jsx now need `(orientation: portrait)`; keep them matched.
+- **View mode** is decided once per visit (rotating a phone no longer flips it) and kept in memory when storage is blocked (the Gallery button did nothing there).
+- **Hosting:** real 404s for missing files (404.html made by the build; `_redirects` lists the app's routes, rewriting to `/`), `/assets/*` cached a year, lobby art and textures revalidate. Link-preview tags + og.jpg (Half Dome; Charly, swap it if you like), apple-touch-icon, canonical. Removed unused lobby/charly.png and the floor-stone preload every page paid for. cloudflare-deploys.md updated; a new top-level route needs a `_redirects` line.
+- Small: sound resumes after an iOS interruption, a second finger no longer hijacks a walk, a double Escape on the map no longer cancels the trip, a resize that doesn't change the size no longer re-fits the collage.
+Not done (bigger, or Charly's call): stable photo ids (links follow hanging order), www → apex redirect (dashboard), bubble timing nits, collage keeping pan/zoom across real resizes.
