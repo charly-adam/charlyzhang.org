@@ -1,6 +1,12 @@
+# Built JS and CSS: the file name carries a hash of its contents, so it never changes
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+# Photos: their URLs carry ?v=<hash> (src/data/gallery.js), so a regenerated one is a new URL
 /photos/*
   Cache-Control: public, max-age=604800
+# The lobby's art and the room textures have no version in their URLs: checked each visit (a
+# cheap 304 when unchanged), so a redrawn layer of Charly never meets an old one
 /textures/*
-  Cache-Control: public, max-age=604800
+  Cache-Control: public, max-age=0, must-revalidate
 /lobby/*
-  Cache-Control: public, max-age=604800
+  Cache-Control: public, max-age=0, must-revalidate

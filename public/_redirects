@@ -1,1 +1,7 @@
-/*  /index.html  200
+# The app's own pages load the app. Anything else that isn't a file (a missing photo, a mistyped
+# path) gets 404.html, a copy of index.html made by `npm run build`, with a real 404 status, so a
+# missing image is a 404, not the page, cached as a photo. (The app sends a mistyped path home.)
+# The target is / rather than /index.html: Pages strips .html, so that would loop and be ignored.
+/collage    /  200
+/room/*     /  200
+/collage/*  /  200
