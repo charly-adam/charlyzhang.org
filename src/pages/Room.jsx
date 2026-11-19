@@ -16,7 +16,7 @@ export default function RoomRoute() {
   const room = getRoom(slug);
   if (!room) return <Navigate to="/" replace />;
   // a link to a photo that isn't in this room (renumbered, or mistyped): the room itself
-  if (photoId && !room.photos.some((p) => p.id === photoId)) return <Navigate to={`/room/${slug}`} replace state={{ gallery: true }} />;
+  if (photoId && !room.photos.some((p) => p.id === photoId)) return <Navigate to={`/room/${slug}`} replace />;
   // someone who'd rather see rooms as collages gets one, coming in; not stepping back from a
   // photo they were sent a link to (state.gallery: stepping back within the gallery)
   if (!photoId && !state?.gallery && getViewMode() === 'collage') return <Navigate to={`/room/${slug}/collage`} replace />;
