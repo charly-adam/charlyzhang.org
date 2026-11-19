@@ -14,7 +14,8 @@ function audio() {
     out.gain.value = 0.5;
     out.connect(ctx.destination);
   }
-  if (ctx.state === 'suspended') ctx.resume();
+  // ('interrupted' too: iOS leaves it so after a call or Siri)
+  if (ctx.state !== 'running') ctx.resume().catch(() => {});
   return ctx;
 }
 

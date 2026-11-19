@@ -284,7 +284,8 @@ export function GalleryMap({ here, onClose, onGo }) {
         e.preventDefault();
         fold();
       }}
-      onClose={() => closeRef.current()}
+      // (closed outright while on the way somewhere, by a second Escape: still go there)
+      onClose={() => (going ? goRef.current(going) : closeRef.current())}
     >
       <div className="map-dim" onClick={fold} aria-hidden="true" />
       <div className="paper-wrap">
