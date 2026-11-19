@@ -7,7 +7,9 @@ import { Curtain, Lens, Shell } from '../components/Scene.jsx';
 import { usePreload } from '../hooks/usePreload.js';
 import { sound } from '../sound.js';
 
-const PHONE = '(max-width: 700px)';
+// (upright only: a phone on its side is too short for the phone layout, and gets the desktop's,
+// which fits the scene to the height; the same query as the lobby's rules in index.css)
+const PHONE = '(max-width: 700px) and (orientation: portrait)';
 const SEEN_KEY = 'charlyzhang.seen-desk';
 const INTRO_MS = 6500; // the circle's up this long after the curtain lifts
 
