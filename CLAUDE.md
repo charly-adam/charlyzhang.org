@@ -10,6 +10,8 @@ Adam and his brother each run Claude Code on their own clone. You never talk to 
 
 Repo: https://github.com/zhang-org/charlyzhang.org (public, owned by the `zhang-org` organisation: Charly, Adam and their dad Qunyuan. It was `charlyzhang-org`, then `charly-adam`, until Nov 2026, and GitHub still redirects the old URLs). The org's profile README is in the `zhang-org/.github` repo, at `profile/README.md`.
 
+**The repo is public.** Anyone can read every commit, the log and these notes. Never commit secrets, tokens, `.env` files or photo originals. Commit author emails are public too.
+
 Each person has one long-lived branch, and **each ships their own work to `main`**:
 
 - **`charly`** and **`adam`**: each agent works on its own. Every push deploys a **preview** to a link that stays the same, **https://charly.charlyzhang.pages.dev** or **https://adam.charlyzhang.pages.dev**, about a minute later.
