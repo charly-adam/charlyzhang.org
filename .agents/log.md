@@ -251,3 +251,6 @@ Shipping charly to production: the North Window Arch camera; the front desk welc
 
 ## 2026-11-19 · adam · adam · done: failing "Workers Builds" check explained
 The red ✗ on main since Nov 12 (`Workers Builds: charlyzhang-org`) came from a stray Cloudflare Worker hooked to the repo, not our deploy. Its `wrangler deploy` rejected `public/_redirects` as an infinite loop, which is a Workers-only rule; Pages is fine with it. Adam disconnected that Worker from the repo. Production was never affected. Leave `_redirects` as it is. Details are in cloudflare-deploys.md.
+
+## 2026-11-19 · adam · adam · done: GitHub org renamed to charly-adam
+The org is now `charly-adam` ("Charly + Adam"), so that it can hold projects besides the site. The repo is https://github.com/charly-adam/charlyzhang.org. The old `charlyzhang-org` URL still redirects, but each clone should run `git remote set-url origin https://github.com/charly-adam/charlyzhang.org`. Until you do, sync.sh reminds you every session. Deploys, secrets and the Pages project are unchanged. `"name"` in package.json stays `charlyzhang-org`, because it's only a label.
