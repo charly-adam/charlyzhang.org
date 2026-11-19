@@ -271,3 +271,7 @@ Not done (bigger, or Charly's call): stable photo ids (links follow hanging orde
 
 ## 2026-11-19 · adam · adam · done: LICENSE, repo going public
 Charly agreed to make the repo public. LICENSE: photos (public/photos, og.jpg, lobby/) are © Charly Zhang, all rights reserved; the code is MIT. Once it's public, anyone can read the commit author emails in git history. That can't be undone without rewriting history, which we never do. To keep new commits' email private, set `git config user.email` to your GitHub noreply address. Contributions only count on your GitHub profile once they're on `main`.
+
+## 2026-11-19 · adam · adam · done: map no longer grows on hover; shipping audit fixes
+- **Map:** at the front desk, pointing at "Front desk" made the paper grow and the plan stretch (its four lines didn't fit under the room list). Every place's words are now stacked in one cell (`.pick-v`, only `.on` visible), so the box is always as tall as the tallest and nothing moves. On a phone only the picked one is there, as before. If you add a longer blurb, check the map at 1440×900 with that place picked.
+- Shipping everything in the entry above to main. Charly: the front desk print, the phone-landscape front desk and the map all changed. Pull before touching Lobby.jsx, GalleryMap.jsx or the lobby/map CSS.
