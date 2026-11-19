@@ -254,3 +254,6 @@ The red ✗ on main since Nov 12 (`Workers Builds: charlyzhang-org`) came from a
 
 ## 2026-11-19 · adam · adam · done: GitHub org renamed to charly-adam
 The org is now `charly-adam` ("Charly + Adam"), so that it can hold projects besides the site. The repo is https://github.com/charly-adam/charlyzhang.org. The old `charlyzhang-org` URL still redirects, but each clone should run `git remote set-url origin https://github.com/charly-adam/charlyzhang.org`. Until you do, sync.sh reminds you every session. Deploys, secrets and the Pages project are unchanged. `"name"` in package.json stays `charlyzhang-org`, because it's only a label.
+
+## 2026-11-19 · adam · adam · started: audit fixes
+Fixing what a full functional audit found (desktop, iOS simulator, WebKit/Chromium phone stand-ins). Touches Room.jsx, Collage.jsx, Lobby.jsx (front desk print per visit), viewMode.js, useRailCamera.js, GalleryMap.jsx, sound.js, index.html, public/_redirects + _headers, and front-desk phone-landscape CSS in index.css. Charly: please hold off on Lobby.jsx and the .desk-scene CSS until this lands on main.
